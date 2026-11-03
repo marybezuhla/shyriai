@@ -180,11 +180,18 @@ jobs:
           set -e
           BT=$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)
           # The keystore lives only in the release environment's secrets, not in the repository.
-          printf %s "$KEYSTORE" | base64 -d > "$RUNNER_TEMP/shyriai.jks"
+          # Spaces or line breaks picked up while pasting are dropped; base64 has none.
+          printf %s "$KEYSTORE" | tr -d '[:space:]' | base64 -d > "$RUNNER_TEMP/shyriai.jks" \
+            || { echo "::error::SHYRIAI_KEYSTORE is not valid base64. Paste the whole line again."; exit 1; }
+          # A JKS keystore starts with the bytes FE ED FE ED (base64 "/u3+7Q").
+          if [ "$(head -c 4 "$RUNNER_TEMP/shyriai.jks" | od -An -tx1 | tr -d ' \n')" != "feedfeed" ]; then
+            echo "::error::SHYRIAI_KEYSTORE does not hold the keystore. It must start with /u3+7Q: paste the whole line again."
+            rm -f "$RUNNER_TEMP/shyriai.jks"; exit 1
+          fi
           mkdir -p out
           "$BT/zipalign" -P 16 -f 4 unsigned/shyriai-unsigned.apk "$RUNNER_TEMP/aligned.apk"
           OUT="out/shyriai-$(tr -d '[:space:]' < version.txt).apk"
-          "$BT/apksigner" sign --ks "$RUNNER_TEMP/shyriai.jks" --ks-key-alias shyriai \
+          "$BT/apksigner" sign --ks "$RUNNER_TEMP/shyriai.jks" --ks-type JKS --ks-key-alias shyriai \
             --ks-pass env:STORE --key-pass env:KEY --out "$OUT" "$RUNNER_TEMP/aligned.apk"
           rm -f "$RUNNER_TEMP/shyriai.jks"
           # The certificate must be exactly Shyriai's own
