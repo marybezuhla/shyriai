@@ -1,0 +1,13 @@
+# Godot
+.godot/
+*.translation
+/build/
+# Signing keys never go in the repository
+*.jks
+*.keystore
+*.b64
+# OS and editors
+.DS_Store
+.idea/
+.vscode/
+__pycache__/

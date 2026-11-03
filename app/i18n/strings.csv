@@ -1,0 +1,155 @@
+keys,en,uk
+APP_NAME,Shyriai,Ширяй
+BACK,Back,Назад
+SETTINGS,Settings,Налаштування
+HOME_WHO,Who’s flying today?,Хто сьогодні пілотує?
+MODE_KIDS,Kids,Дитячий
+MODE_SIMPLE,Simple,Простий
+MODE_PRO,Adult,Дорослий
+MODE_KIDS_DESC,"Crashing is impossible. Playful tasks, big buttons, hardly any text.","Розбитися неможливо. Ігрові завдання, великі кнопки, майже без тексту."
+MODE_SIMPLE_DESC,"For beginners of any age. The drone helps you level out, with hints along the way.","Для новачків будь-якого віку. Дрон допомагає вирівнюватися, є підказки."
+MODE_PRO_DESC,"Full physics: inertia, wind, battery. FPV all the way to Acro mode.","Повна фізика: інерція, вітер, батарея. FPV аж до режиму Acro."
+HOME_CONTINUE,Continue,Продовжити
+HOME_START,Start,Почати
+LESSON_N,Lesson %d,Урок %d
+LESSONS_OF,%d of %d lessons,%d з %d уроків
+HOME_WHAT,What we pilot,Що пілотуємо
+VEH_CAMERA,Camera drone,Камерний дрон
+VEH_CAMERA_DESC,Hovers by itself when you let go of the sticks,"Сам зависає, коли відпускаєш стіки"
+VEH_FPV,FPV drone,FPV-дрон
+VEH_FPV_DESC,First-person flight through the drone’s camera,"Політ від першої особи, у камеру дрона"
+VEH_UGV,UGV,НРК
+VEH_UGV_DESC,Ground robot: delivery and evacuation,Наземний робот: доставка й евакуація
+TAB_LEARN,Learn,Навчання
+TAB_MISSIONS,Missions,Місії
+TAB_THEORY,Theory,Теорія
+LESSON_START,Start lesson,Почати урок
+LESSON_LOCKED,Pass the earlier lessons first.,Спершу пройди попередні уроки.
+SOON_TITLE,You’ll be able to fly here soon,Тут скоро можна буде полетіти
+SOON_TEXT,"This part is still being built. Flight, lessons and missions come in the next versions of Shyriai.","Ця частина ще будується. Політ, уроки й місії з’являться в наступних версіях Ширяя."
+MISSIONS_INTRO,"The same skills, in a real story.","Ті самі навички, але в живому сюжеті."
+THEORY_INTRO,The short version of what to know before you fly.,"Коротко про те, що треба знати до польоту."
+CAM_STICKS,What the sticks do,Що роблять стіки
+CAM_STICKS_NOTE,A sandbox with no crashes,Пісочниця без падінь
+CAM_STICKS_GOAL,Move each stick and watch what the drone does. Nothing can break here.,"Порухай кожен стік і подивись, що робить дрон. Тут нічого не зламаєш."
+CAM_STICKS_PASS,All 4 moves | No time limit,Усі 4 рухи | Без обмеження часу
+CAM_TAKEOFF,Take-off and landing,Зліт і посадка
+CAM_TAKEOFF_NOTE,"Smoothly, without a bounce","Плавно, без підскоку"
+CAM_TAKEOFF_GOAL,"Lift the drone to 2 m, pause, and land softly.","Підніми дрон на 2 м, затримайся і м’яко посади."
+CAM_TAKEOFF_PASS,Height 2 m | Landing under 0.5 m/s,"Висота 2 м | Посадка до 0,5 м/с"
+CAM_HOLD,Hold a spot,Утримати точку
+CAM_HOLD_NOTE,10 s in a 2 m circle,10 с у колі 2 м
+CAM_HOLD_GOAL,The wind pushes the drone. Keep it over the mark with small moves.,Вітер зносить дрон. Тримай його над міткою легкими рухами.
+CAM_HOLD_PASS,10 s | 2 m circle,10 с | Коло 2 м
+CAM_NOSE_IN,Nose in,Носом до себе
+CAM_NOSE_IN_NOTE,The sticks seem reversed,Стіки ніби міняються
+CAM_NOSE_IN_GOAL,"When the drone faces you, the sticks seem reversed: left becomes right. Fly a circle without turning the drone around.","Коли дрон летить на тебе, стіки ніби міняються: вліво стає вправо. Облети коло, не розвертаючи дрон."
+CAM_NOSE_IN_PASS,1 lap · under 60 s | Off track under 1.5 m,"1 коло · до 60 с | Відхилення до 1,5 м"
+CAM_SQUARE,Square and circle,Квадрат і коло
+CAM_SQUARE_NOTE,Turning while moving,Повороти на ходу
+CAM_SQUARE_GOAL,"Fly a square, then a circle, combining movement and turning.","Пролети квадрат, а потім коло, поєднуючи рух і поворот."
+CAM_SQUARE_PASS,10 m square | 10 m circle,Квадрат 10 м | Коло 10 м
+CAM_LANDING,Precise landing,Точна посадка
+CAM_LANDING_NOTE,In the centre of the pad,У центр майданчика
+CAM_LANDING_GOAL,"Land the drone in the centre of the pad, approaching from different sides.","Посади дрон у центр майданчика, підлітаючи з різних боків."
+CAM_LANDING_PASS,3 landings | Within 30 cm of the centre,3 посадки | До 30 см від центру
+CAM_WIND,Wind,Вітер
+CAM_WIND_NOTE,Gusts up to 6 m/s,Пориви до 6 м/с
+CAM_WIND_GOAL,Hold the drone and fly a route while the wind changes.,"Утримай дрон і пролети маршрут, коли вітер змінюється."
+CAM_WIND_PASS,4-point route | Gusts up to 6 m/s,Маршрут 4 точки | Пориви до 6 м/с
+CAM_EXAM,Exam,Іспит
+CAM_EXAM_NOTE,Everything together,Усе разом
+CAM_EXAM_GOAL,"Take-off, a route, nose-in flight and a precise landing in one flight.","Зліт, маршрут, політ носом до себе й точна посадка за один політ."
+CAM_EXAM_PASS,No collisions | Under 3 min,Без зіткнень | До 3 хв
+FPV_THROTTLE,Throttle and hover,Газ і висіння
+FPV_THROTTLE_NOTE,You hold the height,Висоту тримаєш ти
+FPV_THROTTLE_GOAL,In FPV you hold the height. Find the throttle position where the drone hovers.,"У FPV висоту тримаєш ти. Знайди положення газу, на якому дрон висить."
+FPV_THROTTLE_PASS,Hover 10 s | ±1 m,Висіти 10 с | ±1 м
+FPV_FORWARD,Forward and turns,Уперед і повороти
+FPV_FORWARD_NOTE,Tilt gives speed,Нахил дає швидкість
+FPV_FORWARD_GOAL,"Tilt the drone to fly, and turn without losing height.","Нахили дрон, щоб летіти, і поверни, не втративши висоту."
+FPV_FORWARD_PASS,3-point route | Without losing height,Маршрут 3 точки | Без втрати висоти
+FPV_EIGHT,Figure eight,Вісімка
+FPV_EIGHT_NOTE,Smooth arcs,Плавні дуги
+FPV_EIGHT_GOAL,Fly a figure eight around two poles.,Облети два стовпи вісімкою.
+FPV_EIGHT_PASS,2 figure eights | Under 90 s,2 вісімки | До 90 с
+FPV_GATES,Gates,Ворота
+FPV_GATES_NOTE,Precision at speed,Точність на швидкості
+FPV_GATES_GOAL,Fly through the gates in order without touching the frames.,"Пролети крізь ворота по черзі, не зачепивши рамки."
+FPV_GATES_PASS,6 gates | No collisions,6 воріт | Без зіткнень
+FPV_HORIZON,Horizon mode,Режим Horizon
+FPV_HORIZON_NOTE,Less help,Менше допомоги
+FPV_HORIZON_GOAL,The drone only levels itself at small tilts. Repeat the gates with less help.,Дрон вирівнюється лише при малих нахилах. Повтори ворота з меншою допомогою.
+FPV_HORIZON_PASS,6 gates | Horizon,6 воріт | Horizon
+FPV_ACRO,Acro mode,Режим Acro
+FPV_ACRO_NOTE,For Adult mode,Для дорослого режиму
+FPV_ACRO_GOAL,The drone never levels itself. Hold your height and fly a simple course.,Дрон не вирівнюється сам. Утримай висоту й пролети просту трасу.
+FPV_ACRO_PASS,Course | Acro,Траса | Acro
+UGV_DRIVE,Driving and turns,Їзда й повороти
+UGV_DRIVE_NOTE,Each stick drives one side,Кожен стік веде свій бік
+UGV_DRIVE_GOAL,Drive a winding track by steering the tracks.,"Проїдь доріжкою з поворотами, керуючи гусеницями."
+UGV_DRIVE_PASS,Track | Stay on it,Доріжка | Не з’їхати
+UGV_PIVOT,Turning on the spot,Розворот на місці
+UGV_PIVOT_NOTE,Tracks in opposite directions,Гусениці в різні боки
+UGV_PIVOT_GOAL,Turn the robot round in a tight spot and drive back out.,Розверни робота в тісному місці й виїдь назад.
+UGV_PIVOT_PASS,180° turn | Without touching walls,Розворот 180° | Без дотику стін
+UGV_TERRAIN,Slopes and mud,Схил і бруд
+UGV_TERRAIN_NOTE,Terrain changes the ride,Рельєф змінює хід
+UGV_TERRAIN_GOAL,Get over a slope and mud without tipping the robot over.,"Подолай схил і грязюку, не перекинувши робота."
+UGV_TERRAIN_PASS,20° slope | No rollover,Схил 20° | Без перекидання
+UGV_DELIVERY,Delivery,Доставка
+UGV_DELIVERY_NOTE,Cargo to a point,Вантаж у точку
+UGV_DELIVERY_GOAL,Carry cargo along a route and stop right at the mark.,Довези вантаж за маршрутом і зупинись точно біля мітки.
+UGV_DELIVERY_PASS,Cargo intact | Within 1 m of the mark,Вантаж цілий | До 1 м від мітки
+UGV_EVACUATION,Evacuation,Евакуація
+UGV_EVACUATION_NOTE,"Gently, with video delay","Плавно, з затримкою відео"
+UGV_EVACUATION_GOAL,"Bring a wounded person out gently, without sharp jolts, while the video lags.","Вивези пораненого плавно, без різких поштовхів, коли відео запізнюється."
+UGV_EVACUATION_PASS,No jolts | 0.5 s delay,"Без поштовхів | Затримка 0,5 с"
+MIS_CAM_KITTEN,Kitten on the roof,Кошеня на даху
+MIS_CAM_KITTEN_DESC,Find the kitten and show the rescuers where to go.,"Знайди кошеня й покажи рятувальникам, куди йти."
+MIS_CAM_SEARCH,Search in a field,Пошук у полі
+MIS_CAM_SEARCH_DESC,Survey the field and find a person who got lost.,"Оглянь поле й знайди людину, яка загубилася."
+MIS_CAM_SURVEY,Survey after a storm,Огляд після негоди
+MIS_CAM_SURVEY_DESC,Fly over the village and mark damaged roofs.,Облети село й познач пошкоджені дахи.
+MIS_FPV_HOOPS,Hoops,Обручі
+MIS_FPV_HOOPS_DESC,Fly through all the colourful hoops.,Пролети крізь усі кольорові обручі.
+MIS_FPV_BALLOONS,Balloons and target,Кульки й мішень
+MIS_FPV_BALLOONS_DESC,"Pop the balloons and hit the bullseye, like darts.","Лопни кульки й влуч у центр мішені, як у дартсі."
+MIS_FPV_RACE,Timed course,Траса на час
+MIS_FPV_RACE_DESC,"Gate after gate, and every second counts.","Ворота одні за одними, і кожна секунда рахується."
+MIS_FPV_TREES,Between the trees,Між деревами
+MIS_FPV_TREES_DESC,Fly through a tree line without touching the branches.,"Пролети лісосмугою, не зачепивши гілок."
+MIS_UGV_VET,Kitten to the vet,Кошеня до ветеринарки
+MIS_UGV_VET_DESC,Gently drive the kitten to the vet.,Обережно довези кошеня до ветеринарки.
+MIS_UGV_PARCEL,A parcel for granny,Посилка бабусі
+MIS_UGV_PARCEL_DESC,Bring a parcel to granny’s house.,Привези посилку до бабусиної хати.
+MIS_UGV_CARGO,Cargo delivery,Доставка вантажу
+MIS_UGV_CARGO_DESC,Deliver water and medicine over a broken road.,Довези воду й ліки розбитою дорогою.
+MIS_UGV_EVAC,Casualty evacuation,Евакуація пораненого
+MIS_UGV_EVAC_DESC,"Bring a wounded person to safety, gently and without jolts.","Вивези пораненого в безпечне місце, плавно й без поштовхів."
+TH_CHECKLIST,Before you fly,Перед польотом
+TH_CHECKLIST_DESC,"Checklist: battery, propellers, signal, weather, people nearby.","Чекліст: батарея, гвинти, сигнал, погода, люди поруч."
+TH_BATTERY,Battery safety,Безпека батарей
+TH_BATTERY_DESC,"How to charge and store LiPo, and when a battery should no longer be used.",Як заряджати й зберігати LiPo і коли батарею вже не можна використовувати.
+TH_SIGNAL,Lost signal,Втрата сигналу
+TH_SIGNAL_DESC,"What the drone does, and what you do, when the link drops.","Що робить дрон і що робиш ти, коли зв’язок зникає."
+TH_RULES,Flying rules in Ukraine,Правила польотів в Україні
+TH_RULES_DESC,Where and how civilian drones may fly.,Де і як можна літати цивільним дронам.
+SET_THEME,Look,Вигляд
+THEME_DUSK,Dusk,Сутінки
+THEME_DAY,Day,День
+THEME_SYSTEM,System,Як у системі
+SET_LANGUAGE,Language,Мова
+LANG_SYSTEM,System,Як у системі
+ABOUT,About,Про застосунок
+ABOUT_VERSION,Version %s,Версія %s
+ABOUT_WHAT,"Shyriai is a piloting trainer for drones and ground robots, for kids and adults. It works offline, with no accounts and no ads. Progress is stored only on this phone.","Ширяй — тренажер пілотування дронів і наземних роботів для дітей і дорослих. Працює без інтернету, без акаунтів і реклами. Прогрес зберігається лише на цьому телефоні."
+ABOUT_LICENSE_T,Licence,Ліцензія
+ABOUT_LICENSE,"Free software under the GNU GPL 3.0 or later: you may use, study, change and share it. It comes with no warranty of any kind.","Вільна програма за ліцензією GNU GPL 3.0 або новішою: її можна використовувати, вивчати, змінювати й поширювати. Вона надається без жодних гарантій."
+ABOUT_SOURCE_T,Source code,Сирцевий код
+ABOUT_MADE_T,How it was made,Як створено
+ABOUT_MADE,"Written with AI assistance (Claude, Anthropic), directed and tested by the author.","Код написано за допомогою ШІ (Claude, Anthropic) під керівництвом і з тестуванням авторки."
+ABOUT_PARTS_T,What’s inside,Що всередині
+ABOUT_PARTS,"Godot Engine (MIT) © Godot Engine contributors, Juan Linietsky, Ariel Manzur. Unbounded and Manrope fonts (SIL Open Font License 1.1) © The Unbounded Project Authors, The Manrope Project Authors.","Godot Engine (MIT) © Godot Engine contributors, Juan Linietsky, Ariel Manzur. Шрифти Unbounded і Manrope (SIL Open Font License 1.1) © The Unbounded Project Authors, The Manrope Project Authors."
+ABOUT_FULL_LICENSES,Full licence texts,Повні тексти ліцензій
+LICENSES_GODOT_PARTS,Components inside Godot,Компоненти всередині Godot
