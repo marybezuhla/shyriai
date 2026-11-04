@@ -7,8 +7,14 @@ extends Control
 var value := Vector2.ZERO  # x right, y UP, each -1..1
 var kids := false
 var label_text := ""
+## False for an FPV throttle: up and down stay where the thumb leaves them, and moving the thumb
+## moves the stick from there (it does not jump to where the thumb lands).
+var spring_y := true
+var touched := false
 
 var _finger := -1
+var _start_local := Vector2.ZERO
+var _start_y := 0.0
 
 
 func _init() -> void:
@@ -22,12 +28,13 @@ func _input(event: InputEvent) -> void:
 		var local := _local(event.position)
 		if event.pressed and _finger == -1 and _hit(local):
 			_finger = event.index
+			touched = true
+			_start_local = local
+			_start_y = value.y
 			_set_from(local)
 			get_viewport().set_input_as_handled()
 		elif not event.pressed and event.index == _finger:
-			_finger = -1
-			value = Vector2.ZERO
-			queue_redraw()
+			release()
 	elif event is InputEventScreenDrag and event.index == _finger:
 		_set_from(_local(event.position))
 		get_viewport().set_input_as_handled()
@@ -35,7 +42,9 @@ func _input(event: InputEvent) -> void:
 
 func release() -> void:
 	_finger = -1
-	value = Vector2.ZERO
+	value.x = 0.0
+	if spring_y:
+		value.y = 0.0
 	queue_redraw()
 
 
@@ -55,9 +64,13 @@ func _hit(local: Vector2) -> bool:
 func _set_from(local: Vector2) -> void:
 	var travel := _radius() - _knob_radius()
 	var d := (local - size / 2.0) / maxf(travel, 1.0)
-	if d.length() > 1.0:
-		d = d.normalized()
-	value = Vector2(d.x, -d.y)
+	if spring_y:
+		if d.length() > 1.0:
+			d = d.normalized()
+		value = Vector2(d.x, -d.y)
+	else:
+		value.x = clampf(d.x, -1.0, 1.0)
+		value.y = clampf(_start_y - (local.y - _start_local.y) / maxf(travel, 1.0), -1.0, 1.0)
 	queue_redraw()
 
 

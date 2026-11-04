@@ -74,6 +74,11 @@ func place(at: Vector3, heading := 0.0) -> void:
 	time = 0.0
 
 
+## How the drone is turned in space, for drawing it and for cameras on it.
+func orientation() -> Basis:
+	return Basis.from_euler(Vector3(tilt.x, yaw, -tilt.y))
+
+
 func altitude() -> float:
 	return pos.y - ground.call(pos.x, pos.z)
 
@@ -171,7 +176,7 @@ func _touch_ground() -> void:
 		return
 	var speed := -vel.y
 	pos.y = g
-	if p["crash"] and speed > CRASH_FALL:
+	if p["crash"] and speed > float(p.get("crash_fall", CRASH_FALL)):
 		_crash(speed)
 		return
 	on_ground = true
@@ -213,7 +218,7 @@ func _collide() -> void:
 		pos += push
 		if into <= 0.0:
 			continue
-		if p["crash"] and into > CRASH_SPEED:
+		if p["crash"] and into > float(p.get("crash_speed", CRASH_SPEED)):
 			_crash(into)
 			return
 		# Bounce softly in Kids mode, stop against it otherwise.

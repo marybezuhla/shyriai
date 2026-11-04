@@ -39,7 +39,7 @@ func update(dt: float, sim: DroneSim, _sticks: Dictionary) -> void:
 			say("HINT_WIND_OUT")
 		elif sim.on_ground:
 			say("HINT_WIND_UP")
-		elif hint != "HINT_WIND_OUT":
+		elif hint_base != "HINT_WIND_OUT":
 			say("HINT_WIND_GO", [cps.size() - cp])
 		_held = 0.0
 	progress = (cp + _held / HOLD) / cps.size()

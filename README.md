@@ -2,11 +2,11 @@
 
 Тренажер пілотування для Android: камерні й FPV-дрони та наземні роботизовані комплекси (НРК). Для дітей і дорослих. Українська та англійська. Безкоштовно, без реклами й акаунтів, без інтернету. Потрібен Android 7 або новіший.
 
-> **Рання розробка.** У версії 0.3 камерний дрон має всі 8 уроків, від перших рухів стіками до іспиту, три місії й картки теорії. FPV-дрон і НРК — у наступних версіях.
+> **Рання розробка.** У версії 0.4 є повний курс камерного дрона (8 уроків, 3 місії), FPV-дрон (6 уроків, 4 місії) і картки теорії. НРК — у наступній версії.
 
 ## Задум
 
-- 🧒 **Три режими.** Дитячий: розбитися неможливо, ігрові завдання, майже без тексту. Простий: дрон допомагає вирівнюватися, є підказки. Дорослий: повна фізика з інерцією, вітром і батареєю.
+- 🧒 **Три режими, у кожного свій прогрес.** Дитячий: розбитися неможливо, ігрові завдання, майже без тексту. Простий: дрон допомагає вирівнюватися, є підказки. Дорослий: повна фізика з інерцією, вітром і батареєю.
 - 🛸 **Три машини.** Камерний дрон, який сам зависає. FPV-дрон з режимами Angle, Horizon і Acro. НРК з гусеничним керуванням, рельєфом і затримкою відео.
 - 👪 **Дитячий режим** має свою світлу тему «Ранок» і більший текст. За бажанням є батьківський замок: щоб вийти з дитячого режиму чи відкрити налаштування, треба розв'язати приклад.
 - 👀 **Три камери.** «З землі»: як пілот, що стоїть із пультом, так вчаться літати по-справжньому. «За дроном»: легше для початку. «Камера»: вигляд з самого дрона, для пошуку й огляду.
@@ -38,11 +38,11 @@ Godot 4.7 · GDScript. Ліцензія GPL-3.0 або новіша. Шрифт�
 
 A piloting trainer for Android: camera and FPV drones, and ground robots (UGVs). For kids and adults. Ukrainian and English. Free, no ads, no accounts, no internet. Requires Android 7 or newer.
 
-> **Early development.** In version 0.3 the camera drone has all 8 lessons, from the first stick moves to the exam, three missions and the theory cards. The FPV drone and the UGV come in the next versions.
+> **Early development.** Version 0.4 has the full camera drone course (8 lessons, 3 missions), the FPV drone (6 lessons, 4 missions) and the theory cards. The UGV comes in the next version.
 
 ## The idea
 
-- 🧒 **Three modes.** Kids: crashing is impossible, playful tasks, hardly any text. Simple: the drone helps you level out, with hints. Adult: full physics with inertia, wind and battery.
+- 🧒 **Three modes, each with its own progress.** Kids: crashing is impossible, playful tasks, hardly any text. Simple: the drone helps you level out, with hints. Adult: full physics with inertia, wind and battery.
 - 🛸 **Three vehicles.** A camera drone that hovers by itself. An FPV drone with Angle, Horizon and Acro modes. A UGV with tank steering, terrain and video delay.
 - 👪 **Kids mode** has its own light Morning look and larger text. An optional grown-ups' lock asks for a sum to be solved before leaving Kids mode or opening settings.
 - 👀 **Three cameras.** From the ground: as a pilot standing with the radio, the way real flying is learnt. Behind the drone: easier to start with. Camera: the view from the drone itself, for searching and surveying.

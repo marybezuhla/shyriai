@@ -16,7 +16,7 @@ func build() -> void:
 			text.add_child(UI.label(tr(m + "_DESC"), 13, 500, "muted"))
 			var row := UI.hbox(12)
 			row.add_child(text)
-			var done: bool = m in Prefs.missions_done
+			var done: bool = Prefs.mission_done(m)
 			row.add_child(Glyph.make("check" if done else "chevron", 20, Pal.c("accent_text" if done else "muted")))
 			var title := tr(m)
 			var key: String = m

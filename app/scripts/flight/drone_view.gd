@@ -72,9 +72,14 @@ func build(body: Color, front: Color) -> void:
 	add_child(_shadow)
 
 
+## Hidden when the camera sits on the drone itself.
+func body_visible(on: bool) -> void:
+	_body.visible = on
+
+
 func sync(sim: DroneSim, delta: float) -> void:
 	position = sim.pos
-	rotation = Vector3(sim.tilt.x, sim.yaw, -sim.tilt.y)
+	basis = sim.orientation()
 	var running := not sim.on_ground and not sim.crashed
 	_spin += delta * (40.0 if running else 0.0)
 	for r in _rotors:

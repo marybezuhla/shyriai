@@ -16,7 +16,9 @@ func update(dt: float, sim: DroneSim, _sticks: Dictionary) -> void:
 	var alt := sim.altitude()
 	match _phase:
 		0:
-			marker = Vector3.INF
+			# A gold sphere 2 m above the pad shows where to go.
+			marker = world.pad + Vector3(0, 2, 0)
+			beacon = 0.6
 			progress = clampf(alt / 2.0, 0.0, 1.0) / 3.0
 			say("HINT_TAKEOFF_UP")
 			if alt >= LOW and alt <= HIGH and not sim.on_ground:
@@ -34,6 +36,7 @@ func update(dt: float, sim: DroneSim, _sticks: Dictionary) -> void:
 				_phase = 2
 		2:
 			marker = world.pad
+			beacon = 0.0
 			ring = PAD
 			progress = (2.0 + clampf(1.0 - alt / 2.0, 0.0, 0.95)) / 3.0
 			say("HINT_TAKEOFF_LAND")

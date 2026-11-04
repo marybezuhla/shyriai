@@ -51,7 +51,7 @@ func _continue_card() -> Control:
 	for v in Curriculum.VEHICLES:
 		if Prefs.passed_count(v) > Prefs.passed_count(vehicle):
 			vehicle = v
-	var lessons := Curriculum.lessons(vehicle)
+	var lessons := Curriculum.lessons(vehicle, Prefs.mode)
 	var done := Prefs.passed_count(vehicle)
 	var idx := mini(done, lessons.size() - 1)
 
@@ -87,10 +87,10 @@ func _vehicle_card(v: String) -> Control:
 	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	text.alignment = BoxContainer.ALIGNMENT_CENTER
 	text.add_child(UI.label(tr("VEH_" + v.to_upper()), 16, 700))
-	text.add_child(UI.label(tr("VEH_%s_DESC" % v.to_upper()), 13, 500, "muted"))
+	text.add_child(UI.label(tr("VEH_%s_DESC" % v.to_upper()), 14, 500, "muted"))
 
 	var done := Prefs.passed_count(v)
-	var count := UI.label("%d/%d" % [done, Curriculum.lessons(v).size()], 13, 700, "accent_text" if done > 0 else "muted", false, false)
+	var count := UI.label("%d/%d" % [done, Curriculum.lessons(v, Prefs.mode).size()], 13, 700, "accent_text" if done > 0 else "muted", false, false)
 
 	var row := UI.hbox(14)
 	row.add_child(icon_bg)

@@ -16,9 +16,16 @@ func configure() -> void:
 
 
 func update(dt: float, sim: DroneSim, _sticks: Dictionary) -> void:
-	marker = world.hold_mark
-	ring = RADIUS
-	var inside := flat_distance(sim.pos, marker) <= RADIUS and sim.altitude() > 1.0
+	if mode == "kids":
+		# Kids keep the drone inside a big gold sphere; grown-ups over a ring on the ground.
+		marker = world.hold_mark + Vector3(0, 3, 0)
+		beacon = RADIUS
+		ring = 0.0
+	else:
+		marker = world.hold_mark
+		ring = RADIUS
+	var inside := flat_distance(sim.pos, world.hold_mark) <= RADIUS and sim.altitude() > 1.0 \
+		and (mode != "kids" or sim.altitude() < 5.0)
 	if inside:
 		_timer += dt
 		_best = maxf(_best, _timer)
@@ -28,7 +35,7 @@ func update(dt: float, sim: DroneSim, _sticks: Dictionary) -> void:
 			say("HINT_HOLD_OUT")
 		elif sim.on_ground:
 			say("HINT_HOLD_GO")
-		elif hint != "HINT_HOLD_OUT":
+		elif hint_base != "HINT_HOLD_OUT":
 			say("HINT_HOLD_GO")
 		_timer = 0.0
 	progress = clampf(_best / NEED, 0.0, 1.0)

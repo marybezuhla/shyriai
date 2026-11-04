@@ -8,7 +8,7 @@ var selected := -1
 
 
 func build() -> void:
-	var lessons := Curriculum.lessons(vehicle)
+	var lessons := Curriculum.lessons(vehicle, Prefs.mode)
 	var done := Prefs.passed_count(vehicle)
 	if selected < 0:
 		selected = mini(done, lessons.size() - 1)
@@ -36,7 +36,7 @@ func _build_lessons(lessons: Array, done: int) -> void:
 		text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		text.alignment = BoxContainer.ALIGNMENT_CENTER
 		text.add_child(UI.label(tr(lessons[i]), 15, 700, "text" if i <= done else "muted"))
-		text.add_child(UI.label(tr(lessons[i] + "_NOTE"), 12, 500, "muted"))
+		text.add_child(UI.label(tr(Curriculum.text_key(lessons[i] + "_NOTE", Prefs.mode)), 13, 500, "muted"))
 		var row := UI.hbox(14)
 		row.add_child(UI.spacer(0, 40 if i % 2 else 0))
 		row.add_child(dot)
@@ -45,6 +45,8 @@ func _build_lessons(lessons: Array, done: int) -> void:
 		var t := UI.tappable(row, Color(0, 0, 0, 0), func(): selected = idx; rebuild(), tr(lessons[i]), 14, 2)
 		path.add_row(t, dot)
 	add_child(path)
+	if Prefs.mode != "pro" and Curriculum.lessons(vehicle).size() > lessons.size():
+		add_child(UI.label(tr("LESSON_PRO_ONLY"), 13, 600, "muted"))
 	add_child(_lesson_card(lessons, done))
 
 
@@ -71,16 +73,13 @@ func _lesson_card(lessons: Array, done: int) -> Control:
 	var head := UI.vbox(4)
 	head.add_child(UI.eyebrow(tr("LESSON_N") % (selected + 1), "accent_text"))
 	head.add_child(UI.label(tr(key), 18, 600, "text", true))
-	head.add_child(UI.label(tr(key + "_GOAL"), 14, 500, "muted"))
+	head.add_child(UI.label(tr(Curriculum.text_key(key + "_GOAL", Prefs.mode)), 14, 500, "muted"))
 	card.add_child(head)
 	var chips := HFlowContainer.new()
 	chips.add_theme_constant_override("h_separation", 8)
 	chips.add_theme_constant_override("v_separation", 8)
-	var pass_key := key + "_PASS"
-	if Prefs.mode == "kids" and tr(key + "_PASS_KIDS") != key + "_PASS_KIDS":
-		pass_key = key + "_PASS_KIDS"
-	for part in tr(pass_key).split("|"):
-		chips.add_child(UI.panel(UI.label(part.strip_edges(), 12, 700, "text", false, false), Pal.c("surface2"), 10, 7))
+	for part in tr(Curriculum.text_key(key + "_PASS", Prefs.mode)).split("|"):
+		chips.add_child(UI.panel(UI.label(part.strip_edges(), 13, 700, "text", false, false), Pal.c("surface2"), 10, 7))
 	card.add_child(chips)
 	if selected <= done:
 		card.add_child(UI.primary(tr("LESSON_START"), func(): app.start(vehicle, key), "play"))
@@ -98,7 +97,7 @@ func _build_missions() -> void:
 		text.add_child(UI.label(tr(m + "_DESC"), 13, 500, "muted"))
 		var row := UI.hbox(12)
 		row.add_child(text)
-		var done: bool = m in Prefs.missions_done
+		var done: bool = Prefs.mission_done(m)
 		row.add_child(Glyph.make("check" if done else "chevron", 20, Pal.c("accent_text" if done else "muted")))
 		var title := tr(m)
 		var key: String = m

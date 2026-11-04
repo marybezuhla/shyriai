@@ -16,7 +16,22 @@ const FILES := {
 	"MIS_CAM_KITTEN": "res://scripts/flight/tasks/mission_kitten.gd",
 	"MIS_CAM_SEARCH": "res://scripts/flight/tasks/mission_search.gd",
 	"MIS_CAM_SURVEY": "res://scripts/flight/tasks/mission_survey.gd",
+	"FPV_THROTTLE": "res://scripts/flight/tasks/fpv_throttle.gd",
+	"FPV_FORWARD": "res://scripts/flight/tasks/fpv_forward.gd",
+	"FPV_EIGHT": "res://scripts/flight/tasks/fpv_eight.gd",
+	"FPV_GATES": "res://scripts/flight/tasks/fpv_gates.gd",
+	"FPV_HORIZON": "res://scripts/flight/tasks/fpv_gates.gd",
+	"FPV_ACRO": "res://scripts/flight/tasks/fpv_acro.gd",
+	"MIS_FPV_HOOPS": "res://scripts/flight/tasks/mission_hoops.gd",
+	"MIS_FPV_BALLOONS": "res://scripts/flight/tasks/mission_balloons.gd",
+	"MIS_FPV_RACE": "res://scripts/flight/tasks/fpv_gates.gd",
+	"MIS_FPV_TREES": "res://scripts/flight/tasks/mission_trees.gd",
 }
+## The racing gates of the FPV lessons and the race, in order, centre 2.2 m up.
+const GATE_COURSE: Array[Vector3] = [
+	Vector3(0, 2.2, -10), Vector3(-9, 2.2, -20), Vector3(-4, 2.2, -32),
+	Vector3(8, 2.2, -34), Vector3(13, 2.2, -22), Vector3(6, 2.2, -12),
+]
 ## The nose counts as pointing somewhere when it is within this angle of it.
 const FACING := deg_to_rad(50.0)
 
@@ -49,6 +64,9 @@ var choice := {}
 ## The camera this task starts with, if it matters (nose-in needs the pilot's view). "" = the saved one.
 var view_hint := ""
 
+## FPV only: "angle", "horizon" or "acro".
+var flight_mode := "angle"
+
 ## Physics for this task. wind < 0 keeps the mode's wind.
 var gps := true
 var wind := -1.0
@@ -65,6 +83,12 @@ var cp_facing := ""
 var cp_height_tol := 1.5
 
 var _sticky := 0.0
+
+# Gates or hoops to fly through, in order: {"c": centre, "n": way through, "side": across, "w", "h"} or
+# {"c", "n", "r"} for a round hoop.
+var rings: Array[Dictionary] = []
+var ring_i := 0
+var _prev := Vector3.INF
 
 
 static func implemented(task_key: String) -> bool:
@@ -120,28 +144,47 @@ func step(dt: float, sim: DroneSim, sticks: Dictionary) -> void:
 func say(hint_key: String, args: Array = []) -> void:
 	if _sticky > 0.0:
 		return
-	hint = hint_key
-	hint_args = args
+	_set_hint(hint_key, args)
 
 
 ## A hint that stays for a few seconds, e.g. why a landing did not count.
 func say_for(hint_key: String, args: Array = [], seconds := 3.0) -> void:
-	hint = hint_key
-	hint_args = args
+	_set_hint(hint_key, args)
 	_sticky = seconds
 
 
 func pass_with(summary_key: String, args: Array = []) -> void:
 	done = true
 	progress = 1.0
-	summary = summary_key
-	summary_args = args
+	var w := _wording(summary_key, args)
+	summary = w[0]
+	summary_args = w[1]
 
 
 func fail_with(summary_key: String, args: Array = []) -> void:
 	failed = true
-	summary = summary_key
-	summary_args = args
+	var w := _wording(summary_key, args)
+	summary = w[0]
+	summary_args = w[1]
+
+
+## The underlying key, e.g. for tests; hint may be its Kids wording.
+var hint_base := ""
+
+
+func _set_hint(hint_key: String, args: Array) -> void:
+	hint_base = hint_key
+	var w := _wording(hint_key, args)
+	hint = w[0]
+	hint_args = w[1]
+
+
+## Kids get their own wording (KEY_KIDS) when there is one; it has no numbers, so no arguments.
+func _wording(key_: String, args: Array) -> Array:
+	var k := Curriculum.text_key(key_, mode)
+	if k != key_ and not String(TranslationServer.translate(k)).contains("%"):
+		return [k, []]
+	return [k, args]
 
 
 static func flat_distance(a: Vector3, b: Vector3) -> float:
@@ -211,3 +254,54 @@ func course_step(sim: DroneSim) -> String:
 		beacon = 0.0
 		return "done"
 	return "reached"
+
+
+# --- Gates and hoops ------------------------------------------------------------
+
+## Each gate faces from the gate before it towards the next one.
+static func normals_along(points: Array[Vector3], start: Vector3) -> Array[Vector3]:
+	var out: Array[Vector3] = []
+	for i in points.size():
+		var before: Vector3 = start if i == 0 else points[i - 1]
+		var after: Vector3 = points[i + 1] if i + 1 < points.size() else points[i] + (points[i] - before)
+		var d := after - before
+		d.y = 0.0
+		out.append(d.normalized())
+	return out
+
+
+## One step through the gates. Returns "", "passed" or "done".
+func ring_step(sim: DroneSim) -> String:
+	if ring_i >= rings.size():
+		return "done"
+	var g: Dictionary = rings[ring_i]
+	marker = g["c"]
+	beacon = 0.0
+	ring = 0.0
+	var res := ""
+	if _prev != Vector3.INF:
+		var c: Vector3 = g["c"]
+		var n: Vector3 = g["n"]
+		var d0 := (_prev - c).dot(n)
+		var d1 := (sim.pos - c).dot(n)
+		if d0 < 0.0 and d1 >= 0.0:
+			var hit := _prev.lerp(sim.pos, d0 / (d0 - d1))
+			var off: Vector3 = hit - c
+			var inside := false
+			if g.has("r"):
+				inside = (off - n * off.dot(n)).length() < float(g["r"])
+			else:
+				inside = absf(off.dot(g["side"])) < float(g["w"]) / 2.0 and absf(off.y) < float(g["h"]) / 2.0
+			if inside:
+				ring_i += 1
+				res = "passed"
+	_prev = sim.pos
+	if ring_i >= rings.size():
+		marker = Vector3.INF
+		return "done"
+	return res
+
+
+func restart_rings() -> void:
+	ring_i = 0
+	_prev = Vector3.INF

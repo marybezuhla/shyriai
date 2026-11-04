@@ -129,6 +129,179 @@ func add_person(at: Vector3) -> void:
 	n.add_child(hm)
 
 
+## A racing gate: a square frame the drone flies through. Returns its index in `gates`.
+## The opening is `w` wide and `h` tall around `center`; `normal` is the way to fly through.
+var gates: Array[Dictionary] = []
+var _gate_mats: Array[StandardMaterial3D] = []
+
+
+func add_gate(center: Vector3, normal: Vector3, w := 3.2, h := 2.6) -> int:
+	var n := Vector3(normal.x, 0, normal.z).normalized()
+	var side := n.cross(Vector3.UP).normalized()
+	var g := height(center.x, center.z)
+	var c := Vector3(center.x, g + center.y, center.z)
+	var m := _mat(pal["pad"])
+	m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	var t := 0.18
+	var rot := atan2(n.x, n.z)
+	var top := c.y + h / 2.0 + t / 2.0
+	var bottom := c.y - h / 2.0 - t / 2.0
+	var parts := [
+		[Vector3(t, top - g + t / 2.0, t), Vector3(c.x, g + (top - g + t / 2.0) / 2.0, c.z) + side * (w / 2.0 + t / 2.0)],
+		[Vector3(t, top - g + t / 2.0, t), Vector3(c.x, g + (top - g + t / 2.0) / 2.0, c.z) - side * (w / 2.0 + t / 2.0)],
+		[Vector3(w + 2.0 * t, t, t), Vector3(c.x, top, c.z)],
+		[Vector3(w + 2.0 * t, t, t), Vector3(c.x, bottom, c.z)],
+	]
+	for part in parts:
+		var mi := MeshInstance3D.new()
+		mi.mesh = _box(part[0])
+		mi.material_override = m
+		mi.position = part[1]
+		mi.rotation.y = rot
+		add_child(mi)
+	# Collisions: the two posts and the two bars.
+	for sgn in [1.0, -1.0]:
+		var post: Vector3 = c + side * sgn * (w / 2.0 + t / 2.0)
+		obstacles.append({"cyl": Vector2(post.x, post.z), "r": t, "h": top + t / 2.0 - g, "y": g})
+	for y in [top, bottom]:
+		var a := c - side * (w / 2.0 + t) + Vector3(0, y - c.y - t / 2.0, 0)
+		var b := c + side * (w / 2.0 + t) + Vector3(0, y - c.y + t / 2.0, 0)
+		var lo := Vector3(minf(a.x, b.x), a.y, minf(a.z, b.z)) - Vector3(0.05, 0, 0.05)
+		var hi := Vector3(maxf(a.x, b.x), b.y, maxf(a.z, b.z)) + Vector3(0.05, 0, 0.05)
+		obstacles.append({"box": AABB(lo, hi - lo)})
+	gates.append({"c": c, "n": n, "side": side, "w": w, "h": h})
+	_gate_mats.append(m)
+	return gates.size() - 1
+
+
+## The gate to fly through next is gold; the others are cream.
+func highlight_gate(i: int) -> void:
+	for k in _gate_mats.size():
+		_gate_mats[k].albedo_color = pal["pad_ring"] if k == i else pal["pad"]
+
+
+## A hoop for the kids: a ring in the air, no collisions.
+func add_hoop(center: Vector3, normal: Vector3, color: Color, radius := 1.6) -> void:
+	var torus := TorusMesh.new()
+	torus.inner_radius = radius
+	torus.outer_radius = radius + 0.22
+	torus.rings = 32
+	torus.ring_segments = 8
+	var mi := MeshInstance3D.new()
+	mi.mesh = torus
+	var m := _mat(color)
+	m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mi.material_override = m
+	var n := Vector3(normal.x, 0, normal.z).normalized()
+	mi.position = Vector3(center.x, height(center.x, center.z) + center.y, center.z)
+	# A torus lies flat; stand it up facing the way to fly.
+	mi.basis = Basis(Vector3.UP, atan2(n.x, n.z)) * Basis(Vector3.RIGHT, PI / 2.0)
+	add_child(mi)
+	_hoops.append(mi)
+
+
+var _hoops: Array[MeshInstance3D] = []
+
+
+func hoop_done(i: int) -> void:
+	if i < _hoops.size():
+		var tw := create_tween()
+		tw.tween_property(_hoops[i], "scale", Vector3.ONE * 1.25, 0.12)
+		tw.tween_property(_hoops[i], "scale", Vector3.ONE * 0.0, 0.25)
+
+
+## A thin pole for slalom and figure eights.
+func add_pole(at: Vector3, h := 8.0) -> void:
+	var cyl := CylinderMesh.new()
+	cyl.top_radius = 0.25
+	cyl.bottom_radius = 0.25
+	cyl.height = h
+	cyl.radial_segments = 10
+	var g := height(at.x, at.z)
+	_mesh(cyl, pal["pad_ring"], Vector3(at.x, g + h / 2.0, at.z))
+	obstacles.append({"cyl": Vector2(at.x, at.z), "r": 0.25, "h": h, "y": g})
+
+
+var _balloons: Array[MeshInstance3D] = []
+
+
+func add_balloon(at: Vector3, color: Color) -> void:
+	var sph := SphereMesh.new()
+	sph.radius = 0.55
+	sph.height = 1.3
+	sph.radial_segments = 16
+	sph.rings = 8
+	var mi := _mesh(sph, color, Vector3(at.x, height(at.x, at.z) + at.y, at.z))
+	_balloons.append(mi)
+
+
+func pop_balloon(i: int) -> void:
+	if i < _balloons.size():
+		var tw := create_tween()
+		tw.tween_property(_balloons[i], "scale", Vector3.ONE * 1.5, 0.08)
+		tw.tween_property(_balloons[i], "scale", Vector3.ZERO, 0.1)
+
+
+## A round target board with three rings, standing upright and facing `normal`.
+func add_target(center: Vector3, normal: Vector3) -> void:
+	var n := Vector3(normal.x, 0, normal.z).normalized()
+	var c := Vector3(center.x, height(center.x, center.z) + center.y, center.z)
+	var colors := [pal["pad"], pal["roof"], pal["pad_ring"]]
+	var radii := [2.0, 1.25, 0.5]
+	for k in 3:
+		var disc := CylinderMesh.new()
+		disc.top_radius = radii[k]
+		disc.bottom_radius = radii[k]
+		disc.height = 0.1 + k * 0.02
+		disc.radial_segments = 32
+		var mi := MeshInstance3D.new()
+		mi.mesh = disc
+		var m := _mat(colors[k])
+		m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		mi.material_override = m
+		mi.position = c
+		mi.basis = Basis(Vector3.UP, atan2(n.x, n.z)) * Basis(Vector3.RIGHT, PI / 2.0)
+		add_child(mi)
+	var stand := _box(Vector3(0.15, c.y - height(c.x, c.z), 0.15))
+	_mesh(stand, pal["roof"], Vector3(c.x, (c.y + height(c.x, c.z)) / 2.0, c.z) - n * 0.15)
+	var side := n.cross(Vector3.UP)
+	var a := c - side * 2.0 - Vector3(0, 2.0, 0) - n * 0.08
+	var b := c + side * 2.0 + Vector3(0, 2.0, 0) + n * 0.08
+	var lo := Vector3(minf(a.x, b.x), a.y, minf(a.z, b.z))
+	var hi := Vector3(maxf(a.x, b.x), b.y, maxf(a.z, b.z))
+	obstacles.append({"box": AABB(lo, hi - lo)})
+
+
+## A strip of trees: rows across the way. Trunks stand 6 m apart (±0.8 m), so a gap is always at least
+## about 2.4 m wide.
+## Returns the list of trees, each {"at": Vector3, "r": float, "h": float}.
+func add_tree_belt(z_from: float, z_to: float, half_width: float, seed_: int) -> Array:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = seed_
+	var out := []
+	var z := z_from
+	var row := 0
+	while z > z_to:
+		var x := -half_width + (3.0 if row % 2 else 0.0)
+		while x <= half_width:
+			var r := rng.randf_range(0.9, 1.25)
+			var h := rng.randf_range(6.0, 9.0)
+			var at := Vector3(x + rng.randf_range(-0.8, 0.8), 0, z + rng.randf_range(-0.8, 0.8))
+			var cone := CylinderMesh.new()
+			cone.top_radius = 0.05
+			cone.bottom_radius = r
+			cone.height = h
+			cone.radial_segments = 6
+			cone.rings = 1
+			_mesh(cone, pal["poplar"], at + Vector3(0, h / 2.0, 0))
+			obstacles.append({"cyl": Vector2(at.x, at.z), "r": r * 0.8, "h": h, "y": 0.0})
+			out.append({"at": at, "r": r, "h": h})
+			x += 6.0
+		z -= 5.0
+		row += 1
+	return out
+
+
 ## A see-through gold sphere at the next target, on a thin pole, so its height and place are clear.
 func show_beacon(at: Vector3, radius: float) -> void:
 	var on := radius > 0.0 and at != Vector3.INF

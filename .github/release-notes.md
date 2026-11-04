@@ -1,27 +1,37 @@
-**Ширяй 0.3.0** — тренажер пілотування для Android: без інтернету, акаунтів і реклами. Українська та англійська.
+**Ширяй 0.4.0** — тренажер пілотування для Android: без інтернету, акаунтів і реклами. Українська та англійська.
 
-**Нове: увесь курс камерного дрона.**
+**Нове: FPV-дрон.**
 
-- 🎯 **Уроки 4–8:** «Носом до себе», «Квадрат і коло», «Точна посадка», «Вітер» (без GPS, з поривами) та «Іспит». Наступна ціль — золота куля в повітрі.
-- 🔎 **Дорослі місії:** «Пошук у полі» (знайди людину в червоній куртці й поверни дрон) та «Огляд після негоди» (оглянь дахи згори й скажи, які пошкоджено). Щоразу трохи інші.
-- 🎥 **Третя камера** — вигляд з самого дрона.
-- 📘 **Картки теорії:** перед польотом, безпека батарей, втрата сигналу й правила польотів в Україні під час воєнного стану, з джерелами. Для дітей — простіші.
+- 🥽 **Політ очима дрона.** Висоту тримаєш ти: лівий стік — газ, він не повертається до центру, як на справжньому пульті. Режими Angle, Horizon і Acro.
+- 🎯 **6 уроків FPV:** газ висіння, політ уперед, вісімка, ворота, Horizon і Acro (останні два — лише в Дорослому режимі).
+- 🎈 **Місії FPV:** для дітей — «Обручі» та «Кульки й мішень», для дорослих — «Траса на час» і «Між деревами».
 
-FPV-дрон і НРК — у наступних версіях. Потрібен Android 7 або новіший.
+**Виправлено за відгуками:**
+
+- Кожен режим має **свій прогрес**: дитячі уроки не змішуються з дорослими.
+- У Дитячому режимі уроки й підказки **без цифр**: «Злітай до золотої кульки!» замість «Підніми на 2 м».
+- **Більший текст** підказок під час польоту.
+
+НРК — у наступній версії. Потрібен Android 7 або новіший.
 
 📲 Завантажте файл .apk нижче й відкрийте його на телефоні. 🔄 Для оновлень — Obtainium (є в F-Droid): «Додати застосунок» → `github.com/Marybezu/shyriai`.
 
 ---
 
-**Shyriai 0.3.0** — a piloting trainer for Android: no internet, no accounts, no ads. Ukrainian and English.
+**Shyriai 0.4.0** — a piloting trainer for Android: no internet, no accounts, no ads. Ukrainian and English.
 
-**New: the whole camera drone course.**
+**New: the FPV drone.**
 
-- 🎯 **Lessons 4–8:** Nose in, Square and circle, Precise landing, Wind (no GPS, with gusts) and the Exam. The next target is a gold sphere in the air.
-- 🔎 **Adult missions:** Search in a field (find a person in a red jacket and bring the drone back) and Survey after a storm (look at the roofs from above and say which are damaged). A little different each time.
-- 🎥 **A third camera**: the view from the drone itself.
-- 📘 **Theory cards:** before you fly, battery safety, lost signal, and the rules for flying in Ukraine under martial law, with sources. Simpler ones for kids.
+- 🥽 **Fly through the drone's eyes.** You hold the height: the left stick is the throttle and does not spring back, as on a real radio. Angle, Horizon and Acro modes.
+- 🎯 **6 FPV lessons:** hover throttle, flying forward, figure eight, gates, Horizon and Acro (the last two in Adult mode only).
+- 🎈 **FPV missions:** for kids, Hoops and Balloons and target; for adults, Timed course and Between the trees.
 
-The FPV drone and the UGV come in the next versions. Requires Android 7 or newer.
+**Fixed from feedback:**
+
+- Each mode keeps **its own progress**: kids' lessons no longer mix with adults'.
+- In Kids mode, lessons and hints have **no numbers**: "Fly up to the gold ball!" instead of "Lift to 2 m".
+- **Larger hint text** in flight.
+
+The UGV comes in the next version. Requires Android 7 or newer.
 
 📲 Download the .apk file below and open it on your phone. 🔄 For updates, use Obtainium (on F-Droid): Add App → `github.com/Marybezu/shyriai`.

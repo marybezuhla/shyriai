@@ -8,7 +8,7 @@ const PATH := "user://prefs.cfg"
 const MODES := ["kids", "simple", "pro"]
 const THEMES := ["dusk", "day", "system"]
 const LANGUAGES := ["system", "uk", "en"]
-const VIEWS := ["pilot", "chase", "drone"]
+const VIEWS := ["pilot", "chase", "drone", "fpv"]
 
 var mode := "simple"
 ## The theme the grown-up chose. Kids mode shows "morning" instead, without changing this.
@@ -16,9 +16,10 @@ var theme := "dusk"
 var language := "system"
 ## Leaving Kids mode or opening settings needs a sum solved.
 var kids_lock := false
-## Lessons passed per vehicle, in order: {"camera": 3, ...}
+## Lessons passed, per mode and vehicle, in order: {"kids": {"camera": 3}, ...}
 var passed := {}
-var missions_done: Array[String] = []
+## Missions done, per mode: {"pro": ["MIS_CAM_SEARCH"], ...}
+var missions := {}
 ## Camera per mode: {"kids": "chase", ...}
 var views := {}
 
@@ -59,33 +60,45 @@ func set_kids_lock(on: bool) -> void:
 		changed.emit()
 
 
-func passed_count(vehicle: String) -> int:
-	return int(passed.get(vehicle, 0))
+## Each mode keeps its own progress: a child's lessons are not a grown-up's.
+func passed_count(vehicle: String, m := "") -> int:
+	return int(passed.get(m if m != "" else mode, {}).get(vehicle, 0))
 
 
 ## A lesson counts once the ones before it are passed too.
 func mark_passed(vehicle: String, index: int) -> void:
 	if index < 0:
 		return
-	if index + 1 > passed_count(vehicle) and index <= passed_count(vehicle):
-		passed[vehicle] = index + 1
+	var n := passed_count(vehicle)
+	if index + 1 > n and index <= n:
+		if not passed.has(mode):
+			passed[mode] = {}
+		passed[mode][vehicle] = index + 1
 		_save()
+
+
+func mission_done(key: String) -> bool:
+	return key in missions.get(mode, [])
 
 
 func mark_mission(key: String) -> void:
-	if key not in missions_done:
-		missions_done.append(key)
+	if not mission_done(key):
+		if not missions.has(mode):
+			missions[mode] = []
+		missions[mode].append(key)
 		_save()
 
 
-## Kids follow the drone from behind; everyone else sees it as a pilot on the ground does.
-func view_for(m: String) -> String:
-	return views.get(m, "chase" if m == "kids" else "pilot")
+## The FPV drone is flown through its own camera. With the camera drone, kids follow it from
+## behind and everyone else sees it as a pilot on the ground does. Kept per mode and vehicle.
+func view_for(m: String, vehicle := "camera") -> String:
+	var fallback := "fpv" if vehicle == "fpv" else ("chase" if m == "kids" else "pilot")
+	return views.get(m + "/" + vehicle, fallback)
 
 
-func set_view(m: String, v: String) -> void:
-	if v in VIEWS and m in MODES:
-		views[m] = v
+func set_view(m: String, vehicle: String, v: String) -> void:
+	if v in VIEWS and m in MODES and vehicle in Curriculum.VEHICLES:
+		views[m + "/" + vehicle] = v
 		_save()
 
 
@@ -120,18 +133,42 @@ func _load() -> void:
 	var v = cfg.get_value("prefs", "views", {})
 	if v is Dictionary:
 		for key in v.keys():
-			if key is String and key in MODES and v[key] is String and v[key] in VIEWS:
+			if key is String and key.get_slice("/", 0) in MODES and key.get_slice("/", 1) in Curriculum.VEHICLES \
+					and v[key] is String and v[key] in VIEWS:
 				views[key] = v[key]
 	var p = cfg.get_value("progress", "passed", {})
 	if p is Dictionary:
 		for key in p.keys():
-			if key is String and key in Curriculum.VEHICLES and (p[key] is int):
-				passed[key] = clampi(p[key], 0, Curriculum.lessons(key).size())
-	var md = cfg.get_value("progress", "missions", [])
+			if key is String and key in MODES and p[key] is Dictionary:
+				passed[key] = _read_counts(p[key])
+			elif key is String and key in Curriculum.VEHICLES:
+				# Version 0.3 and earlier kept one progress for all modes: it goes to the mode in use.
+				if not passed.has(mode):
+					passed[mode] = {}
+				passed[mode].merge(_read_counts({key: p[key]}), true)
+	var md = cfg.get_value("progress", "missions", {})
 	if md is Array:
-		for key in md:
-			if key is String and key.begins_with("MIS_") and key.length() < 40 and key not in missions_done:
-				missions_done.append(key)
+		missions[mode] = _read_missions(md)
+	elif md is Dictionary:
+		for key in md.keys():
+			if key is String and key in MODES and md[key] is Array:
+				missions[key] = _read_missions(md[key])
+
+
+func _read_counts(d: Dictionary) -> Dictionary:
+	var out := {}
+	for v in d.keys():
+		if v is String and v in Curriculum.VEHICLES and d[v] is int:
+			out[v] = clampi(d[v], 0, Curriculum.lessons(v).size())
+	return out
+
+
+func _read_missions(list: Array) -> Array:
+	var out := []
+	for key in list:
+		if key is String and key.begins_with("MIS_") and key.length() < 40 and key not in out:
+			out.append(key)
+	return out
 
 
 func _save() -> void:
@@ -142,5 +179,5 @@ func _save() -> void:
 	cfg.set_value("prefs", "kids_lock", kids_lock)
 	cfg.set_value("prefs", "views", views)
 	cfg.set_value("progress", "passed", passed)
-	cfg.set_value("progress", "missions", missions_done)
+	cfg.set_value("progress", "missions", missions)
 	cfg.save(PATH)

@@ -41,7 +41,7 @@ func _visit(lang: String, theme: String) -> void:
 		s.rebuild()
 		await _shot("%s-%s-lessons-%s-missions" % [lang, theme, v])
 		s.tab = "learn"
-		s.selected = Curriculum.lessons(v).size() - 1
+		s.selected = Curriculum.lessons(v, Prefs.mode).size() - 1
 		s.rebuild()
 		await _frames(2)
 		main.back()
@@ -80,14 +80,19 @@ func _flights() -> void:
 		var m: String = run[1]
 		Prefs.set_theme(theme)
 		Prefs.set_mode(m)
-		var keys: Array = Curriculum.lessons("camera").filter(func(k): return FlightTask.implemented(k))
-		keys.append_array(Curriculum.missions("camera", m))
-		for key in keys:
-			main.start("camera", key)
+		var keys: Array = []
+		for veh in ["camera", "fpv"]:
+			for k in Curriculum.lessons(veh, m) + Curriculum.missions(veh, m):
+				if FlightTask.implemented(k):
+					keys.append([veh, k])
+		for vk in keys:
+			var veh: String = vk[0]
+			var key: String = vk[1]
+			main.start(veh, key)
 			await _frames(2)
 			var f = main.flight
 			assert(f != null)
-			var ap = Autopilot.new()
+			var ap = Autopilot.new() if f.sim is not FpvSim else load("res://tests/fpv_autopilot.gd").new()
 			ap.height = 3.0
 			ap.target = f.world.hold_mark
 			if key == "MIS_CAM_KITTEN":
@@ -95,6 +100,10 @@ func _flights() -> void:
 			f.autopilot = func(sim, _task): return ap.sticks(sim)
 			await _seconds(1.5)
 			await _shot("uk-%s-flight-%s-%s" % [theme, m, key])
+			if key == "FPV_GATES":
+				for v in ["chase", "pilot", "fpv"]:
+					f.set_view(v)
+					await _shot("uk-%s-flight-%s-%s-%s" % [theme, m, key, v])
 			if key == "CAM_HOLD":
 				for v in ["chase", "drone", "pilot"]:
 					f.set_view(v)

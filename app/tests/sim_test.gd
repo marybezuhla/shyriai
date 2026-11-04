@@ -4,6 +4,7 @@
 extends Node
 
 const Autopilot := preload("res://tests/autopilot.gd")
+const FpvAutopilot := preload("res://tests/fpv_autopilot.gd")
 const DT := 1.0 / 60.0
 
 var failures := 0
@@ -16,6 +17,7 @@ func _ready() -> void:
 	test_kids_never_crash()
 	test_adult_crashes_into_a_house()
 	test_battery_lands_by_itself()
+	test_fpv_physics()
 	for mode in Prefs.MODES:
 		await test_sticks_lesson(mode)
 		await test_takeoff_lesson(mode)
@@ -30,6 +32,15 @@ func _ready() -> void:
 	await test_nose_rule("CAM_NOSE_IN")
 	await test_nose_rule("CAM_SQUARE")
 	await test_kitten_mission()
+	for mode in Prefs.MODES:
+		for key in Curriculum.lessons("fpv", mode):
+			await test_fpv_task(key, mode)
+	await test_fpv_task("MIS_FPV_HOOPS", "kids")
+	await test_fpv_task("MIS_FPV_BALLOONS", "kids")
+	for mode in ["simple", "pro"]:
+		await test_fpv_task("MIS_FPV_RACE", mode)
+		await test_fpv_task("MIS_FPV_TREES", mode)
+	await test_trees_over_fails()
 	for mode in ["simple", "pro"]:
 		await test_search_mission(mode)
 		await test_survey_mission(mode)
@@ -120,16 +131,76 @@ func test_battery_lands_by_itself() -> void:
 	check(sim.battery <= 0.0 and sim.on_ground, "adult: an empty battery brings the drone down")
 
 
+func test_fpv_physics() -> void:
+	# Hover throttle holds the height; nothing else does.
+	var sim := FpvSim.new("simple")
+	sim.set_wind(0.0, 0.0)
+	sim.place(Vector3.ZERO)
+	run(sim, 1.0, 0.6, 0, 0, 0)
+	var h := sim.hover_throttle() * 2.0 - 1.0
+	run(sim, 4.0, h, 0, 0, 0)
+	check(absf(sim.vel.y) < 0.2 and not sim.on_ground, "FPV: hover throttle keeps it in the air")
+	run(sim, 2.0, -1.0, 0, 0, 0)
+	check(sim.vel.y < -1.0 or sim.on_ground, "FPV: no throttle and it falls")
+	# Angle: the stick tilts it, letting go levels it.
+	sim.place(Vector3.ZERO)
+	run(sim, 1.0, 0.6, 0, 0, 0)
+	run(sim, 1.0, h, 0, 1.0, 0)
+	var leaned := sim.tilt_angles().x
+	run(sim, 1.0, h, 0, 0, 0)
+	check(leaned > deg_to_rad(25.0) and absf(sim.tilt_angles().x) < deg_to_rad(3.0), "FPV angle: tilts to the stick and levels when let go")
+	# Acro: it keeps the turn it was given.
+	var pro := FpvSim.new("pro")
+	pro.set_wind(0.0, 0.0)
+	pro.flight_mode = "acro"
+	pro.place(Vector3.ZERO)
+	run(pro, 0.8, 0.6, 0, 0, 0)
+	run(pro, 0.15, pro.hover_throttle() * 2.0 - 1.0, 0, 0.5, 0)
+	var before := pro.tilt_angles().x
+	run(pro, 0.5, pro.hover_throttle() * 2.0 - 1.0, 0, 0, 0)
+	# It turns on a little after the stick (the turn has momentum), then holds: it never levels.
+	check(before > deg_to_rad(10.0) and pro.tilt_angles().x > before - deg_to_rad(1.0) and pro.tilt_angles().x < before + deg_to_rad(10.0),
+		"FPV acro: the tilt stays after letting go")
+	# Adult: a hard hit on the ground crashes.
+	var c := FpvSim.new("pro")
+	c.place(Vector3(0, 12, 0))
+	c.on_ground = false
+	run(c, 3.0, -1.0, 0, 0, 0)
+	check(c.crashed, "FPV adult: falling from 12 m crashes")
+	# The test pilot can fly each mode to a point.
+	for fm in [["simple", "angle"], ["pro", "angle"], ["pro", "horizon"], ["pro", "acro"]]:
+		var s2 := FpvSim.new(fm[0])
+		s2.flight_mode = fm[1]
+		s2.place(Vector3.ZERO)
+		var ap := FpvAutopilot.new()
+		ap.target = Vector3(-10, 0, -20)
+		ap.height = 4.0
+		for i in int(20.0 / DT):
+			var st: Dictionary = ap.sticks(s2)
+			s2.step(DT, st["throttle"], st["yaw"], st["pitch"], st["roll"])
+		var off := Vector2(s2.pos.x + 10, s2.pos.z + 20).length()
+		check(off < 2.0 and absf(s2.altitude() - 4.0) < 1.0 and not s2.crashed,
+			"FPV %s %s: the test pilot reaches a point (%.1f m off)" % [fm[0], fm[1], off])
+
+
 # --- Lessons, flown with the sticks ---------------------------------------------
 
-func _flight(key: String, mode: String) -> Array:
+func _flight(key: String, mode: String, vehicle := "camera") -> Array:
 	var task := FlightTask.make(key, mode, 7)
 	var world := FlightWorld.new()
 	add_child(world)
 	world.build("day", 7)
 	task.world = world
 	task.setup_world()
-	var sim := DroneSim.new(mode, 11)
+	var sim: DroneSim
+	if vehicle == "fpv" and mode != "kids":
+		var f := FpvSim.new(mode, 11)
+		f.flight_mode = task.flight_mode
+		sim = f
+	else:
+		sim = DroneSim.new(mode, 11)
+		if vehicle == "fpv":
+			sim.p["vmax"] = 4.0
 	sim.gps = task.gps
 	if task.wind >= 0.0:
 		sim.set_wind(task.wind, task.gust)
@@ -178,7 +249,7 @@ func test_takeoff_lesson(mode: String) -> void:
 	ap.descend = -0.12 if mode == "pro" else -0.6
 	var task: FlightTask = f[0]
 	var plan := func(_t: float) -> Dictionary:
-		ap.land = task.hint == "HINT_TAKEOFF_LAND"
+		ap.land = task.hint_base == "HINT_TAKEOFF_LAND"
 		return ap.sticks(f[1])
 	var ok := _fly(task, f[1], 60.0, plan)
 	check(ok, "%s: lesson 2 (take-off and landing) passes%s" % [mode, "" if ok else " — " + task.hint])
@@ -306,7 +377,7 @@ func test_search_mission(mode: String) -> void:
 	var ap := Autopilot.new()
 	var land := _lander(task, f[1], f[2], ap, mode)
 	var plan := func(t: float) -> Dictionary:
-		if task.hint == "HINT_SEARCH_BACK" or task._found:
+		if task.hint_base == "HINT_SEARCH_BACK" or task._found:
 			# Climb back over the poplars before coming down.
 			if FlightTask.flat_distance(f[1].pos, f[2].pad) > 3.0:
 				ap.land = false
@@ -365,7 +436,7 @@ func test_kitten_mission() -> void:
 	ap.height = 8.5
 	var plan := func(_t: float) -> Dictionary:
 		var sim: DroneSim = f[1]
-		if task.hint == "HINT_KITTEN_FIND":
+		if task.hint_base == "HINT_KITTEN_FIND":
 			ap.target = world.kitten
 			ap.height = 8.5
 		else:
@@ -374,4 +445,121 @@ func test_kitten_mission() -> void:
 		return ap.sticks(sim)
 	check(_fly(task, f[1], 180.0, plan), "kids: the kitten mission passes (hint: %s)" % task.hint)
 	world.queue_free()
+	await get_tree().process_frame
+
+
+# --- FPV -------------------------------------------------------------------------
+
+## Where to aim for the next gate or hoop: line up in front of it, then fly straight through.
+func _through(task: FlightTask, sim: DroneSim) -> Array:
+	var g: Dictionary = task.rings[task.ring_i]
+	var c: Vector3 = g["c"]
+	var n: Vector3 = g["n"]
+	var side := n.cross(Vector3.UP).normalized()
+	var rel := sim.pos - c
+	var along := rel.dot(n)
+	var lat := absf(rel.dot(side))
+	# The lining-up point (4 m in front) lies inside the corridor, so reaching it starts the run through.
+	var aim: Vector3 = c + n * 4.0 if (along > -5.0 and lat < 0.8) else c - n * 4.0
+	return [aim, c.y - task.world.height(c.x, c.z)]
+
+
+## A safe line through the tree belt: in each row, the widest gap near the last one.
+func _tree_line(task: FlightTask) -> Array[Vector3]:
+	var rows := {}
+	for t in task.trees:
+		var z := snappedf(t["at"].z, 5.0)
+		if not rows.has(z):
+			rows[z] = []
+		rows[z].append(t)
+	var keys := rows.keys()
+	keys.sort()
+	keys.reverse()
+	var out: Array[Vector3] = []
+	var last_x := 0.0
+	for z in keys:
+		var best_x := 0.0
+		var best := -INF
+		var x := -9.0
+		while x <= 9.0:
+			var clear := INF
+			for t in rows[z]:
+				clear = minf(clear, absf(x - t["at"].x) - t["r"])
+			var score := clear - absf(x - last_x) * 0.15
+			if score > best:
+				best = score
+				best_x = x
+			x += 0.25
+		out.append(Vector3(best_x, 2.5, z))
+		last_x = best_x
+	return out
+
+
+func test_fpv_task(key: String, mode: String) -> void:
+	var f := _flight(key, mode, "fpv")
+	var task: FlightTask = f[0]
+	var sim: DroneSim = f[1]
+	var world: FlightWorld = f[2]
+	var kids := mode == "kids"
+	var ap = Autopilot.new() if kids else FpvAutopilot.new()
+	if not kids:
+		ap.speed = 4.0 if mode == "simple" else 5.0
+	var line: Array[Vector3] = []
+	var leg := [0]  # in an array: a lambda keeps its own copy of a plain number
+	if key == "MIS_FPV_TREES":
+		var there := _tree_line(task)
+		var back := there.duplicate()
+		back.reverse()
+		line.append_array(there)
+		line.append(Vector3(0, 3, -38))
+		line.append_array(back)
+		line.append(Vector3(0, 3, -6))
+		if not kids:
+			ap.speed = 2.5 if mode == "simple" else 1.8
+	var balloons_done := func() -> bool: return task.get("_popped") != null and task._popped.size() >= task.BALLOONS.size()
+	var plan := func(_t: float) -> Dictionary:
+		if not task.rings.is_empty() and task.ring_i < task.rings.size():
+			var a := _through(task, sim)
+			ap.target = a[0]
+			ap.height = a[1]
+		elif key == "MIS_FPV_BALLOONS":
+			if not balloons_done.call():
+				for i in task.BALLOONS.size():
+					if i not in task._popped:
+						var b: Vector3 = task.balloon_pos(i)
+						ap.target = b
+						ap.height = b.y - world.height(b.x, b.z)
+						break
+			else:
+				ap.target = task._target + Vector3(0, 0, -0.5)
+				ap.height = task._target.y - world.height(task._target.x, task._target.z)
+		elif key == "MIS_FPV_TREES":
+			var w := line[mini(leg[0], line.size() - 1)]
+			if FlightTask.flat_distance(sim.pos, w) < 0.9:
+				leg[0] += 1
+			ap.target = Vector3(w.x, 0, w.z)
+			ap.height = w.y
+		elif key == "FPV_THROTTLE":
+			ap.target = world.pad
+			ap.height = 3.0
+		else:
+			var t := task.course_world_target()
+			if t != Vector3.INF:
+				ap.target = t
+				ap.height = task.cps[task.cp].y
+		return ap.sticks(sim)
+	var ok := _fly(task, sim, 200.0, plan)
+	check(ok, "%s: FPV %s passes%s" % [mode, key, "" if ok else " — %s %s crashed=%s" % [task.hint_base, task.summary, sim.crashed]])
+	world.queue_free()
+	await get_tree().process_frame
+
+
+func test_trees_over_fails() -> void:
+	var f := _flight("MIS_FPV_TREES", "simple", "fpv")
+	var ap := FpvAutopilot.new()
+	ap.target = Vector3(0, 0, -38)
+	ap.height = 12.0
+	_fly(f[0], f[1], 60.0, func(_t): return ap.sticks(f[1]))
+	check(f[0].failed and f[0].summary == "FAIL_TREES_OVER", "simple: flying over the tree line does not count")
+	f[2].queue_free()
 	await get_tree().process_frame

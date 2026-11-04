@@ -29,9 +29,25 @@ const MISSIONS := {
 
 const THEORY := ["TH_CHECKLIST", "TH_BATTERY", "TH_SIGNAL", "TH_RULES"]
 
+## Flying without self-levelling is for Adult mode only.
+const PRO_ONLY := ["FPV_HORIZON", "FPV_ACRO"]
 
-static func lessons(vehicle: String) -> Array:
-	return LESSONS.get(vehicle, [])
+
+## The lessons of a vehicle in a mode. Without a mode: every lesson there is.
+static func lessons(vehicle: String, mode := "") -> Array:
+	var all: Array = LESSONS.get(vehicle, [])
+	if mode == "" or mode == "pro":
+		return all
+	return all.filter(func(k): return k not in PRO_ONLY)
+
+
+## Kids mode has its own wording for many texts: KEY_KIDS, when it exists.
+static func text_key(key: String, mode: String) -> String:
+	if mode == "kids":
+		var kids := key + "_KIDS"
+		if String(TranslationServer.translate(kids)) != kids:
+			return kids
+	return key
 
 
 static func missions(vehicle: String, mode: String) -> Array:
