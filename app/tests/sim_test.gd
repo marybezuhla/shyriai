@@ -717,6 +717,8 @@ func test_shortcuts_closed() -> void:
 			phase[0] = 2
 		if phase[0] == 1:
 			return {"throttle": -0.4, "yaw": 0.0, "pitch": -0.4, "roll": 0.0}
+		if u.pos.z > 0.0:
+			return {"throttle": 0.0, "yaw": 0.0, "pitch": 0.0, "roll": 0.0}  # out: stop
 		return {"throttle": 0.4, "yaw": 0.0, "pitch": 0.4, "roll": 0.0}
 	var passed := _fly(g[0], u, 60.0, reverse)
 	check(phase[0] == 2 and not g[0].failed, "simple: the robot really reversed into the alley and out without a bump (phase %d, %s, %s)" % [phase[0], u.pos, g[0].summary])

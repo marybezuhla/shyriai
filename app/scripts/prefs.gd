@@ -138,7 +138,8 @@ func reset_progress() -> void:
 ## undo_reset() puts it all back.
 func erase_all() -> void:
 	_undo = {"all": _data()}
-	DirAccess.remove_absolute(OLD_PATH)
+	if path() == PATH:  # tests use a scratch file and must not touch real settings
+		DirAccess.remove_absolute(OLD_PATH)
 	mode = "simple"
 	theme = "dusk"
 	language = "system"
@@ -209,6 +210,9 @@ func _apply_language() -> void:
 
 func _load() -> void:
 	var data = _read_json(path())
+	if data == null:
+		# The swap may not have reached the disk: the last written copy is the next best.
+		data = _read_json(path() + ".tmp")
 	if data == null and path() == PATH:
 		data = _read_old_config()
 		if data != null:
@@ -330,8 +334,9 @@ func _data() -> Dictionary:
 	}
 
 
-## Writes a whole new file and then swaps it in, so a phone switching off mid-write
-## can never leave half a file. Returns false if it could not be written.
+## Writes a whole new file and then swaps it in, so the app closing mid-write leaves the old
+## file whole. (A sudden power loss can still lose the newest file: _load then tries the copy.)
+## Returns false if it could not be written.
 func _save() -> bool:
 	var tmp := path() + ".tmp"
 	var f := FileAccess.open(tmp, FileAccess.WRITE)
