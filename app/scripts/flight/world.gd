@@ -33,14 +33,22 @@ var pilot := Vector3(0, 1.7, 11)
 var kitten := Vector3.INF
 var sunflowers: Array[Vector3] = []
 var obstacles: Array[Dictionary] = []
+## Every house: {"pos": Vector3, "rot": float}. The roof ridge is 6 m above the ground.
+var houses: Array[Dictionary] = []
+const HOUSE_SPOTS := [
+	Vector3(-24, 0, -30), Vector3(16, 0, -36), Vector3(32, 0, -14),
+	Vector3(-34, 0, -6), Vector3(26, 0, 24), Vector3(-20, 0, 30),
+]
 
 var _noise := FastNoiseLite.new()
 var _sunflower_nodes: Array[Node3D] = []
 var _kitten_node: Node3D
+var _beacon: MeshInstance3D
+var _beacon_pole: MeshInstance3D
 var _t := 0.0
 
 
-func build(look: String, with_mission: bool, seed_ := 7) -> void:
+func build(look: String, seed_ := 7) -> void:
 	pal = PALETTES.get(look, PALETTES["day"])
 	_noise.seed = seed_
 	_noise.frequency = 0.012
@@ -49,24 +57,123 @@ func build(look: String, with_mission: bool, seed_ := 7) -> void:
 	_field()
 	_pad()
 	_poplars()
-	var houses := [Vector3(-24, 0, -30), Vector3(16, 0, -36), Vector3(32, 0, -14), Vector3(-34, 0, -6)]
-	for h in houses:
+	for h in HOUSE_SPOTS:
 		_house(h, atan2(h.x, h.z) + PI)  # front door towards the pad
 	_decor_sunflowers(Vector3(-12, 0, -18))
-	if with_mission:
-		var rng := RandomNumberGenerator.new()
-		rng.seed = seed_
-		var home: Vector3 = houses[rng.randi_range(0, houses.size() - 1)]
-		kitten = home + Vector3(0, 6.15, 0)
-		_kitten(kitten)
-		_van(Vector3(4, 0, 2.5))
-		for i in 5:
-			var t := (i + 1) / 6.0
-			var p := pad.lerp(kitten, t)
-			p.y = 2.5 + 1.5 * sin(t * PI)
-			p.x += 3.0 * sin(i * 1.7)
-			sunflowers.append(p)
-			_sunflower_nodes.append(_sunflower(p))
+	_make_beacon()
+
+
+# --- Things a lesson or mission adds ------------------------------------------
+
+func add_kitten(house: int) -> void:
+	kitten = houses[house]["pos"] + Vector3(0, 6.15, 0)
+	_kitten(kitten)
+
+
+func add_van(at: Vector3) -> void:
+	_van(at)
+
+
+func add_sunflowers(points: Array[Vector3]) -> void:
+	for p in points:
+		sunflowers.append(p)
+		_sunflower_nodes.append(_sunflower(p))
+
+
+## A storm-damaged roof: a dark hole in one slope and fallen tiles on the ground.
+func damage_roof(house: int) -> void:
+	var h: Dictionary = houses[house]
+	var at: Vector3 = h["pos"]
+	var rot: float = h["rot"]
+	var front := Vector3(sin(rot), 0, cos(rot))
+	var side := front.cross(Vector3.UP)
+	var hole := _mesh(_box(Vector3(2.2, 0.12, 1.6)), Color("#2A1D3B"), at + front * 1.3 + Vector3(0, 4.95, 0) + side * 0.8, rot)
+	hole.rotation = Vector3(0, rot, 0)
+	hole.rotate_object_local(Vector3.RIGHT, 0.73)  # lies on the front slope
+	var tile := _box(Vector3(0.5, 0.08, 0.35))
+	var rng := RandomNumberGenerator.new()
+	rng.seed = house * 31 + 5
+	for i in 7:
+		var off := front * rng.randf_range(3.2, 5.0) + side * rng.randf_range(-2.5, 2.5)
+		var t := _mesh(tile, pal["roof"], at + off + Vector3(0, 0.04, 0), rng.randf() * TAU)
+		t.rotation.z = rng.randf_range(-0.3, 0.3)
+
+
+## A person sitting in the field, in a red jacket, for the search mission.
+func add_person(at: Vector3) -> void:
+	var n := Node3D.new()
+	n.position = Vector3(at.x, height(at.x, at.z), at.z)
+	add_child(n)
+	var jacket := _mat(Color("#D9473B"))
+	var skin := _mat(Color("#E7B992"))
+	var dark := _mat(Color("#39254F"))
+	var parts := [
+		[_box(Vector3(0.45, 0.6, 0.3)), jacket, Vector3(0, 0.55, 0)],
+		[_box(Vector3(0.4, 0.2, 0.75)), dark, Vector3(0, 0.15, 0.25)],
+	]
+	for part in parts:
+		var mi := MeshInstance3D.new()
+		mi.mesh = part[0]
+		mi.material_override = part[1]
+		mi.position = part[2]
+		n.add_child(mi)
+	var head := SphereMesh.new()
+	head.radius = 0.14
+	head.height = 0.28
+	head.radial_segments = 8
+	head.rings = 4
+	var hm := MeshInstance3D.new()
+	hm.mesh = head
+	hm.material_override = skin
+	hm.position = Vector3(0, 1.0, 0)
+	n.add_child(hm)
+
+
+## A see-through gold sphere at the next target, on a thin pole, so its height and place are clear.
+func show_beacon(at: Vector3, radius: float) -> void:
+	var on := radius > 0.0 and at != Vector3.INF
+	_beacon.visible = on
+	_beacon_pole.visible = on
+	if not on:
+		return
+	_beacon.position = at
+	_beacon.scale = Vector3.ONE * radius
+	var g := height(at.x, at.z)
+	var h := maxf(at.y - g - radius, 0.0)
+	_beacon_pole.position = Vector3(at.x, g + h / 2.0, at.z)
+	_beacon_pole.scale = Vector3(1, maxf(h, 0.01), 1)
+
+
+func _make_beacon() -> void:
+	var sphere := SphereMesh.new()
+	sphere.radius = 1.0
+	sphere.height = 2.0
+	sphere.radial_segments = 24
+	sphere.rings = 12
+	var m := StandardMaterial3D.new()
+	m.albedo_color = Color(1.0, 0.765, 0.13, 0.28)
+	m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	m.cull_mode = BaseMaterial3D.CULL_DISABLED
+	_beacon = MeshInstance3D.new()
+	_beacon.mesh = sphere
+	_beacon.material_override = m
+	_beacon.visible = false
+	add_child(_beacon)
+	var pole := CylinderMesh.new()
+	pole.top_radius = 0.03
+	pole.bottom_radius = 0.03
+	pole.height = 1.0
+	pole.radial_segments = 6
+	var pm := StandardMaterial3D.new()
+	pm.albedo_color = Color(1.0, 0.765, 0.13, 0.7)
+	pm.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	pm.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	_beacon_pole = MeshInstance3D.new()
+	_beacon_pole.mesh = pole
+	_beacon_pole.material_override = pm
+	_beacon_pole.visible = false
+	add_child(_beacon_pole)
 
 
 ## Ground height at (x, z): flat around the pad, rolling hills further out.
@@ -251,6 +358,7 @@ func _poplars() -> void:
 
 
 func _house(at: Vector3, rot: float) -> void:
+	houses.append({"pos": at, "rot": rot})
 	var walls := _box(Vector3(6, 3.5, 5))
 	_mesh(walls, pal["wall"], at + Vector3(0, 1.75, 0), rot)
 	var roof := PrismMesh.new()

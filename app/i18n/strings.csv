@@ -47,19 +47,19 @@ CAM_NOSE_IN_GOAL,"When the drone faces you, the sticks seem reversed: left becom
 CAM_NOSE_IN_PASS,1 lap · under 60 s | Off track under 1.5 m,"1 коло · до 60 с | Відхилення до 1,5 м"
 CAM_SQUARE,Square and circle,Квадрат і коло
 CAM_SQUARE_NOTE,Turning while moving,Повороти на ходу
-CAM_SQUARE_GOAL,"Fly a square, then a circle, combining movement and turning.","Пролети квадрат, а потім коло, поєднуючи рух і поворот."
+CAM_SQUARE_GOAL,"Fly a square, then a circle. Fly nose first: turn the drone with the left stick as you go.","Пролети квадрат, а потім коло. Лети носом уперед: повертай дрон лівим стіком на ходу."
 CAM_SQUARE_PASS,10 m square | 10 m circle,Квадрат 10 м | Коло 10 м
 CAM_LANDING,Precise landing,Точна посадка
 CAM_LANDING_NOTE,In the centre of the pad,У центр майданчика
 CAM_LANDING_GOAL,"Land the drone in the centre of the pad, approaching from different sides.","Посади дрон у центр майданчика, підлітаючи з різних боків."
-CAM_LANDING_PASS,3 landings | Within 30 cm of the centre,3 посадки | До 30 см від центру
+CAM_LANDING_PASS,3 landings | Within 50 cm of the centre,3 посадки | До 50 см від центру
 CAM_WIND,Wind,Вітер
-CAM_WIND_NOTE,Gusts up to 6 m/s,Пориви до 6 м/с
-CAM_WIND_GOAL,Hold the drone and fly a route while the wind changes.,"Утримай дрон і пролети маршрут, коли вітер змінюється."
-CAM_WIND_PASS,4-point route | Gusts up to 6 m/s,Маршрут 4 точки | Пориви до 6 м/с
+CAM_WIND_NOTE,"No GPS, gusts","Без GPS, пориви"
+CAM_WIND_GOAL,"There is no GPS, and the wind is strong and gusty. Fly to four points and hold 2 s over each.","GPS немає, а вітер сильний і поривчастий. Пролети чотири точки й над кожною затримайся на 2 с."
+CAM_WIND_PASS,"4 points | Strong, gusty wind",4 точки | Сильний вітер з поривами
 CAM_EXAM,Exam,Іспит
 CAM_EXAM_NOTE,Everything together,Усе разом
-CAM_EXAM_GOAL,"Take-off, a route, nose-in flight and a precise landing in one flight.","Зліт, маршрут, політ носом до себе й точна посадка за один політ."
+CAM_EXAM_GOAL,"Take-off, a route nose first, a sideways pass nose in, and a precise landing, in one flight.","Зліт, маршрут носом уперед, проліт боком носом до себе й точна посадка — за один політ."
 CAM_EXAM_PASS,No collisions | Under 3 min,Без зіткнень | До 3 хв
 FPV_THROTTLE,Throttle and hover,Газ і висіння
 FPV_THROTTLE_NOTE,You hold the height,Висоту тримаєш ти
@@ -165,8 +165,8 @@ UNIT_M,%s m,%s м
 UNIT_MS,%s m/s,%s м/с
 STICK_LEFT,Height · turn,Висота · поворот
 STICK_RIGHT,Move,Рух
-VIEW_PILOT,From the ground,З землі
-VIEW_CHASE,Behind the drone,За дроном
+VIEW_PILOT,Ground,З землі
+VIEW_CHASE,Behind,За дроном
 PASSED,Passed!,Зараховано!
 PASSED_KIDS,"Hooray, you did it!","Ура, вийшло!"
 NEXT_LESSON,Next lesson,Наступний урок
@@ -203,3 +203,67 @@ GATE_OK,OK,OK
 GATE_ERASE,Erase,Стерти
 GATE_WRONG,Not quite. Here is another one.,Не те. Ось інший приклад.
 CANCEL,Cancel,Скасувати
+VIEW_DRONE,Camera,Камера
+NOT_THIS_TIME,Not this time,Цього разу не вийшло
+CAM_NOSE_IN_PASS_KIDS,1 lap | No rush,1 коло | Без поспіху
+CAM_SQUARE_PASS_KIDS,Square | Circle,Квадрат | Коло
+CAM_LANDING_PASS_KIDS,3 landings | On the pad,3 посадки | На майданчик
+CAM_WIND_PASS_KIDS,4 points | A light wind,4 точки | Легкий вітер
+CAM_EXAM_PASS_KIDS,Everything together | No rush,Усе разом | Без поспіху
+HINT_NOSE_UP,Take off: the drone is already facing you,Злітай: дрон уже дивиться на тебе
+HINT_NOSE_FACE,Turn the drone to face you with the left stick,Поверни дрон носом до себе лівим стіком
+HINT_NOSE_GO,"Fly from sphere to sphere, nose towards you: %d to go","Лети від кулі до кулі, носом до себе: ще %d"
+HINT_NOSE_SLOW,A minute has passed. Let’s start the lap again,Хвилина минула. Почнімо коло спочатку
+SUM_NOSE_IN,A nose-in lap in %d s.,Коло носом до себе за %d с.
+HINT_SQUARE_UP,Take off and fly to the first sphere,Злітай і лети до першої кулі
+HINT_SQUARE_NOSE,Fly nose first: turn the drone with the left stick,Лети носом уперед: поверни дрон лівим стіком
+HINT_SQUARE_GO,Square: %d spheres to go,Квадрат: ще %d кулі
+HINT_CIRCLE_GO,Now the circle: %d spheres to go,Тепер коло: ще %d кулі
+SUM_SQUARE,Square and circle flown nose first.,Квадрат і коло пройдено носом уперед.
+HINT_LAND_UP,Take off and fly to the sphere,Злітай і лети до кулі
+HINT_LAND_TAKEOFF,Take off and fly to the next sphere,Злітай і лети до наступної кулі
+HINT_LAND_GO,Landing %d of 3: fly to the sphere,Посадка %d з 3: лети до кулі
+HINT_LAND_DOWN,Now land in the centre of the pad,Тепер сідай у центр майданчика
+HINT_LAND_MISS,Off by %d cm. Take off and try again,Мимо: %d см від центру. Злети й спробуй ще
+HINT_LAND_HARD,Too hard: %s m/s. Take off and come down slower,Зажорстко: %s м/с. Злети й сідай повільніше
+HINT_LAND_GOOD,Landing %d: %d cm from the centre!,Посадка %d: %d см від центру!
+SUM_LANDING,Three precise landings from different sides. The last was %d cm from the centre.,Три точні посадки з різних боків. Остання — %d см від центру.
+HINT_WIND_UP,Take off: the wind is already blowing,Злітай: вітер уже дме
+HINT_WIND_GO,Fly to the sphere: %d to go,Лети до кулі: ще %d
+HINT_WIND_HOLD,Keep the drone in the sphere: %d more s,Тримай дрон у кулі: ще %d с
+HINT_WIND_OUT,A gust pushed it out. Back into the sphere,Порив виніс дрон. Повертайся в кулю
+SUM_WIND,Route flown. The wind at the end: %s m/s.,Маршрут пройдено. Вітер наприкінці: %s м/с.
+HINT_EXAM_UP,Exam: take off to 2 m,Іспит: злітай на 2 м
+HINT_EXAM_ROUTE,"Route, nose first: %d to go",Маршрут носом уперед: ще %d
+HINT_EXAM_SWEEP,"Now sideways, nose towards you: %d to go","Тепер боком, носом до себе: ще %d"
+SUM_EXAM,Exam passed in %d:%02d.,Іспит складено за %d:%02d.
+FAIL_EXAM_BUMP,The drone touched an obstacle. In the exam nothing may be touched: give obstacles room.,Дрон зачепив перешкоду. На іспиті не можна торкатися нічого: облітай з запасом.
+FAIL_EXAM_TIME,"Three minutes have passed. Fly steadily, without rushing, and try again.","Три хвилини минули. Літай упевнено, але без поспіху, і спробуй ще."
+HINT_SEARCH_UP,Climb above the poplars and fly to the search area,Злітай вище за тополі й лети до зони пошуку
+HINT_SEARCH_GO,Fly to the search area. The poplars are 11 m tall,Лети до зони пошуку. Тополі заввишки 11 м
+HINT_SEARCH_LOOK,Search the area with the drone camera: the person wears a red jacket,Оглядай зону з камери дрона: людина в червоній куртці
+HINT_SEARCH_MARK,Hover over the person: %d more s,Зависни над людиною: ще %d с
+HINT_SEARCH_FOUND,Found! The mark has gone to the rescuers,Знайдено! Позначку передано рятувальникам
+HINT_SEARCH_BACK,Fly back and land by the pad,Повертайся й сідай біля майданчика
+SUM_SEARCH,The person was found and the drone was back in %d:%02d.,"Людину знайдено, дрон повернувся за %d:%02d."
+HINT_SURVEY_UP,Take off and look at the roofs from above,Злітай і оглядай дахи згори
+HINT_SURVEY_GO,Fly to the next house: %d to go,Лети до наступної хати: ще %d
+HINT_SURVEY_HIGHER,Climb above the roof: over 7 m,Піднімись вище за дах: понад 7 м
+HINT_SURVEY_LOOK,Look at the roof through the drone camera,Придивися до даху з камери дрона
+HINT_SURVEY_NOTED,Noted,Записано
+Q_ROOF,Is this roof damaged?,Цей дах пошкоджено?
+OPT_DAMAGED,Damaged,Пошкоджено
+OPT_INTACT,Intact,Цілий
+SUM_SURVEY,Every roof assessed correctly: %d of %d.,Усі дахи оглянуто правильно: %d з %d.
+FAIL_SURVEY,"%d of %d right. Damaged roofs have a dark hole, and fallen tiles lie on the ground.","Правильно %d з %d. На пошкоджених дахах темна діра, а на землі лежать уламки черепиці."
+SOURCES,Sources,Джерела
+TH_CHECKLIST_BODY,"The drone and radio batteries are charged; no updates install in the field.|Propellers are whole, without cracks or chips, and fixed tight.|The body, camera and gimbal are undamaged; the battery has clicked into place.|Weather: no rain or fog, and the wind is lighter than the maker allows.|The place: you have permission, and there are no people, wires, trees or buildings in the way.|The return-to-home height is set above the tallest obstacles around.|Wait for the satellites and the home point to be recorded before take-off.|Keep the drone in sight for the whole flight.","Батареї дрона й пульта заряджені, оновлення не встановлюються просто на полі.|Гвинти цілі, без тріщин і щербин, міцно закріплені.|Корпус, камера й підвіс без пошкоджень, кріплення батареї клацнуло.|Погода: без дощу й туману, вітер слабший, ніж дозволяє виробник.|Місце: є дозвіл, поруч немає людей, дротів, дерев і будівель на шляху.|Висоту автоповернення встановлено вище за найвищі перешкоди довкола.|Дочекайся супутників і запису точки старту, перш ніж злітати.|Тримай дрон у полі зору весь політ."
+TH_CHECKLIST_KIDS,"Before a flight, a grown-up checks the drone with you.|Are the propellers whole? Is the battery charged?|No people, animals or trees nearby?|Watch the drone the whole time it flies.","Перед польотом дорослий перевіряє дрон разом з тобою.|Гвинти цілі? Батарея заряджена?|Поруч немає людей, тварин і дерев?|Дивись на дрон увесь час, поки він літає."
+TH_BATTERY_BODY,"Charge only with a matching charger, on a surface that cannot burn, and never unattended.|Never charge or use a swollen, dented or pierced battery.|If a battery will sit for a few days, put it in storage mode: about 3.7–3.8 V per cell.|Do not run it flat: land with 20–30 % left.|In the cold a battery gives less energy: keep it warm before the flight and fly shorter.|Take an old or damaged battery to a battery collection point; never throw it in the bin.|If a battery smokes or burns, step away, do not breathe the smoke, and call for help (101 in Ukraine).","Заряджай лише відповідним зарядним пристроєм, на негорючій поверхні, і не залишай без нагляду.|Не заряджай і не використовуй здуту, пом’яту чи пробиту батарею.|Якщо батарея не потрібна кілька днів, переведи її в режим зберігання: близько 3,7–3,8 В на банку.|Не розряджай до нуля: сідай, коли лишається 20–30 %.|На холоді батарея віддає менше енергії: тримай її в теплі до польоту й літай коротше.|Стару чи пошкоджену батарею здай у пункт приймання батарей, не викидай у смітник.|Якщо батарея димить або горить, відійди, не вдихай дим і клич на допомогу (101)."
+TH_BATTERY_KIDS,"Only a grown-up charges the battery.|If a battery has puffed up like a pillow, do not touch it; tell a grown-up.|Is a battery hot or smelly? Step away and call a grown-up.","Батарею заряджає тільки дорослий.|Якщо батарея надулася, як подушка, не чіпай її і скажи дорослому.|Батарея гріється чи пахне? Відійди й клич дорослого."
+TH_SIGNAL_BODY,"If the link to the radio drops, a camera drone usually hovers and then flies back to its home point by itself.|That is why the return-to-home height should be above trees and buildings.|Do not panic: let go of the sticks, move closer, or turn the radio’s antennas towards the drone.|In Ukraine GPS is often jammed. Without GPS the drone cannot hold its place and the wind carries it, as in the Hold a spot lesson.|An FPV drone without a link does what its failsafe is set to do: usually it stops the motors.|A ground robot without a link should stop where it is.","Якщо зв’язок з пультом зник, камерний дрон зазвичай зависає, а потім сам повертається до точки старту.|Тому висоту автоповернення варто ставити вище за дерева й будівлі.|Не панікуй: відпусти стіки, підійди ближче чи підніми пульт антенами до дрона.|В Україні GPS часто глушать. Без GPS дрон не тримає точку, і вітер його зносить, як в уроці «Утримати точку».|FPV-дрон без зв’язку діє так, як налаштовано на випадок втрати сигналу: зазвичай вимикає мотори.|Наземний робот без зв’язку має зупинитися на місці."
+TH_SIGNAL_KIDS,"Sometimes the drone loses the radio, like a phone loses its signal.|Then a smart drone hovers and flies home by itself.|Do not worry, and let go of the sticks.","Іноді дрон «губить» пульт, як телефон губить мережу.|Тоді розумний дрон зависає і сам летить додому.|Не хвилюйся і відпусти стіки."
+TH_RULES_BODY,"While martial law is in force, launching a civilian drone without permission is forbidden, even over your own yard: once airborne, it is in the national airspace.|Permission comes from the General Staff of the Armed Forces of Ukraine, only in exceptional cases: in the interests of the state or the Armed Forces, or to inspect destroyed property. Requests go in at least 10 days ahead.|Without permission you may fly only indoors.|Always, in peacetime too, flying is forbidden over nuclear and hydro power plants, dams, important state sites, nature reserves and hazardous plants.|Do not film or publish soldiers, equipment, fortifications or the results of strikes: this is a criminal offence.|Shyriai is a trainer. Practise here, and fly for real only with permission. Rules change: check them with your local military administration.","Поки діє воєнний стан, запускати цивільні дрони без дозволу заборонено, навіть над власним подвір’ям: дрон уже в повітряному просторі.|Дозвіл дає Генеральний штаб ЗСУ лише у виняткових випадках: у інтересах держави чи ЗСУ або для огляду зруйнованого майна. Заявку подають щонайменше за 10 днів.|Без дозволу літати можна лише в закритому приміщенні.|Завжди, і в мирний час, заборонено літати над АЕС, ГЕС, дамбами, важливими державними об’єктами, заповідниками й небезпечними підприємствами.|Не знімай і не публікуй військових, техніку, укріплення й наслідки ударів: за це є кримінальна відповідальність.|Ширяй — тренажер. Тренуйся тут, а справжні польоти — лише з дозволом. Правила змінюються: перевіряй їх у своїй військовій адміністрації."
+TH_RULES_KIDS,"Right now, real drones may fly only with permission.|A small drone can fly in a room, together with a grown-up.|And in Shyriai you can fly as much as you like!","Справжні дрони зараз можна запускати лише з дозволом.|Маленький дрон можна запускати в кімнаті, разом з дорослими.|А в Ширяї можна літати скільки завгодно!"
+TH_RULES_SOURCES,"Oster community, Procedure for drone flight permits under martial law, 22 Dec 2025. Sud.ua, Where drones may not be launched, 2026. CEDEM, Using drones in wartime, 2023. As of November 2026.","Остерська громада, «Порядок отримання дозволів на польоти БпЛА під час воєнного стану», 22.12.2025. Судово-юридична газета (sud.ua), «Де не можна запускати дрони», 2026. ЦЕДЕМ, «Використання дронів під час воєнного часу», 2023. Станом на листопад 2026 року."
+TH_BATTERY_SOURCES,LiPo safety rules of the University of Maryland drone lab and of battery makers.,Правила безпеки LiPo-батарей лабораторії дронів Університету Меріленду та виробників батарей.

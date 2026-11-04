@@ -10,6 +10,8 @@ var vehicle := "camera"
 var task_key := "CAM_STICKS"
 var mode := "simple"
 var look := "dusk"
+## Which world and task variant to build; tests and "Start over" keep it, a new attempt changes it.
+var flight_seed := 7
 ## Tests set this to fly by themselves: func(sim, task) -> {"throttle", "yaw", "pitch", "roll"}.
 var autopilot := Callable()
 
@@ -32,6 +34,8 @@ var _stats := {}
 var _counter: Label
 var _view_box := VBoxContainer.new()
 var _overlay: Control
+var _choice_box := CenterContainer.new()
+var _choice_shown := {}
 var _paused := false
 var _finished := false
 var _sticks := {"throttle": 0.0, "yaw": 0.0, "pitch": 0.0, "roll": 0.0}
@@ -51,11 +55,14 @@ func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 
-	task = FlightTask.make(task_key, mode)
+	task = FlightTask.make(task_key, mode, flight_seed)
 	world = FlightWorld.new()
 	add_child(world)
-	world.build(look, task.is_mission, 7)
+	world.build(look, 7)
 	task.world = world
+	task.setup_world()
+	if task.view_hint != "":
+		view = task.view_hint
 
 	sim = DroneSim.new(mode, 11)
 	sim.gps = task.gps
@@ -63,7 +70,7 @@ func _ready() -> void:
 		sim.set_wind(task.wind, task.gust)
 	sim.ground = world.height
 	sim.obstacles = world.obstacles
-	sim.place(task.start_position(), 0.0)
+	sim.place(task.start_position(), task.start_heading())
 
 	drone = DroneView.new()
 	world.add_child(drone)
@@ -92,9 +99,11 @@ func _physics_process(_delta: float) -> void:
 		return
 	_read_sticks()
 	sim.step(STEP, _sticks["throttle"], _sticks["yaw"], _sticks["pitch"], _sticks["roll"])
-	task.update(STEP, sim, _sticks)
+	task.step(STEP, sim, _sticks)
 	if task.done:
 		_finish()
+	elif task.failed:
+		_not_this_time()
 	elif sim.crashed:
 		_crashed()
 
@@ -102,6 +111,7 @@ func _physics_process(_delta: float) -> void:
 func _process(delta: float) -> void:
 	drone.sync(sim, delta)
 	_place_camera(delta)
+	world.show_beacon(task.marker, task.beacon)
 	_update_hud()
 	_marks.queue_redraw()
 
@@ -145,7 +155,12 @@ func _bigger(a: float, b: float) -> float:
 
 func _place_camera(delta: float) -> void:
 	var target := sim.pos + Vector3(0, 0.15, 0)
-	if view == "chase":
+	if view == "drone":
+		# The drone's own camera on a steady gimbal, tilted down a little.
+		cam.position = sim.pos + sim.forward() * 0.45 + Vector3(0, 0.2, 0)
+		cam.rotation = Vector3(deg_to_rad(-25.0), sim.yaw, 0)
+		cam.fov = 75.0
+	elif view == "chase":
 		var back := -sim.forward() * 6.0 + Vector3(0, 2.6, 0)
 		var want := target + back
 		var g := sim.ground.call(want.x, want.z) as float
@@ -267,6 +282,7 @@ func _build_hud() -> void:
 	hint_row.add_child(_hint_panel)
 	col.add_child(hint_row)
 
+
 	var fill := Control.new()
 	fill.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	fill.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -287,6 +303,13 @@ func _build_hud() -> void:
 	col.add_child(bottom)
 	_build_view_toggle()
 
+	# A question with buttons, e.g. "Is this roof damaged?", floats in the middle of the view.
+	_choice_box.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_choice_box.offset_top = 24
+	_choice_box.offset_bottom = 24
+	_choice_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_hud.add_child(_choice_box)
+
 
 func _stick_with_label(s: Stick, text: String) -> Control:
 	var v := UI.vbox(4)
@@ -306,15 +329,41 @@ func _build_view_toggle() -> void:
 	fill.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	fill.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_view_box.add_child(fill)
-	var seg := UI.segmented([["pilot", tr("VIEW_PILOT")], ["chase", tr("VIEW_CHASE")]], view, set_view)
-	seg.custom_minimum_size = Vector2(260, 0)
+	var seg := UI.segmented([["pilot", tr("VIEW_PILOT")], ["chase", tr("VIEW_CHASE")], ["drone", tr("VIEW_DRONE")]], view, set_view)
+	seg.custom_minimum_size = Vector2(360, 0)
 	var center := CenterContainer.new()
 	center.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	center.add_child(seg)
 	_view_box.add_child(center)
 
 
+func _update_choice() -> void:
+	if task.choice == _choice_shown:
+		return
+	_choice_shown = task.choice.duplicate(true)
+	for c in _choice_box.get_children():
+		c.queue_free()
+	if task.choice.is_empty():
+		return
+	var glass := Pal.c("bg")
+	glass.a = 0.85
+	var col := UI.vbox(10)
+	var q := UI.label(tr(task.choice["prompt"]), 15, 700, "text", false, false)
+	q.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	col.add_child(q)
+	var row := UI.hbox(10)
+	for opt in task.choice["options"]:
+		var id: String = opt[0]
+		var c := CenterContainer.new()
+		c.custom_minimum_size = Vector2(150, 46)
+		c.add_child(UI.label(tr(opt[1]), 15, 800, "on_accent", false, false))
+		row.add_child(UI.tappable(c, Pal.c("accent"), func(): task.choose(id), tr(opt[1]), 14, 0))
+	col.add_child(row)
+	_choice_box.add_child(UI.panel(col, glass, 18, 12))
+
+
 func _update_hud() -> void:
+	_update_choice()
 	_bar_fill.size = Vector2(120.0 * task.progress, 6)
 	if _bar_text:
 		_bar_text.text = "%d %%" % int(round(task.progress * 100.0))
@@ -467,6 +516,21 @@ func _crashed() -> void:
 	var col := UI.vbox(12)
 	col.add_child(UI.label(tr("CRASHED"), 22, 600, "text", true))
 	col.add_child(UI.label(tr("CRASHED_TEXT") % ("%.1f" % sim.crash_speed), 14, 500, "muted"))
+	col.add_child(UI.primary(tr("AGAIN"), restart, "play"))
+	col.add_child(_secondary(tr("EXIT"), leave))
+	_show_overlay(col)
+
+
+func _not_this_time() -> void:
+	_finished = true
+	_left.release()
+	_right.release()
+	var col := UI.vbox(12)
+	col.add_child(UI.label(tr("NOT_THIS_TIME"), 22, 600, "text", true))
+	var s := tr(task.summary)
+	if not task.summary_args.is_empty():
+		s = s % task.summary_args
+	col.add_child(UI.label(s, 14, 500, "muted"))
 	col.add_child(UI.primary(tr("AGAIN"), restart, "play"))
 	col.add_child(_secondary(tr("EXIT"), leave))
 	_show_overlay(col)

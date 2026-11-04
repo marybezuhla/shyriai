@@ -14,6 +14,21 @@ func configure() -> void:
 	wind = 0.0
 
 
+func setup_world() -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = task_seed
+	world.add_kitten(rng.randi_range(0, 3))  # one of the houses in front of the pilot
+	world.add_van(Vector3(4, 0, 2.5))
+	var pts: Array[Vector3] = []
+	for i in 5:
+		var t := (i + 1) / 6.0
+		var p: Vector3 = world.pad.lerp(world.kitten, t)
+		p.y = 2.5 + 1.5 * sin(t * PI)
+		p.x += 3.0 * sin(i * 1.7)
+		pts.append(p)
+	world.add_sunflowers(pts)
+
+
 func update(_dt: float, sim: DroneSim, _sticks: Dictionary) -> void:
 	counter_max = world.sunflowers.size()
 	for i in world.sunflowers.size():

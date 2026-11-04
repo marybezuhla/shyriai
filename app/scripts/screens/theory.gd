@@ -16,5 +16,6 @@ func build() -> void:
 		row.add_child(text)
 		row.add_child(Glyph.make("chevron", 20, Pal.c("muted")))
 		var title := tr(t)
-		list.add_child(UI.tappable(row, Pal.c("surface"), func(): app.open_soon(title), title))
+		var card: String = t
+		list.add_child(UI.tappable(row, Pal.c("surface"), func(): app.open_theory(card), title))
 	add_child(list)

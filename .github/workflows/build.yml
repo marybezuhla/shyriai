@@ -23,7 +23,7 @@ jobs:
   # Builds and tests. Runs third-party build code (Godot), so it gets no secrets and no write access.
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
         with:
@@ -79,9 +79,10 @@ jobs:
           set -o pipefail
           godot --headless --path app --import 2>&1 | tail -5
           # Each lesson must be passable with the sticks alone, in every mode.
-          godot --headless --path app res://tests/sim_test.tscn 2>&1 | tee sim.log
+          # A test that hangs (a script error stops it before it quits) fails after the time limit.
+          timeout 600 godot --headless --path app res://tests/sim_test.tscn 2>&1 | tee sim.log || true
           grep -q "SIM OK" sim.log || { echo "::error::Physics or lesson tests failed"; exit 1; }
-          godot --headless --path app res://tests/smoke.tscn 2>&1 | tee smoke.log
+          timeout 900 godot --headless --path app res://tests/smoke.tscn 2>&1 | tee smoke.log || true
           grep -q "SMOKE OK" smoke.log || { echo "::error::Smoke test did not finish"; exit 1; }
           if grep -E "SCRIPT ERROR|^ERROR|Parse Error|leaked" sim.log smoke.log; then echo "::error::Script errors or leaks in the tests"; exit 1; fi
 

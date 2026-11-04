@@ -8,7 +8,7 @@ const PATH := "user://prefs.cfg"
 const MODES := ["kids", "simple", "pro"]
 const THEMES := ["dusk", "day", "system"]
 const LANGUAGES := ["system", "uk", "en"]
-const VIEWS := ["pilot", "chase"]
+const VIEWS := ["pilot", "chase", "drone"]
 
 var mode := "simple"
 ## The theme the grown-up chose. Kids mode shows "morning" instead, without changing this.

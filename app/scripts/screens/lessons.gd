@@ -76,7 +76,10 @@ func _lesson_card(lessons: Array, done: int) -> Control:
 	var chips := HFlowContainer.new()
 	chips.add_theme_constant_override("h_separation", 8)
 	chips.add_theme_constant_override("v_separation", 8)
-	for part in tr(key + "_PASS").split("|"):
+	var pass_key := key + "_PASS"
+	if Prefs.mode == "kids" and tr(key + "_PASS_KIDS") != key + "_PASS_KIDS":
+		pass_key = key + "_PASS_KIDS"
+	for part in tr(pass_key).split("|"):
 		chips.add_child(UI.panel(UI.label(part.strip_edges(), 12, 700, "text", false, false), Pal.c("surface2"), 10, 7))
 	card.add_child(chips)
 	if selected <= done:

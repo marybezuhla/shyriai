@@ -7,6 +7,10 @@ var target := Vector3.ZERO
 var height := 2.0
 var land := false
 var descend := -0.35  # throttle while landing
+## Where the nose should point: a point to face, or INF to keep it.
+var face := Vector3.INF
+## Face the way it flies (towards the target).
+var face_travel := false
 var _int := Vector3.ZERO
 
 
@@ -33,4 +37,16 @@ func sticks(sim: DroneSim, dt := 1.0 / 60.0) -> Dictionary:
 		throttle = clampf(((height - sim.altitude()) * 1.2 - sim.vel.y * 0.6) / vz, -1.0, 1.0)
 		if sim.on_ground and height > 0.3:
 			throttle = 1.0
-	return {"throttle": throttle, "yaw": 0.0, "pitch": pitch, "roll": roll}
+	var yaw_in := 0.0
+	var look := Vector3.INF
+	if face_travel:
+		look = target
+	elif face != Vector3.INF:
+		look = face
+	if look != Vector3.INF:
+		var d := look - sim.pos
+		if Vector2(d.x, d.z).length() > 0.5:
+			var heading := atan2(-d.x, -d.z)
+			var turn := wrapf(heading - sim.yaw, -PI, PI)
+			yaw_in = clampf(-turn * 2.5, -1.0, 1.0)
+	return {"throttle": throttle, "yaw": yaw_in, "pitch": pitch, "roll": roll}

@@ -41,10 +41,10 @@ func update(dt: float, sim: DroneSim, _sticks: Dictionary) -> void:
 		if e["type"] != "landed" or _phase != 2:
 			continue
 		if flat_distance(sim.pos, world.pad) > PAD:
-			say("HINT_TAKEOFF_MISSED")
+			say_for("HINT_TAKEOFF_MISSED")
 			_phase = 0
 		elif e["speed"] > SOFT:
-			say("HINT_TAKEOFF_HARD", ["%.1f" % e["speed"]])
+			say_for("HINT_TAKEOFF_HARD", ["%.1f" % e["speed"]])
 			_phase = 0
 		else:
 			pass_with("SUM_TAKEOFF", ["%.1f" % e["speed"]])

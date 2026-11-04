@@ -91,6 +91,12 @@ func open_licenses() -> void:
 	_push(_make("res://scripts/screens/licenses.gd"))
 
 
+func open_theory(card: String) -> void:
+	var s := _make("res://scripts/screens/theory_card.gd")
+	s.card = card
+	_push(s)
+
+
 func open_soon(title: String) -> void:
 	var s := _make("res://scripts/screens/soon.gd")
 	s.title = title
@@ -130,6 +136,8 @@ func open_flight(vehicle: String, key: String) -> void:
 	_frame.visible = false
 	flight = load("res://scripts/flight/flight.gd").new()
 	flight.setup(self, vehicle, key)
+	# Missions change a little each attempt: another house, another place in the field.
+	flight.flight_seed = randi_range(1, 9999) if key.begins_with("MIS_") else 7
 	add_child(flight)
 
 

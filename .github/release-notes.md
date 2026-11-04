@@ -1,31 +1,27 @@
-**Ширяй 0.2.0** — тренажер пілотування для Android: без інтернету, акаунтів і реклами. Українська та англійська.
+**Ширяй 0.3.0** — тренажер пілотування для Android: без інтернету, акаунтів і реклами. Українська та англійська.
 
-**Нове: перший політ.**
+**Нове: увесь курс камерного дрона.**
 
-- 🛸 **Камерний дрон** літає в low-poly світі з полем, тополями й хатками. Два стіки на екрані (Mode 2), також геймпад.
-- 🎯 **Уроки 1–3:** «Що роблять стіки», «Зліт і посадка», «Утримати точку» (без GPS, на вітрі). Кожен сам перевіряє умови й підказує, що робити далі. Прогрес зберігається.
-- 🐱 **Дитяча місія «Кошеня на даху»** з соняшниками.
-- 👀 **Дві камери:** «З землі», як пілот із пультом, і «За дроном».
-- 🧒 **Три режими по-різному літають:** у Дитячому розбитися неможливо, у Дорослому є інерція, пориви вітру, батарея і падіння від сильного удару.
-- 🌅 **Дитяча тема «Ранок»** і **батьківський замок** з прикладом на множення (вмикається в налаштуваннях).
+- 🎯 **Уроки 4–8:** «Носом до себе», «Квадрат і коло», «Точна посадка», «Вітер» (без GPS, з поривами) та «Іспит». Наступна ціль — золота куля в повітрі.
+- 🔎 **Дорослі місії:** «Пошук у полі» (знайди людину в червоній куртці й поверни дрон) та «Огляд після негоди» (оглянь дахи згори й скажи, які пошкоджено). Щоразу трохи інші.
+- 🎥 **Третя камера** — вигляд з самого дрона.
+- 📘 **Картки теорії:** перед польотом, безпека батарей, втрата сигналу й правила польотів в Україні під час воєнного стану, з джерелами. Для дітей — простіші.
 
-Інші уроки, FPV-дрон і НРК — у наступних версіях. Потрібен Android 7 або новіший.
+FPV-дрон і НРК — у наступних версіях. Потрібен Android 7 або новіший.
 
 📲 Завантажте файл .apk нижче й відкрийте його на телефоні. 🔄 Для оновлень — Obtainium (є в F-Droid): «Додати застосунок» → `github.com/Marybezu/shyriai`.
 
 ---
 
-**Shyriai 0.2.0** — a piloting trainer for Android: no internet, no accounts, no ads. Ukrainian and English.
+**Shyriai 0.3.0** — a piloting trainer for Android: no internet, no accounts, no ads. Ukrainian and English.
 
-**New: the first flight.**
+**New: the whole camera drone course.**
 
-- 🛸 **The camera drone** flies in a low-poly world of fields, poplars and houses. Two on-screen sticks (Mode 2), or a gamepad.
-- 🎯 **Lessons 1–3:** What the sticks do, Take-off and landing, Hold a spot (no GPS, in the wind). Each checks its own goals and tells you what to do next. Progress is saved.
-- 🐱 **Kids' mission Kitten on the roof**, with sunflowers.
-- 👀 **Two cameras:** From the ground, like a pilot with the radio, and Behind the drone.
-- 🧒 **The three modes fly differently:** in Kids mode crashing is impossible; in Adult mode there is inertia, gusty wind, a battery, and a crash on a hard hit.
-- 🌅 **The Morning look for Kids mode** and a **grown-ups' lock** with a multiplication sum (turn it on in settings).
+- 🎯 **Lessons 4–8:** Nose in, Square and circle, Precise landing, Wind (no GPS, with gusts) and the Exam. The next target is a gold sphere in the air.
+- 🔎 **Adult missions:** Search in a field (find a person in a red jacket and bring the drone back) and Survey after a storm (look at the roofs from above and say which are damaged). A little different each time.
+- 🎥 **A third camera**: the view from the drone itself.
+- 📘 **Theory cards:** before you fly, battery safety, lost signal, and the rules for flying in Ukraine under martial law, with sources. Simpler ones for kids.
 
-More lessons, the FPV drone and the UGV come in the next versions. Requires Android 7 or newer.
+The FPV drone and the UGV come in the next versions. Requires Android 7 or newer.
 
 📲 Download the .apk file below and open it on your phone. 🔄 For updates, use Obtainium (on F-Droid): Add App → `github.com/Marybezu/shyriai`.
