@@ -13,7 +13,7 @@ func build() -> void:
 	app_name.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	app_name.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	top.add_child(app_name)
-	top.add_child(UI.icon_button("gear", func(): app.open_settings(), tr("SETTINGS"), Pal.c("surface")))
+	top.add_child(UI.icon_button("gear", func(): app.guard(app.open_settings), tr("SETTINGS"), Pal.c("surface")))
 	add_child(top)
 
 	# Mode
@@ -21,7 +21,7 @@ func build() -> void:
 	mode_box.add_child(UI.label(tr("HOME_WHO"), 24, 600, "text", true))
 	mode_box.add_child(UI.segmented([
 		["kids", tr("MODE_KIDS")], ["simple", tr("MODE_SIMPLE")], ["pro", tr("MODE_PRO")],
-	], Prefs.mode, func(m): Prefs.set_mode(m)))
+	], Prefs.mode, _pick_mode))
 	var desc := UI.label(tr("MODE_%s_DESC" % Prefs.mode.to_upper()), 14, 500, "muted")
 	desc.custom_minimum_size = Vector2(0, 40)
 	mode_box.add_child(desc)
@@ -35,6 +35,14 @@ func build() -> void:
 	for v in Curriculum.VEHICLES:
 		list.add_child(_vehicle_card(v))
 	add_child(list)
+
+
+func _pick_mode(m: String) -> void:
+	# Leaving Kids mode may need a grown-up.
+	if Prefs.mode == "kids" and m != "kids":
+		app.guard(func(): Prefs.set_mode(m))
+	else:
+		Prefs.set_mode(m)
 
 
 func _continue_card() -> Control:

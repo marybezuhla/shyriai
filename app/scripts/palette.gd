@@ -33,7 +33,24 @@ const THEMES := {
 		"accent_text": Color("#5B3E86"),
 		"focus": Color("#5B3E86"),
 	},
+	# Morning: the Kids mode look. Sky-light, the same violet ink and gold.
+	"morning": {
+		"bg": Color("#EAF3F8"),
+		"surface": Color("#FFFFFF"),
+		"surface2": Color("#D6E8F2"),
+		"line": Color("#B5CCDA"),
+		"text": Color("#2A1D3B"),
+		"muted": Color("#4B4564"),
+		"faint": Color("#5C5679"),
+		"accent": Color("#FFC321"),
+		"on_accent": Color("#2A1D3B"),
+		"accent_text": Color("#5B3E86"),
+		"focus": Color("#5B3E86"),
+	},
 }
+
+## Kids get slightly larger text; everything else follows from it.
+const TEXT_SCALE := {"morning": 1.1}
 
 var current := "dusk"
 var _fonts := {}
@@ -41,6 +58,10 @@ var _fonts := {}
 
 func c(token: String) -> Color:
 	return THEMES[current][token]
+
+
+func text_scale() -> float:
+	return TEXT_SCALE.get(current, 1.0)
 
 
 func apply(choice: String) -> void:

@@ -56,6 +56,9 @@ func _draw() -> void:
 			_line([[9, 5], [16, 12], [9, 19]])
 		"play":
 			draw_colored_polygon(PackedVector2Array([_p(8, 5), _p(19.5, 12), _p(8, 19)]), color)
+		"pause":
+			draw_rect(Rect2(_p(7, 5), Vector2(3.5, 14) * _k), color)
+			draw_rect(Rect2(_p(13.5, 5), Vector2(3.5, 14) * _k), color)
 		"check":
 			_line([[5, 12.5], [10, 17], [19, 7]])
 		"lock":

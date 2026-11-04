@@ -12,7 +12,7 @@ static func label(text: String, px: int, weight := 500, token := "text", display
 	var l := Label.new()
 	l.text = text
 	l.add_theme_font_override("font", Pal.font(weight, display))
-	l.add_theme_font_size_override("font_size", px)
+	l.add_theme_font_size_override("font_size", roundi(px * Pal.text_scale()))
 	l.add_theme_color_override("font_color", Pal.c(token))
 	if wrap:
 		l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -147,3 +147,39 @@ static func _ignore_mouse(n: Node) -> void:
 		(n as Control).mouse_filter = Control.MOUSE_FILTER_IGNORE
 	for ch in n.get_children():
 		_ignore_mouse(ch)
+
+
+## A full-width row with an on/off switch and a line of explanation under the title.
+static func switch_row(title: String, desc: String, on: bool, on_toggle: Callable) -> PanelContainer:
+	var text := vbox(3)
+	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	text.add_child(label(title, 16, 700))
+	text.add_child(label(desc, 13, 500, "muted"))
+	var sw := Toggle.new()
+	sw.on = on
+	sw.custom_minimum_size = Vector2(48, 28)
+	sw.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	var row := hbox(14)
+	row.add_child(text)
+	row.add_child(sw)
+	var t := tappable(row, Pal.c("surface"), func(): on_toggle.call(not on), title)
+	t.get_child(1).set("toggle_mode", true)
+	t.get_child(1).set("button_pressed", on)
+	return t
+
+
+class Toggle extends Control:
+	var on := false
+
+	func _draw() -> void:
+		var h := size.y
+		var track := Pal.c("accent") if on else Pal.c("line")
+		var r := Rect2(Vector2.ZERO, size)
+		var sb := StyleBoxFlat.new()
+		sb.bg_color = track
+		sb.set_corner_radius_all(int(h / 2.0))
+		sb.anti_aliasing = true
+		draw_style_box(sb, r)
+		var knob := Pal.c("on_accent") if on else Pal.c("surface")
+		var x := size.x - h / 2.0 if on else h / 2.0
+		draw_circle(Vector2(x, h / 2.0), h / 2.0 - 3.0, knob, true, -1.0, true)

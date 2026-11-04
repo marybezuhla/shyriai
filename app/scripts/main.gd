@@ -17,6 +17,9 @@ var _scroll := ScrollContainer.new()
 var _pad := MarginContainer.new()
 var _nav := PanelContainer.new()
 var _bottom_inset := 0.0
+var _insets := {"top": 0.0, "bottom": 0.0, "left": 0.0, "right": 0.0}
+var flight: Control = null
+var _gate: Control = null
 
 
 func _ready() -> void:
@@ -45,6 +48,9 @@ func _ready() -> void:
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_WM_GO_BACK_REQUEST:
 		back()
+	elif what == NOTIFICATION_APPLICATION_FOCUS_OUT and flight:
+		# A call or a notification came in: stop the drone rather than let it fly on.
+		flight.pause()
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -92,6 +98,12 @@ func open_soon(title: String) -> void:
 
 
 func back() -> void:
+	if is_instance_valid(_gate):
+		_gate.close()
+		return
+	if flight:
+		flight.on_back()
+		return
 	if stack.size() > 1:
 		stack.pop_back().queue_free()
 		_show()
@@ -99,6 +111,62 @@ func back() -> void:
 		open_tab("learn")
 	else:
 		get_tree().quit()
+
+
+## Opens a lesson or mission in flight, or an honest "soon" page if it is not built yet.
+func start(vehicle: String, key: String) -> void:
+	if FlightTask.implemented(key):
+		open_flight(vehicle, key)
+	else:
+		open_soon(tr(key))
+
+
+func open_flight(vehicle: String, key: String) -> void:
+	if flight:
+		flight.queue_free()
+		remove_child(flight)
+	_set_landscape(true)
+	_bg.visible = false
+	_frame.visible = false
+	flight = load("res://scripts/flight/flight.gd").new()
+	flight.setup(self, vehicle, key)
+	add_child(flight)
+
+
+func close_flight() -> void:
+	if flight:
+		flight.queue_free()
+		remove_child(flight)
+		flight = null
+	_set_landscape(false)
+	_bg.visible = true
+	_frame.visible = true
+	_restyle()
+
+
+## The grown-ups' lock: in Kids mode with the lock on, a sum must be solved first.
+func guard(action: Callable) -> void:
+	if not (Prefs.kids_lock and Prefs.mode == "kids"):
+		action.call()
+		return
+	if is_instance_valid(_gate):
+		_gate.queue_free()
+	var g := Gate.new()
+	g.on_pass = action
+	_gate = g
+	add_child(g)
+
+
+func insets() -> Dictionary:
+	return _insets
+
+
+func _set_landscape(on: bool) -> void:
+	if OS.has_feature("mobile"):
+		DisplayServer.screen_set_orientation(DisplayServer.SCREEN_SENSOR_LANDSCAPE if on else DisplayServer.SCREEN_PORTRAIT)
+	elif DisplayServer.get_name() != "headless":
+		# On a computer the window turns instead of the screen.
+		get_window().size = Vector2i(844, 390) if on else Vector2i(390, 844)
 
 
 func _make(path: String) -> Screen:
@@ -180,6 +248,7 @@ func _apply_insets() -> void:
 			left = maxf(0.0, safe.position.x * k.x)
 			right = maxf(0.0, (win.x - safe.end.x) * k.x)
 	_bottom_inset = bottom
+	_insets = {"top": top - 16.0 if OS.has_feature("mobile") else 0.0, "bottom": bottom, "left": left, "right": right}
 	_pad.add_theme_constant_override("margin_left", UI.GUTTER + int(left))
 	_pad.add_theme_constant_override("margin_right", UI.GUTTER + int(right))
 	_pad.add_theme_constant_override("margin_top", int(top))

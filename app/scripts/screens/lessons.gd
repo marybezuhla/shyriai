@@ -80,7 +80,7 @@ func _lesson_card(lessons: Array, done: int) -> Control:
 		chips.add_child(UI.panel(UI.label(part.strip_edges(), 12, 700, "text", false, false), Pal.c("surface2"), 10, 7))
 	card.add_child(chips)
 	if selected <= done:
-		card.add_child(UI.primary(tr("LESSON_START"), func(): app.open_soon(tr(key)), "play"))
+		card.add_child(UI.primary(tr("LESSON_START"), func(): app.start(vehicle, key), "play"))
 	else:
 		card.add_child(UI.label(tr("LESSON_LOCKED"), 13, 600, "muted"))
 	return UI.panel(card, Pal.c("surface"), 22, 18)
@@ -95,7 +95,9 @@ func _build_missions() -> void:
 		text.add_child(UI.label(tr(m + "_DESC"), 13, 500, "muted"))
 		var row := UI.hbox(12)
 		row.add_child(text)
-		row.add_child(Glyph.make("chevron", 20, Pal.c("muted")))
+		var done: bool = m in Prefs.missions_done
+		row.add_child(Glyph.make("check" if done else "chevron", 20, Pal.c("accent_text" if done else "muted")))
 		var title := tr(m)
-		list.add_child(UI.tappable(row, Pal.c("surface"), func(): app.open_soon(title), title))
+		var key: String = m
+		list.add_child(UI.tappable(row, Pal.c("surface"), func(): app.start(vehicle, key), title))
 	add_child(list)

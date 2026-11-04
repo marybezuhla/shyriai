@@ -25,8 +25,8 @@ TAB_MISSIONS,Missions,Місії
 TAB_THEORY,Theory,Теорія
 LESSON_START,Start lesson,Почати урок
 LESSON_LOCKED,Pass the earlier lessons first.,Спершу пройди попередні уроки.
-SOON_TITLE,You’ll be able to fly here soon,Тут скоро можна буде полетіти
-SOON_TEXT,"This part is still being built. Flight, lessons and missions come in the next versions of Shyriai.","Ця частина ще будується. Політ, уроки й місії з’являться в наступних версіях Ширяя."
+SOON_TITLE,Coming soon,Скоро
+SOON_TEXT,This part is still being built and will come in the next versions of Shyriai.,Ця частина ще будується і з’явиться в наступних версіях Ширяя.
 MISSIONS_INTRO,"The same skills, in a real story.","Ті самі навички, але в живому сюжеті."
 THEORY_INTRO,The short version of what to know before you fly.,"Коротко про те, що треба знати до польоту."
 CAM_STICKS,What the sticks do,Що роблять стіки
@@ -153,3 +153,53 @@ ABOUT_PARTS_T,What’s inside,Що всередині
 ABOUT_PARTS,"Godot Engine (MIT) © Godot Engine contributors, Juan Linietsky, Ariel Manzur. Unbounded and Manrope fonts (SIL Open Font License 1.1) © The Unbounded Project Authors, The Manrope Project Authors.","Godot Engine (MIT) © Godot Engine contributors, Juan Linietsky, Ariel Manzur. Шрифти Unbounded і Manrope (SIL Open Font License 1.1) © The Unbounded Project Authors, The Manrope Project Authors."
 ABOUT_FULL_LICENSES,Full licence texts,Повні тексти ліцензій
 LICENSES_GODOT_PARTS,Components inside Godot,Компоненти всередині Godot
+PAUSE,Pause,Пауза
+RESUME,Resume,Продовжити
+RESTART,Start over,Почати знову
+EXIT,Exit,Вийти
+STAT_ALT,Height,Висота
+STAT_SPEED,Speed,Швидкість
+STAT_BATTERY,Battery,Батарея
+STAT_TIME,Time,Час
+UNIT_M,%s m,%s м
+UNIT_MS,%s m/s,%s м/с
+STICK_LEFT,Height · turn,Висота · поворот
+STICK_RIGHT,Move,Рух
+VIEW_PILOT,From the ground,З землі
+VIEW_CHASE,Behind the drone,За дроном
+PASSED,Passed!,Зараховано!
+PASSED_KIDS,"Hooray, you did it!","Ура, вийшло!"
+NEXT_LESSON,Next lesson,Наступний урок
+DONE,Done,Готово
+AGAIN,Try again,Ще раз
+CRASHED,The drone crashed,Дрон упав
+CRASHED_TEXT,"It hit at %s m/s. It happens: try again, more gently.","Удар на швидкості %s м/с. Так буває: спробуй ще раз, плавніше."
+HINT_STICKS_UP,Push the left stick up: the drone takes off,Потягни лівий стік угору: дрон злетить
+HINT_STICKS_YAW,Left stick left and right: the drone turns on the spot,Лівий стік уліво й управо: дрон повертається на місці
+HINT_STICKS_FWD,Right stick up and down: the drone flies forward and back,Правий стік угору й униз: дрон летить уперед і назад
+HINT_STICKS_SIDE,Right stick left and right: the drone flies sideways,Правий стік уліво й управо: дрон летить убік
+SUM_STICKS,All four moves tried. Now you know what each stick does.,"Усі чотири рухи спробувано. Тепер ти знаєш, що робить кожен стік."
+HINT_TAKEOFF_UP,Lift the drone to 2 m with the left stick,Підніми дрон на 2 м лівим стіком
+HINT_TAKEOFF_HOLD,Hold this height for %d more s,Тримай висоту ще %d с
+HINT_TAKEOFF_BACK,Get back to 1.5–2.5 m,"Повернись на висоту 1,5–2,5 м"
+HINT_TAKEOFF_LAND,Now land softly on the pad,Тепер м’яко посади дрон на майданчик
+HINT_TAKEOFF_MISSED,You missed the pad. Take off and land inside the circle,Повз майданчик. Злети й сідай у коло
+HINT_TAKEOFF_HARD,Too hard: %s m/s. Take off and come down slower,Зажорстко: %s м/с. Злети й сідай повільніше
+SUM_TAKEOFF,Touchdown at %s m/s: soft.,Посадка на швидкості %s м/с: м’яко.
+HINT_HOLD_GO,Take off and fly to the mark,Злети й лети до мітки
+HINT_HOLD_KEEP,Keep the drone over the mark: %d more s,Тримай дрон над міткою: ще %d с
+HINT_HOLD_OUT,The wind pushed it out. Back into the circle,Вітер зніс дрон. Повертайся в коло
+SUM_HOLD,10 seconds over the mark despite the wind.,10 секунд над міткою попри вітер.
+HINT_KITTEN_FIND,Fly to the kitten!,Лети до кошеняти!
+HINT_KITTEN_BACK,Kitten found! Fly back to the rescuers,Кошеня знайдено! Лети назад до рятувальників
+SUM_KITTEN,The kitten is saved. Sunflowers: %d of %d.,Кошеня врятовано. Соняшників: %d з %d.
+THEME_KIDS_NOTE,Kids mode uses the light Morning look. Your choice comes back when you leave Kids mode.,"У дитячому режимі — світла тема «Ранок». Твій вибір повернеться, коли вийдеш з дитячого режиму."
+SET_KIDS,Kids mode,Дитячий режим
+KIDS_LOCK,Grown-ups’ lock,Батьківський замок
+KIDS_LOCK_DESC,"To leave Kids mode or open settings, a sum must be solved.","Щоб вийти з дитячого режиму чи відкрити налаштування, треба розв’язати приклад."
+GATE_TITLE,For grown-ups,Для дорослих
+GATE_TEXT,Solve the sum to continue.,"Розв’яжи приклад, щоб продовжити."
+GATE_OK,OK,OK
+GATE_ERASE,Erase,Стерти
+GATE_WRONG,Not quite. Here is another one.,Не те. Ось інший приклад.
+CANCEL,Cancel,Скасувати
