@@ -49,6 +49,7 @@ func path() -> String:
 func set_mode(value: String) -> void:
 	if value in MODES and value != mode:
 		mode = value
+		_undo = {}
 		_save()
 		_apply_theme()
 		changed.emit()
@@ -57,6 +58,7 @@ func set_mode(value: String) -> void:
 func set_theme(value: String) -> void:
 	if value in THEMES and value != theme:
 		theme = value
+		_undo = {}
 		_save()
 		_apply_theme()
 
@@ -64,6 +66,7 @@ func set_theme(value: String) -> void:
 func set_language(value: String) -> void:
 	if value in LANGUAGES and value != language:
 		language = value
+		_undo = {}
 		_save()
 		_apply_language()
 		changed.emit()
@@ -72,6 +75,7 @@ func set_language(value: String) -> void:
 func set_text_size(value: String) -> void:
 	if TEXT_SIZES.has(value) and value != text_size:
 		text_size = value
+		_undo = {}
 		_save()
 		_apply_theme()
 
@@ -79,6 +83,7 @@ func set_text_size(value: String) -> void:
 func set_kids_lock(on: bool) -> void:
 	if on != kids_lock:
 		kids_lock = on
+		_undo = {}
 		_save()
 		changed.emit()
 
@@ -133,6 +138,7 @@ func reset_progress() -> void:
 ## undo_reset() puts it all back.
 func erase_all() -> void:
 	_undo = {"all": _data()}
+	DirAccess.remove_absolute(OLD_PATH)
 	mode = "simple"
 	theme = "dusk"
 	language = "system"
@@ -145,6 +151,11 @@ func erase_all() -> void:
 	_apply_language()
 	_apply_theme()
 	changed.emit()
+
+
+## The mode whose progress "Undo" would bring back.
+func undo_mode() -> String:
+	return str(_undo.get("mode", mode))
 
 
 func undo_kind() -> String:
@@ -202,9 +213,12 @@ func _load() -> void:
 		data = _read_old_config()
 		if data != null:
 			_apply(data)
-			_save()
-			DirAccess.remove_absolute(OLD_PATH)
+			# The old file goes only once its contents are safely in the new one.
+			if _save():
+				DirAccess.remove_absolute(OLD_PATH)
 			return
+		# A refused or unreadable old file is not kept either.
+		DirAccess.remove_absolute(OLD_PATH)
 	if data is Dictionary:
 		_apply(data)
 
@@ -234,10 +248,13 @@ func _read_old_config():
 	if cfg.parse(text) != OK:
 		return null
 	var out := {}
+	# Older files may lack some keys; asking for a missing key without a default logs an error.
 	for k in ["mode", "theme", "language", "kids_lock", "views"]:
-		out[k] = cfg.get_value("prefs", k, null)
-	out["passed"] = cfg.get_value("progress", "passed", {})
-	out["missions"] = cfg.get_value("progress", "missions", {})
+		if cfg.has_section_key("prefs", k):
+			out[k] = cfg.get_value("prefs", k)
+	for k in ["passed", "missions"]:
+		if cfg.has_section_key("progress", k):
+			out[k] = cfg.get_value("progress", k)
 	return out
 
 
@@ -313,8 +330,13 @@ func _data() -> Dictionary:
 	}
 
 
-func _save() -> void:
-	var data := _data()
-	var f := FileAccess.open(path(), FileAccess.WRITE)
-	if f:
-		f.store_string(JSON.stringify(data, "\t"))
+## Writes a whole new file and then swaps it in, so a phone switching off mid-write
+## can never leave half a file. Returns false if it could not be written.
+func _save() -> bool:
+	var tmp := path() + ".tmp"
+	var f := FileAccess.open(tmp, FileAccess.WRITE)
+	if f == null:
+		return false
+	f.store_string(JSON.stringify(_data(), "\t"))
+	f.close()
+	return DirAccess.rename_absolute(tmp, path()) == OK

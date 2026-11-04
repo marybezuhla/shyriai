@@ -60,7 +60,8 @@ func _progress_section() -> void:
 	var undo := Prefs.undo_kind()
 	if undo != "":
 		var col := UI.vbox(10)
-		col.add_child(UI.label(tr("ERASE_DONE") if undo == "all" else tr("RESET_DONE") % mode_name, 14, 600))
+		var undone := tr("MODE_" + Prefs.undo_mode().to_upper())
+		col.add_child(UI.label(tr("ERASE_DONE") if undo == "all" else tr("RESET_DONE") % undone, 14, 600))
 		col.add_child(UI.primary(tr("RESET_UNDO"), func(): Prefs.undo_reset(); rebuild()))
 		box.add_child(UI.panel(col, Pal.c("surface"), 18, 14))
 	elif _confirm != "":
@@ -72,14 +73,7 @@ func _progress_section() -> void:
 		var yes := CenterContainer.new()
 		yes.custom_minimum_size = Vector2(0, 48)
 		yes.add_child(UI.label(yes_text, 15, 800, "on_accent", false, false))
-		var erase := func():
-			_confirm = ""
-			if all:
-				Prefs.erase_all()
-			else:
-				Prefs.reset_progress()
-			rebuild()
-		var y := UI.tappable(yes, Pal.c("accent"), erase, yes_text, 16, 0)
+		var y := UI.tappable(yes, Pal.c("accent"), confirm_erase, yes_text, 16, 0)
 		y.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		r.add_child(y)
 		var no := CenterContainer.new()
@@ -94,6 +88,16 @@ func _progress_section() -> void:
 		box.add_child(_action_row(tr("RESET_PROGRESS") % mode_name, Prefs.has_progress(), "mode"))
 		box.add_child(_action_row(tr("ERASE_ALL"), true, "all"))
 	add_child(box)
+
+
+## "Yes" on the question: erase what was asked about.
+func confirm_erase() -> void:
+	if _confirm == "all":
+		Prefs.erase_all()
+	elif _confirm == "mode":
+		Prefs.reset_progress()
+	_confirm = ""
+	rebuild()
 
 
 func _action_row(text: String, active: bool, kind: String) -> Control:

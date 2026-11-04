@@ -131,6 +131,8 @@ static func segmented(options: Array, selected: String, on_pick: Callable) -> Pa
 		var b: Button = t.get_child(1)
 		b.toggle_mode = true
 		b.set_pressed_no_signal(on)
+		# Tapping the chosen option again changes nothing, so its button stays pressed too.
+		b.toggled.connect(func(_p: bool): b.set_pressed_no_signal(on))
 		t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		row.add_child(t)
 	var p := panel(row, Pal.c("surface"), 18, 5)

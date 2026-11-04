@@ -120,7 +120,7 @@ func _physics_process(_delta: float) -> void:
 		_crashed()
 	elif sim.p.get("battery_s", 0.0) > 0.0 and sim.battery <= 0.0 and (sim.on_ground or sim is UgvSim):
 		# The battery ran out and the drone has come down (or the robot has stopped): say so.
-		task.fail_with("FAIL_BATTERY")
+		task.fail_with("FAIL_BATTERY_UGV" if sim is UgvSim else "FAIL_BATTERY")
 		_not_this_time()
 
 

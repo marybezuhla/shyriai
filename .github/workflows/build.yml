@@ -42,7 +42,8 @@ jobs:
             echo "::error::v$V is already released; raise version.txt first."; exit 1
           fi
           # The release notes are written for this version, not left over from the last one.
-          grep -qF "$V" .github/release-notes.md || { echo "::error::.github/release-notes.md does not mention $V"; exit 1; }
+          grep -qF "**Shyriai $V**" .github/release-notes.md && grep -qF "**Ширяй $V**" .github/release-notes.md \
+            || { echo "::error::.github/release-notes.md is not written for $V"; exit 1; }
           # 1.2.4 -> 10204 (minor and patch stay below 100, checked above)
           IFS=. read -r MA MI PA <<< "$V"
           CODE=$((MA * 10000 + MI * 100 + PA))

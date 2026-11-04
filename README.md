@@ -23,8 +23,8 @@
 
 ## Прозорість
 
-- **Дозволи:** жодних. Збірка зупиняється, якщо в APK зʼявляється будь-який дозвіл, а надто дозвіл на інтернет.
-- **Дані:** налаштування й прогрес зберігаються лише на телефоні, в одному маленькому файлі. Хмарну копію Android вимкнено, тож після видалення застосунку чи на новому телефоні прогрес починається заново. У налаштуваннях можна почати режим спочатку або стерти всі дані, і одразу «Повернути». Докладніше — [PRIVACY.md](PRIVACY.md).
+- **Дозволи:** жодних, які стосуються людини чи телефона; є лише один внутрішній технічний дозвіл бібліотеки AndroidX. Збірка зупиняється, якщо в APK зʼявляється будь-який інший дозвіл, а надто дозвіл на інтернет.
+- **Дані:** налаштування й прогрес зберігаються лише на телефоні, в одному маленькому файлі. Хмарну копію Android вимкнено, тож після видалення застосунку прогрес починається заново. Пряме перенесення на новий телефон (Android 12+) рушій Godot вимкнути не дозволяє, тож тоді файл може перенестися. У налаштуваннях можна почати режим спочатку або стерти всі дані, і одразу «Повернути». Докладніше — [PRIVACY.md](PRIVACY.md).
 - **Підпис:** справжній APK підписано сертифікатом із відбитком SHA-256 `BF:06:A3:A2:27:BB:10:32:DC:B1:41:C8:92:93:85:80:72:A5:A0:0A:F2:BF:70:39:4A:44:9E:B3:25:FF:2E:1F`. Перевірити завантажений файл: `apksigner verify --print-certs shyriai-<версія>.apk` — рядок `SHA-256 digest` має збігтися (там він малими літерами й без двокрапок).
 - **Збірка:** APK збирається з цього коду в GitHub Actions. Godot і його шаблони звіряються за SHA-512. APK підписується лише після схвалення авторки.
 - **Доступність:** розмір тексту можна збільшити в налаштуваннях. Програми читання екрана (TalkBack) поки не підтримуються: рушій Godot на Android їм нічого не передає.
@@ -61,8 +61,8 @@ Shyriai teaches piloting itself. There are no combat or tactical scenarios, so i
 
 ## Transparency
 
-- **Permissions:** none. The build stops if any permission appears in the APK, internet above all.
-- **Data:** settings and progress stay on the phone, in one small file. Android cloud backup is off, so after uninstalling or on a new phone progress starts again. Settings can start a mode over or erase all data, with an immediate Undo. More in [PRIVACY.md](PRIVACY.md).
+- **Permissions:** none that concern you or your phone; there is only one internal technical permission of the AndroidX library. The build stops if any other permission appears in the APK, internet above all.
+- **Data:** settings and progress stay on the phone, in one small file. Android cloud backup is off, so after uninstalling progress starts again. Direct transfer to a new phone (Android 12+) cannot be switched off in the Godot engine, so the file may be copied then. Settings can start a mode over or erase all data, with an immediate Undo. More in [PRIVACY.md](PRIVACY.md).
 - **Signature:** the genuine APK is signed with a certificate whose SHA-256 fingerprint is `BF:06:A3:A2:27:BB:10:32:DC:B1:41:C8:92:93:85:80:72:A5:A0:0A:F2:BF:70:39:4A:44:9E:B3:25:FF:2E:1F`. To check a downloaded file: `apksigner verify --print-certs shyriai-<version>.apk`; the `SHA-256 digest` line must match (it is printed in lower case, without the colons).
 - **Build:** the APK is built from this code in GitHub Actions. Godot and its templates are checked by SHA-512. The APK is signed only after the author's approval.
 - **Accessibility:** text size can be increased in settings. Screen readers (TalkBack) are not supported yet: the Godot engine passes them nothing on Android.

@@ -15,6 +15,11 @@ func _ready() -> void:
 	get_tree().root.add_child.call_deferred(main)
 	await _frames(3)
 	if store != "":
+		# The store pass erases progress: never let it touch a real settings file.
+		if OS.get_environment("SHYRIAI_PREFS") == "":
+			printerr("SHYRIAI_STORE needs SHYRIAI_PREFS pointing at a scratch file")
+			get_tree().quit(1)
+			return
 		await _store_shots()
 		get_tree().quit(0)
 		return
@@ -209,21 +214,36 @@ func _gate() -> void:
 	main.open_settings()
 	main.back()
 	Prefs.set_kids_lock(false)
-	# Erase everything, then put it back: nothing may be lost.
+	# Start a mode over, then erase everything, through the settings screen; Undo puts it all back.
 	Prefs.set_mode("simple")
 	Prefs.mark_passed("camera", 0)
 	var before: Dictionary = Prefs._data()
 	main.open_settings()
 	var st = main.stack.back()
+	st._confirm = "mode"
+	st.rebuild()
+	await _shot("uk-dusk-settings-reset-ask")
+	st.confirm_erase()
+	await _shot("uk-dusk-settings-reset-done")
+	assert(Prefs.passed_count("camera") == 0 and Prefs.undo_kind() == "mode")
+	Prefs.undo_reset()
+	assert(Prefs._data() == before)
 	st._confirm = "all"
 	st.rebuild()
 	await _shot("uk-dusk-settings-erase-ask")
-	Prefs.erase_all()
-	st.rebuild()
+	st.confirm_erase()
 	await _shot("uk-dusk-settings-erase-done")
-	assert(Prefs.passed_count("camera") == 0 and Prefs.can_undo_reset())
+	assert(Prefs.passed_count("camera") == 0 and Prefs.undo_kind() == "all")
 	Prefs.undo_reset()
 	assert(Prefs._data() == before)
+	# Changing any setting after an erase makes its Undo go away instead of reverting the change.
+	Prefs.erase_all()
+	Prefs.set_text_size("large")
+	assert(Prefs.undo_kind() == "")
+	Prefs._apply(before)
+	Prefs._apply_theme()
+	assert(Prefs._data() == before)
+	st.rebuild()
 	main.back()
 
 
@@ -254,7 +274,6 @@ func _store_shots() -> void:
 		for i in 4:
 			Prefs.mark_passed("camera", i)
 		Prefs.mark_passed("fpv", 0)
-		Prefs.mark_mission("MIS_CAM_KITTEN")
 		var dir: String = store.path_join(lang[1])
 		DirAccess.make_dir_recursive_absolute(dir)
 		Prefs.set_theme("day")

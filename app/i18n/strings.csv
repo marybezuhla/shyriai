@@ -473,3 +473,4 @@ ERASE_ALL,Erase all data,Стерти всі дані
 ERASE_ASK,Erase progress in every mode and all settings? The app will be as if just installed.,Стерти прогрес у всіх режимах і всі налаштування? Застосунок стане як щойно встановлений.
 ERASE_YES,"Yes, erase everything","Так, стерти все"
 ERASE_DONE,All data is erased.,Усі дані стерто.
+FAIL_BATTERY_UGV,The battery ran out and the robot stopped.,"Батарея сіла, і робот зупинився."

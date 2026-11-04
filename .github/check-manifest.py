@@ -58,6 +58,9 @@ def elements(data):
 
 def main(apk):
     data = zipfile.ZipFile(apk).read("AndroidManifest.xml")
+    if data[:4] != b"\x03\x00\x08\x00":
+        print("::error::Manifest: not a compiled Android XML file")
+        sys.exit(1)
     errors, app_seen = [], False
     for tag, attrs in elements(data):
         print(tag, " ".join("%s=%s" % kv for kv in attrs.items()))
@@ -65,11 +68,14 @@ def main(apk):
             app_seen = True
             if attrs.get("allowBackup") != "false":
                 errors.append("allowBackup is not false")
-            if attrs.get("debuggable") == "true":
-                errors.append("the app is debuggable")
-            if attrs.get("usesCleartextTraffic") == "true":
+            # A value taken from a resource cannot be read here: treat it as switched on.
+            if attrs.get("debuggable", "false") != "false":
+                errors.append("debuggable is not false")
+            if attrs.get("testOnly", "false") != "false":
+                errors.append("testOnly is not false")
+            if attrs.get("usesCleartextTraffic", "false") != "false":
                 errors.append("cleartext traffic is allowed")
-        if tag in COMPONENTS and attrs.get("exported") == "true":
+        if tag in COMPONENTS and attrs.get("exported", "false") != "false":
             name = attrs.get("name", "?")
             if name not in EXPORTED_OK:
                 errors.append("unexpected exported component: " + name)

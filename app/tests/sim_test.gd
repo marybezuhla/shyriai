@@ -69,7 +69,7 @@ func _ready() -> void:
 	for v in Curriculum.VEHICLES:
 		for m in Prefs.MODES:
 			for k in Curriculum.lessons(v, m) + Curriculum.missions(v, m):
-				check(_flown.has(k + "/" + m), "%s %s was flown in the tests" % [m, k])
+				check(_flown.has(k + "/" + m), "%s %s was flown to a pass in the tests" % [m, k])
 	if failures == 0:
 		print("SIM OK")
 		get_tree().quit(0)
@@ -222,7 +222,6 @@ func _flight(key: String, mode: String, vehicle := "camera") -> Array:
 	world.build("day", 7)
 	task.world = world
 	task.setup_world()
-	_flown[key + "/" + mode] = true
 	return [task, task.make_sim(vehicle), world]
 
 
@@ -232,6 +231,7 @@ func _fly(task: FlightTask, sim: DroneSim, seconds: float, pick: Callable) -> bo
 		sim.step(DT, s["throttle"], s["yaw"], s["pitch"], s["roll"])
 		task.step(DT, sim, s)
 		if task.done:
+			_flown[task.key + "/" + task.mode] = true
 			return true
 		if sim.crashed or task.failed:
 			return false
@@ -681,6 +681,10 @@ func test_ugv_rough_driving_fails() -> void:
 
 
 
+## Deep enough in the alley for the pivot lesson's "inside" point.
+const END_IN := -12.4
+
+
 ## Each way round a lesson that the audit found is now closed.
 func test_shortcuts_closed() -> void:
 	# Flying round the end of the tree belt instead of through it.
@@ -699,17 +703,24 @@ func test_shortcuts_closed() -> void:
 	f[2].queue_free()
 	await get_tree().process_frame
 
-	# Turning on the pad and reversing into the alley.
+	# Turning on the pad and reversing into the alley: the task must not move on, and must say why.
 	var g := _flight("UGV_PIVOT", "simple", "ugv")
 	var u: UgvSim = g[1]
-	var steps := 0
-	var reverse := func(t: float) -> Dictionary:
-		if t < 2.4:
-			return {"throttle": 0.6, "yaw": 0.0, "pitch": -0.6, "roll": 0.0}  # turn round on the pad
-		if u.pos.z > -12.8 and steps == 0:
-			return {"throttle": -0.5, "yaw": 0.0, "pitch": -0.5, "roll": 0.0}  # back into the alley
-		return {"throttle": 0.5, "yaw": 0.0, "pitch": 0.5, "roll": 0.0}
-	check(not _fly(g[0], u, 40.0, reverse), "simple: reversing into the alley does not skip the turn")
+	u.place(Vector3.ZERO, PI)  # already turned round, facing the pilot
+	check(u.forward().dot(Vector3(0, 0, 1)) > 0.99, "test setup: the robot faces out of the alley")
+	var phase := [1]  # 1 reverse in, 2 drive out
+	var told := [false]
+	var reverse := func(_t: float) -> Dictionary:
+		if g[0].hint_base == "HINT_PIVOT_FORWARD":
+			told[0] = true
+		if phase[0] == 1 and u.pos.z < END_IN:
+			phase[0] = 2
+		if phase[0] == 1:
+			return {"throttle": -0.4, "yaw": 0.0, "pitch": -0.4, "roll": 0.0}
+		return {"throttle": 0.4, "yaw": 0.0, "pitch": 0.4, "roll": 0.0}
+	var passed := _fly(g[0], u, 60.0, reverse)
+	check(phase[0] == 2 and not g[0].failed, "simple: the robot really reversed into the alley and out without a bump (phase %d, %s, %s)" % [phase[0], u.pos, g[0].summary])
+	check(not passed and g[0]._stage == 0 and told[0], "simple: reversing into the alley does not count, and the hint says to turn first")
 	g[2].queue_free()
 	await get_tree().process_frame
 
