@@ -13,7 +13,7 @@ func build() -> void:
 	if selected < 0:
 		selected = mini(done, lessons.size() - 1)
 
-	add_child(header(tr("VEH_" + vehicle.to_upper()),
+	add_child(header(Curriculum.label("VEH_" + vehicle.to_upper()),
 		"%s · %s" % [tr("MODE_" + Prefs.mode.to_upper()), tr("LESSONS_OF") % [done, lessons.size()]]))
 
 	add_child(UI.segmented([["learn", tr("TAB_LEARN")], ["missions", tr("TAB_MISSIONS")]], tab,
@@ -35,14 +35,16 @@ func _build_lessons(lessons: Array, done: int) -> void:
 		var text := UI.vbox(1)
 		text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		text.alignment = BoxContainer.ALIGNMENT_CENTER
-		text.add_child(UI.label(tr(lessons[i]), 15, 700, "text" if i <= done else "muted"))
+		text.add_child(UI.label(Curriculum.label(lessons[i]), 15, 700, "text" if i <= done else "muted"))
 		text.add_child(UI.label(tr(Curriculum.text_key(lessons[i] + "_NOTE", Prefs.mode)), 13, 500, "muted"))
 		var row := UI.hbox(14)
 		row.add_child(UI.spacer(0, 40 if i % 2 else 0))
 		row.add_child(dot)
 		row.add_child(text)
 		var idx := i
-		var t := UI.tappable(row, Color(0, 0, 0, 0), func(): selected = idx; rebuild(), tr(lessons[i]), 14, 2)
+		var state_name: String = {"done": tr("A11Y_DONE"), "next": "", "locked": tr("A11Y_LOCKED")}[state]
+		var name_: String = Curriculum.label(lessons[i]) + (", " + state_name if state_name != "" else "")
+		var t := UI.tappable(row, Color(0, 0, 0, 0), func(): selected = idx; rebuild(), name_, 14, 2)
 		path.add_row(t, dot)
 	add_child(path)
 	if Prefs.mode != "pro" and Curriculum.lessons(vehicle).size() > lessons.size():
@@ -72,7 +74,7 @@ func _lesson_card(lessons: Array, done: int) -> Control:
 	var card := UI.vbox(12)
 	var head := UI.vbox(4)
 	head.add_child(UI.eyebrow(tr("LESSON_N") % (selected + 1), "accent_text"))
-	head.add_child(UI.label(tr(key), 18, 600, "text", true))
+	head.add_child(UI.label(Curriculum.label(key), 18, 600, "text", true))
 	head.add_child(UI.label(tr(Curriculum.text_key(key + "_GOAL", Prefs.mode)), 14, 500, "muted"))
 	card.add_child(head)
 	var chips := HFlowContainer.new()
@@ -93,13 +95,13 @@ func _build_missions() -> void:
 	for m in Curriculum.missions(vehicle, Prefs.mode):
 		var text := UI.vbox(3)
 		text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		text.add_child(UI.label(tr(m), 16, 700))
+		text.add_child(UI.label(Curriculum.label(m), 16, 700))
 		text.add_child(UI.label(tr(m + "_DESC"), 13, 500, "muted"))
 		var row := UI.hbox(12)
 		row.add_child(text)
 		var done: bool = Prefs.mission_done(m)
 		row.add_child(Glyph.make("check" if done else "chevron", 20, Pal.c("accent_text" if done else "muted")))
-		var title := tr(m)
+		var title := Curriculum.label(m)
 		var key: String = m
 		list.add_child(UI.tappable(row, Pal.c("surface"), func(): app.start(vehicle, key), title))
 	add_child(list)

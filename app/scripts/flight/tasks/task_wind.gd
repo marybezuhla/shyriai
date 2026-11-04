@@ -32,7 +32,7 @@ func update(dt: float, sim: DroneSim, _sticks: Dictionary) -> void:
 			_held = 0.0
 			cp += 1
 			if cp >= cps.size():
-				pass_with("SUM_WIND", ["%.1f" % sim.wind().length()])
+				pass_with("SUM_WIND", [num(sim.wind().length())])
 				return
 	else:
 		if _held > 0.3:

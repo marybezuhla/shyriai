@@ -171,12 +171,11 @@ func add_gate(center: Vector3, normal: Vector3, w := 3.2, h := 2.6) -> int:
 	for sgn in [1.0, -1.0]:
 		var post: Vector3 = c + side * sgn * (w / 2.0 + t / 2.0)
 		obstacles.append({"cyl": Vector2(post.x, post.z), "r": t, "h": top + t / 2.0 - g, "y": g})
+	# The bars are true bars at any angle (a box aligned to the world would stick out of a turned gate).
 	for y in [top, bottom]:
-		var a := c - side * (w / 2.0 + t) + Vector3(0, y - c.y - t / 2.0, 0)
-		var b := c + side * (w / 2.0 + t) + Vector3(0, y - c.y + t / 2.0, 0)
-		var lo := Vector3(minf(a.x, b.x), a.y, minf(a.z, b.z)) - Vector3(0.05, 0, 0.05)
-		var hi := Vector3(maxf(a.x, b.x), b.y, maxf(a.z, b.z)) + Vector3(0.05, 0, 0.05)
-		obstacles.append({"box": AABB(lo, hi - lo)})
+		var a := Vector3(c.x, y, c.z) - side * (w / 2.0 + t)
+		var b := Vector3(c.x, y, c.z) + side * (w / 2.0 + t)
+		obstacles.append({"seg": [a, b], "r": t / 2.0})
 	gates.append({"c": c, "n": n, "side": side, "w": w, "h": h})
 	_gate_mats.append(m)
 	return gates.size() - 1
@@ -215,7 +214,8 @@ func hoop_done(i: int) -> void:
 	if i < _hoops.size():
 		var tw := create_tween()
 		tw.tween_property(_hoops[i], "scale", Vector3.ONE * 1.25, 0.12)
-		tw.tween_property(_hoops[i], "scale", Vector3.ONE * 0.0, 0.25)
+		tw.tween_property(_hoops[i], "scale", Vector3.ONE * 0.001, 0.25)
+		tw.tween_callback(_hoops[i].hide)
 
 
 ## A thin pole for slalom and figure eights.
@@ -278,6 +278,19 @@ func add_target(center: Vector3, normal: Vector3) -> void:
 	var lo := Vector3(minf(a.x, b.x), a.y, minf(a.z, b.z))
 	var hi := Vector3(maxf(a.x, b.x), b.y, maxf(a.z, b.z))
 	obstacles.append({"box": AABB(lo, hi - lo)})
+
+
+## A round landing target lying on the ground, with three rings.
+func add_ground_target(center: Vector3) -> void:
+	var colors := [pal["pad"], pal["roof"], pal["pad_ring"]]
+	var radii := [2.4, 1.4, 0.6]
+	for k in 3:
+		var disc := CylinderMesh.new()
+		disc.top_radius = radii[k]
+		disc.bottom_radius = radii[k]
+		disc.height = 0.03 + k * 0.01
+		disc.radial_segments = 32
+		_mesh(disc, colors[k], Vector3(center.x, height(center.x, center.z) + 0.02 + k * 0.01, center.z))
 
 
 ## A strip of trees: rows across the way. Trunks stand 6 m apart (±0.8 m), so a gap is always at least
@@ -562,10 +575,22 @@ func _mat(c: Color, vertex := false) -> StandardMaterial3D:
 	return m
 
 
+## One material per colour, shared by every plain object of that colour (fewer draw states on cheap
+## phones). Materials that change later (a highlighted gate) are made separately with _mat().
+var _shared := {}
+
+
+func _shared_mat(c: Color) -> StandardMaterial3D:
+	var k := c.to_html()
+	if not _shared.has(k):
+		_shared[k] = _mat(c)
+	return _shared[k]
+
+
 func _mesh(mesh: Mesh, c: Color, at: Vector3, rot_y := 0.0) -> MeshInstance3D:
 	var mi := MeshInstance3D.new()
 	mi.mesh = mesh
-	mi.material_override = _mat(c)
+	mi.material_override = _shared_mat(c)
 	mi.position = at
 	mi.rotation.y = rot_y
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF

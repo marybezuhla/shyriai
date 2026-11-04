@@ -22,12 +22,25 @@ func setup_world() -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = task_seed
 	_area = SPOTS[rng.randi_range(0, SPOTS.size() - 1)]
-	var a := rng.randf() * TAU
-	var d := rng.randf_range(3.0, AREA_R - 4.0)
-	_person = _area + Vector3(cos(a) * d, 0, sin(a) * d)
+	# A spot in the area, clear of trees and houses, so the person can be seen from above.
+	for attempt in 50:
+		var a := rng.randf() * TAU
+		var d := rng.randf_range(3.0, AREA_R - 4.0)
+		_person = _area + Vector3(cos(a) * d, 0, sin(a) * d)
+		if _clear(_person):
+			break
 	world.add_person(_person)
 	_person.y = world.height(_person.x, _person.z)
 	_area.y = world.height(_area.x, _area.z)
+
+
+func _clear(p: Vector3) -> bool:
+	for o in world.obstacles:
+		if o.has("cyl") and Vector2(p.x, p.z).distance_to(o["cyl"]) < float(o["r"]) + 2.5:
+			return false
+		if o.has("box") and (o["box"] as AABB).grow(2.5).has_point(Vector3(p.x, 0.5, p.z)):
+			return false
+	return true
 
 
 ## For tests only: where the person is.
@@ -66,4 +79,4 @@ func update(dt: float, sim: DroneSim, _sticks: Dictionary) -> void:
 		for e in sim.events:
 			if e["type"] == "landed" and flat_distance(sim.pos, world.pad) <= 3.0:
 				var t := int(ceil(_t))
-				pass_with("SUM_SEARCH", [t / 60, t % 60])
+				pass_with("SUM_SEARCH", [floori(t / 60.0), t % 60])

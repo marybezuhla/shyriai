@@ -38,6 +38,8 @@ func update(dt: float, sim: DroneSim, _sticks: Dictionary) -> void:
 	if off and mode != "kids" and _off > 1.0:
 		fail_with("FAIL_UGV_OFF")
 		return
+	if sim.vel.length() > 0.3:
+		stick_hint = {}
 	var r := course_step(sim)
 	beacon = 1.0
 	progress = float(cp) / cps.size()
@@ -47,5 +49,6 @@ func update(dt: float, sim: DroneSim, _sticks: Dictionary) -> void:
 		say("HINT_UGV_OFF")
 	elif cp == 0 and sim.vel.length() < 0.1:
 		say("HINT_UGV_START_TANK" if (sim is UgvSim and sim.tank) else "HINT_UGV_START_CAR")
+		stick_hint = {"left": Vector2.UP, "right": Vector2.UP} if (sim is UgvSim and sim.tank) else {"left": Vector2.UP}
 	else:
 		say("HINT_UGV_DRIVE_GO", [cps.size() - cp])

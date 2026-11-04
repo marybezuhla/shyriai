@@ -19,6 +19,7 @@ func build() -> void:
 	add_child(top)
 
 	add_child(UI.label(tr("ABOUT_WHAT"), 15, 500))
+	add_child(UI.label(tr("ABOUT_COPYRIGHT"), 13, 600, "muted"))
 
 	add_child(_section(tr("ABOUT_LICENSE_T"), tr("ABOUT_LICENSE")))
 	var src := UI.vbox(6)
@@ -28,7 +29,12 @@ func build() -> void:
 	url.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	link_row.add_child(url)
 	link_row.add_child(Glyph.make("link", 18, Pal.c("accent_text")))
-	src.add_child(UI.tappable(link_row, Pal.c("surface"), func(): OS.shell_open(SOURCE_URL), tr("ABOUT_SOURCE_T")))
+	if Prefs.mode == "kids":
+		# In Kids mode the address is only shown: nothing here opens the web browser.
+		link_row.get_child(1).queue_free()
+		src.add_child(UI.panel(link_row, Pal.c("surface")))
+	else:
+		src.add_child(UI.tappable(link_row, Pal.c("surface"), func(): OS.shell_open(SOURCE_URL), tr("ABOUT_SOURCE_T")))
 	add_child(src)
 	add_child(_section(tr("ABOUT_MADE_T"), tr("ABOUT_MADE")))
 	add_child(_section(tr("ABOUT_PARTS_T"), tr("ABOUT_PARTS")))

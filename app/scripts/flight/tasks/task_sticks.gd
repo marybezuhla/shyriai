@@ -37,9 +37,13 @@ func update(_dt: float, sim: DroneSim, sticks: Dictionary) -> void:
 		pass_with("SUM_STICKS")
 	elif not _up:
 		say("HINT_STICKS_UP")
+		stick_hint = {"left": Vector2.UP}
 	elif not yaw_ok:
 		say("HINT_STICKS_YAW")
+		stick_hint = {"left": Vector2.RIGHT}
 	elif not fwd_ok:
 		say("HINT_STICKS_FWD")
+		stick_hint = {"right": Vector2.UP}
 	else:
 		say("HINT_STICKS_SIDE")
+		stick_hint = {"right": Vector2.RIGHT}

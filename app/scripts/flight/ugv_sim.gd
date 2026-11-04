@@ -18,6 +18,7 @@ const UGV := {
 }
 const HALF_LEN := 0.8  # m, for reading the slope under the robot
 const HALF_WIDTH := 0.6
+const MAX_STEP := 0.25  # m the ground may rise in one step; more is a wall
 
 var tank := true
 ## Actual track speeds, -1..1.
@@ -90,8 +91,16 @@ func step(dt: float, throttle: float, yaw_in: float, pitch: float, roll: float) 
 	var before := vel
 	yaw = wrapf(yaw - w * dt, -PI, PI)
 	vel = forward() * v
+	var old := pos
 	pos += vel * dt
 	var g := ground.call(pos.x, pos.z) as float
+	if g - old.y > MAX_STEP:
+		# A wall or a sheer edge, not a slope: the tracks cannot climb it.
+		pos = old
+		g = old.y
+		events.append({"type": "bump", "speed": absf(v)})
+		vel = Vector3.ZERO
+		tracks = Vector2.ZERO
 	var vy := (g - pos.y) / maxf(dt, 1e-4)
 	pos.y = g
 	att = _terrain_basis()

@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-# Kids FPV mission: pop the balloons, then fly into the target, as close to the middle as you can.
+# Kids FPV mission: pop the balloons, then land in the middle of a target lying on the ground.
 extends FlightTask
 
 const BALLOONS: Array[Vector3] = [
@@ -7,19 +7,16 @@ const BALLOONS: Array[Vector3] = [
 	Vector3(6, 2.5, -17), Vector3(-2, 4, -21), Vector3(3, 3, -26),
 ]
 const COLORS := ["#E5708B", "#5B9BD5", "#FFC321", "#7DBE6A", "#B07CD8", "#F29B50"]
-const TARGET := Vector3(0, 3, -32)
+const TARGET := Vector3(0, 0, -32)
 
 var _popped: Array[int] = []
-var _target := Vector3.ZERO
-var _normal := Vector3(0, 0, 1)
 
 
 func setup_world() -> void:
 	counter_shown = true
 	for i in BALLOONS.size():
 		world.add_balloon(BALLOONS[i], Color(COLORS[i]))
-	world.add_target(TARGET, _normal)
-	_target = Vector3(TARGET.x, world.height(TARGET.x, TARGET.z) + TARGET.y, TARGET.z)
+	world.add_ground_target(TARGET)
 
 
 func balloon_pos(i: int) -> Vector3:
@@ -42,16 +39,19 @@ func update(_dt: float, sim: DroneSim, _sticks: Dictionary) -> void:
 		else:
 			say("HINT_BALLOONS_GO", [BALLOONS.size() - _popped.size()])
 		return
-	marker = _target
+	marker = TARGET
+	ring = 0.0
 	progress = 0.8
 	say("HINT_TARGET_GO")
-	# A hit: the drone touches the board's face.
-	var front := (sim.pos - _target).dot(_normal)
-	var off := sim.pos - _normal * front - _target
-	if front < 0.75 and front > -0.3 and off.length() < 2.0:
-		if off.length() < 0.5:
+	for e in sim.events:
+		if e["type"] != "landed":
+			continue
+		var off := flat_distance(sim.pos, TARGET)
+		if off < 0.6:
 			pass_with("SUM_TARGET_CENTRE")
-		elif off.length() < 1.25:
+		elif off < 1.4:
 			pass_with("SUM_TARGET_MIDDLE")
-		else:
+		elif off < 2.4:
 			pass_with("SUM_TARGET_EDGE")
+		else:
+			say_for("HINT_TARGET_MISS")

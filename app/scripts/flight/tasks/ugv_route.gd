@@ -24,7 +24,7 @@ func configure() -> void:
 	match key:
 		"UGV_DELIVERY":
 			cfg = {"road": [Vector3(0, 0, 0), Vector3(0, 0, -10), Vector3(-8, 0, -18), Vector3(-8, 0, -30)],
-				"load": "cargo", "fragile": true, "barrels": true, "meter": "", "dest_r": 2.0 if kids else 1.0}
+				"load": "cargo", "fragile": not kids, "barrels": true, "meter": "", "dest_r": 2.0 if kids else 1.0}
 		"UGV_EVACUATION":
 			cfg = {"road": [Vector3(0, 0, 0), Vector3(0, 0, -8), Vector3(10, 0, -16), Vector3(10, 0, -22)],
 				"pickup": true, "load": "stretcher", "meter": "METER_PATIENT", "limit": 3.0, "drain": 9.0,
@@ -126,7 +126,7 @@ func update(dt: float, sim: DroneSim, _sticks: Dictionary) -> void:
 				world.take_sunflower(i)
 		counter = _taken.size()
 
-	var stopped := absf(sim.vel.length()) < STOP_SPEED
+	var stopped := sim.vel.length() < STOP_SPEED
 	if not loaded:
 		marker = pickup + Vector3(0, 0.8, 0)
 		beacon = 1.4

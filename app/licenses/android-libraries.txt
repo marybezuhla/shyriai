@@ -1,0 +1,11 @@
+The Android part of the Godot Engine export template includes these libraries, all under the
+Apache License 2.0 (full text below):
+
+AndroidX (© The Android Open Source Project): activity 1.8.1, annotation-experimental 1.4.0,
+arch core-runtime, core 1.8.0, core-ktx 1.2.0, core-splashscreen 1.0.1, customview 1.0.0,
+documentfile 1.1.0, fragment 1.8.6, lifecycle (livedata, livedata-core, runtime, viewmodel,
+viewmodel-savedstate), loader 1.0.0, profileinstaller 1.3.1, savedstate 1.2.1,
+startup-runtime 1.1.1, tracing 1.0.0, versionedparcelable 1.1.1, viewpager 1.0.0.
+
+Kotlin standard library and kotlinx.coroutines 1.6.4 (© JetBrains s.r.o. and Kotlin Programming
+Language contributors).

@@ -1,0 +1,7 @@
+• Text size in settings.
+• "Start over" for a mode and "Erase all data", both with Undo.
+• FPV balloons now end with a landing in the middle of a target.
+• Sticks, the arrow and markers are easier to see; a hint shows how to move a stick.
+• Fairer lessons: no more going round the trees, reversing in, or climbing the side of the hill.
+• Flying rules now cite national sources.
+• Safer settings storage and full licence texts.

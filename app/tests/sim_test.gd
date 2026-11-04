@@ -12,6 +12,8 @@ var failures := 0
 
 
 func _ready() -> void:
+	# A script error stops a test without quitting; never wait for the CI job's own time limit.
+	get_tree().create_timer(540.0).timeout.connect(func(): printerr("SIM TIMEOUT"); get_tree().quit(1))
 	test_hover_holds_with_gps()
 	test_atti_drifts_with_wind()
 	test_landing_assist()
@@ -51,6 +53,23 @@ func _ready() -> void:
 		await test_search_mission(mode)
 		await test_survey_mission(mode)
 	await test_survey_wrong_answers_fail()
+	await test_shortcuts_closed()
+	# Missions change with every attempt: fly them with other layouts too.
+	for seed_ in [1234, 9001]:
+		_seed = seed_
+		await test_kitten_mission()
+		for mode in ["simple", "pro"]:
+			await test_search_mission(mode)
+			await test_survey_mission(mode)
+			await test_fpv_task("MIS_FPV_TREES", mode)
+		for key in ["MIS_UGV_CARGO", "MIS_UGV_EVAC"]:
+			await test_ugv_task(key, "simple")
+	_seed = 7
+	# Every lesson and mission the app offers was flown in every mode that offers it.
+	for v in Curriculum.VEHICLES:
+		for m in Prefs.MODES:
+			for k in Curriculum.lessons(v, m) + Curriculum.missions(v, m):
+				check(_flown.has(k + "/" + m), "%s %s was flown in the tests" % [m, k])
 	if failures == 0:
 		print("SIM OK")
 		get_tree().quit(0)
@@ -191,40 +210,25 @@ func test_fpv_physics() -> void:
 
 # --- Lessons, flown with the sticks ---------------------------------------------
 
+## Which layout missions get (tests run several), and which tasks were flown in which mode.
+var _seed := 7
+var _flown := {}
+
+
 func _flight(key: String, mode: String, vehicle := "camera") -> Array:
-	var task := FlightTask.make(key, mode, 7)
+	var task := FlightTask.make(key, mode, _seed)
 	var world := FlightWorld.new()
 	add_child(world)
 	world.build("day", 7)
 	task.world = world
 	task.setup_world()
-	var sim: DroneSim
-	if vehicle == "ugv":
-		var u := UgvSim.new(mode, 11)
-		u.grip = world.grip
-		sim = u
-	elif vehicle == "fpv" and mode != "kids":
-		var f := FpvSim.new(mode, 11)
-		f.flight_mode = task.flight_mode
-		sim = f
-	else:
-		sim = DroneSim.new(mode, 11)
-		if vehicle == "fpv":
-			sim.p["vmax"] = 4.0
-	sim.gps = task.gps
-	if task.wind >= 0.0:
-		sim.set_wind(task.wind, task.gust)
-	sim.ground = world.height
-	sim.obstacles = world.obstacles
-	sim.place(task.start_position(), task.start_heading())
-	return [task, sim, world]
+	_flown[key + "/" + mode] = true
+	return [task, task.make_sim(vehicle), world]
 
 
 func _fly(task: FlightTask, sim: DroneSim, seconds: float, pick: Callable) -> bool:
 	for i in int(seconds / DT):
-		var s: Dictionary = pick.call(i * DT)
-		if not task.link_ok:
-			s = {"throttle": 0.0, "yaw": 0.0, "pitch": 0.0, "roll": 0.0}
+		var s: Dictionary = task.controls(pick.call(i * DT))
 		sim.step(DT, s["throttle"], s["yaw"], s["pitch"], s["roll"])
 		task.step(DT, sim, s)
 		if task.done:
@@ -543,8 +547,9 @@ func test_fpv_task(key: String, mode: String) -> void:
 						ap.height = b.y - world.height(b.x, b.z)
 						break
 			else:
-				ap.target = task._target + Vector3(0, 0, -0.5)
-				ap.height = task._target.y - world.height(task._target.x, task._target.z)
+				ap.target = task.TARGET
+				ap.height = 3.0
+				ap.land = FlightTask.flat_distance(sim.pos, task.TARGET) < 0.2
 		elif key == "MIS_FPV_TREES":
 			var w := line[mini(leg[0], line.size() - 1)]
 			if FlightTask.flat_distance(sim.pos, w) < 0.9:
@@ -672,4 +677,57 @@ func test_ugv_rough_driving_fails() -> void:
 	_fly(task, sim, 120.0, plan)
 	check(task.failed and task.summary == "FAIL_JOLT_STRETCHER", "simple: jerky driving with a casualty does not pass (%s)" % task.summary)
 	f[2].queue_free()
+	await get_tree().process_frame
+
+
+
+## Each way round a lesson that the audit found is now closed.
+func test_shortcuts_closed() -> void:
+	# Flying round the end of the tree belt instead of through it.
+	var f := _flight("MIS_FPV_TREES", "simple", "fpv")
+	var ap := FpvAutopilot.new()
+	var legs := [Vector3(-17, 0, -4), Vector3(-17, 0, -38), Vector3(0, 0, -38)]
+	var leg := [0]
+	var plan := func(_t: float) -> Dictionary:
+		ap.target = legs[mini(leg[0], legs.size() - 1)]
+		ap.height = 3.0
+		if FlightTask.flat_distance(f[1].pos, ap.target) < 1.0:
+			leg[0] += 1
+		return ap.sticks(f[1])
+	_fly(f[0], f[1], 80.0, plan)
+	check(f[0].failed and f[0].summary == "FAIL_TREES_AROUND", "simple: going round the tree belt does not count")
+	f[2].queue_free()
+	await get_tree().process_frame
+
+	# Turning on the pad and reversing into the alley.
+	var g := _flight("UGV_PIVOT", "simple", "ugv")
+	var u: UgvSim = g[1]
+	var steps := 0
+	var reverse := func(t: float) -> Dictionary:
+		if t < 2.4:
+			return {"throttle": 0.6, "yaw": 0.0, "pitch": -0.6, "roll": 0.0}  # turn round on the pad
+		if u.pos.z > -12.8 and steps == 0:
+			return {"throttle": -0.5, "yaw": 0.0, "pitch": -0.5, "roll": 0.0}  # back into the alley
+		return {"throttle": 0.5, "yaw": 0.0, "pitch": 0.5, "roll": 0.0}
+	check(not _fly(g[0], u, 40.0, reverse), "simple: reversing into the alley does not skip the turn")
+	g[2].queue_free()
+	await get_tree().process_frame
+
+	# Driving up the sheer side of the ramp.
+	var h := _flight("UGV_TERRAIN", "simple", "ugv")
+	var hu: UgvSim = h[1]
+	hu.place(Vector3(-4, 0, -14.45), -PI / 2.0)  # beside the ramp, facing it
+	var side := func(_t: float) -> Dictionary:
+		return {"throttle": 0.8, "yaw": 0.0, "pitch": 0.8, "roll": 0.0}
+	_fly(h[0], hu, 5.0, side)
+	check(hu.pos.y < 0.3, "simple: the robot cannot climb the sheer side of the ramp (%.2f m)" % hu.pos.y)
+	h[2].queue_free()
+	await get_tree().process_frame
+
+	# Kids: bumping a barrel on the delivery does not fail it.
+	var k := _flight("UGV_DELIVERY", "kids", "ugv")
+	k[1].events.append({"type": "bump", "speed": 1.0})
+	k[0].step(DT, k[1], {})
+	check(not k[0].failed, "kids: a bump on the delivery is not a failure")
+	k[2].queue_free()
 	await get_tree().process_frame

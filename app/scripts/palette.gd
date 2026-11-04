@@ -60,11 +60,16 @@ func c(token: String) -> Color:
 	return THEMES[current][token]
 
 
+## Text size: the look's own scale (Kids read a little larger) times the reader's choice.
 func text_scale() -> float:
-	return TEXT_SCALE.get(current, 1.0)
+	return TEXT_SCALE.get(current, 1.0) * _user_scale
 
 
-func apply(choice: String) -> void:
+var _user_scale := 1.0
+
+
+func apply(choice: String, user_scale := 1.0) -> void:
+	_user_scale = user_scale
 	var chosen := choice
 	if choice == "system":
 		chosen = "dusk" if DisplayServer.is_dark_mode() or not DisplayServer.is_dark_mode_supported() else "day"

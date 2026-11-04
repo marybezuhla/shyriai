@@ -29,8 +29,13 @@ func update(_dt: float, sim: DroneSim, _sticks: Dictionary) -> void:
 			beacon = 1.0
 			progress = 0.0
 			say("HINT_PIVOT_IN")
+			# Driving in forwards: reversing in and out would skip the turn.
+			var facing_in := sim.forward().angle_to(Vector3(0, 0, -1)) < deg_to_rad(45.0)
 			if flat_distance(sim.pos, inside) < 1.3:
-				_stage = 1
+				if facing_in:
+					_stage = 1
+				else:
+					say_for("HINT_PIVOT_FORWARD", [], 2.0)
 		1:
 			marker = Vector3.INF
 			beacon = 0.0

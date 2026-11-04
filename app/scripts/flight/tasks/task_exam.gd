@@ -69,7 +69,7 @@ func update(dt: float, sim: DroneSim, _sticks: Dictionary) -> void:
 				if miss > ring:
 					say_for("HINT_LAND_MISS", [int(round(miss * 100.0))])
 				elif strict and e["speed"] > (1.0 if mode == "pro" else 0.6):
-					say_for("HINT_LAND_HARD", ["%.1f" % e["speed"]])
+					say_for("HINT_LAND_HARD", [num(e["speed"])])
 				else:
 					var t := int(ceil(_t))
-					pass_with("SUM_EXAM", [t / 60, t % 60])
+					pass_with("SUM_EXAM", [floori(t / 60.0), t % 60])

@@ -1,29 +1,33 @@
-**Ширяй 0.5.0** — тренажер пілотування для Android: без інтернету, акаунтів і реклами. Українська та англійська.
+**Ширяй 0.5.1** — тренажер пілотування для Android: без інтернету, акаунтів і реклами. Українська та англійська.
 
-**Нове: наземний робот (НРК).**
+**Виправлення після незалежного аудиту.**
 
-- 🚜 **Гусеничне керування:** кожен стік веде свою гусеницю, а в різні боки — розворот на місці. У Дитячому режимі робот керується простіше, як машинка.
-- 🎯 **5 уроків:** дорога з поворотами, розворот у глухому провулку, пагорб і бруд, доставка вантажу, евакуація пораненого.
-- 📦 **Місії:** для дітей — «Кошеня до ветеринарки» і «Посилка бабусі», для дорослих — «Доставка вантажу» розбитою дорогою та «Евакуація пораненого».
-- 🩹 **Плавність має значення:** різкі старти, гальмування, повороти й ями зменшують комфорт пораненого чи цілість вантажу.
-- 📡 **Як по-справжньому:** відео з камери робота може запізнюватися, а зв’язок — на мить зникати. Тоді робот сам зупиняється.
+- 🔠 **Розмір тексту** в налаштуваннях: звичайний, більший, найбільший.
+- ↩️ **Почати спочатку** для режиму й **Стерти всі дані** — обидва можна одразу «Повернути».
+- 🎈 **Кульки в FPV** тепер закінчуються посадкою в центр мішені на землі.
+- 👀 **Краще видно** стіки, стрілку й позначки; підказка показує, як рухати стік.
+- ⚖️ **Чесніші уроки:** облетіти дерева, заїхати в провулок задом чи видертися на крутий край пагорба вже не вийде.
+- 📘 **Правила польотів** посилаються на загальнодержавні джерела.
+- 🔒 **Безпечніше збереження** налаштувань і повні тексти всіх ліцензій.
 
-Тепер у Ширяї є всі три машини. Наступний крок — незалежний аудит перед першим релізом для людей. Потрібен Android 7 або новіший.
+Потрібен Android 7 або новіший і OpenGL ES 3.0. Перевірити підпис: `apksigner verify --print-certs shyriai-0.5.1.apk` → SHA-256 `bf06a3a2…25ff2e1f`.
 
 📲 Завантажте файл .apk нижче й відкрийте його на телефоні. 🔄 Для оновлень — Obtainium (є в F-Droid): «Додати застосунок» → `github.com/Marybezu/shyriai`.
 
 ---
 
-**Shyriai 0.5.0** — a piloting trainer for Android: no internet, no accounts, no ads. Ukrainian and English.
+**Shyriai 0.5.1** — a piloting trainer for Android: no internet, no accounts, no ads. Ukrainian and English.
 
-**New: the ground robot (UGV).**
+**Fixes after an independent audit.**
 
-- 🚜 **Tank steering:** each stick drives one track, and opposite ways turn it on the spot. In Kids mode it steers more simply, like a toy car.
-- 🎯 **5 lessons:** a winding road, a turn in a dead-end alley, a hill and mud, cargo delivery, casualty evacuation.
-- 📦 **Missions:** for kids, Kitten to the vet and A parcel for granny; for adults, Cargo delivery over a broken road and Casualty evacuation.
-- 🩹 **Smoothness matters:** sharp starts, braking, turns and potholes cost the casualty's comfort or the cargo's condition.
-- 📡 **As in real life:** the robot's video may arrive late and the link may drop for a moment; then the robot stops by itself.
+- 🔠 **Text size** in settings: normal, large, largest.
+- ↩️ **Start over** for a mode and **Erase all data**, both with an immediate Undo.
+- 🎈 **FPV balloons** now end with a landing in the middle of a target on the ground.
+- 👀 **Easier to see:** sticks, the arrow and markers; a hint shows how to move a stick.
+- ⚖️ **Fairer lessons:** no more going round the trees, reversing into the alley, or climbing the steep side of the hill.
+- 📘 **Flying rules** now cite national sources.
+- 🔒 **Safer settings storage** and the full text of every licence.
 
-Shyriai now has all three vehicles. Next comes an independent audit before the first release for everyone. Requires Android 7 or newer.
+Requires Android 7 or newer and OpenGL ES 3.0. To check the signature: `apksigner verify --print-certs shyriai-0.5.1.apk` → SHA-256 `bf06a3a2…25ff2e1f`.
 
 📲 Download the .apk file below and open it on your phone. 🔄 For updates, use Obtainium (on F-Droid): Add App → `github.com/Marybezu/shyriai`.

@@ -44,7 +44,7 @@ func update(_dt: float, sim: DroneSim, _sticks: Dictionary) -> void:
 			say_for("HINT_LAND_MISS", [int(round(miss * 100.0))])
 			_approach = true
 		elif e["speed"] > _max_speed():
-			say_for("HINT_LAND_HARD", ["%.1f" % e["speed"]])
+			say_for("HINT_LAND_HARD", [num(e["speed"])])
 			_approach = true
 		else:
 			_round += 1
