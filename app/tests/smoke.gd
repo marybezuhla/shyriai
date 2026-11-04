@@ -81,7 +81,7 @@ func _flights() -> void:
 		Prefs.set_theme(theme)
 		Prefs.set_mode(m)
 		var keys: Array = []
-		for veh in ["camera", "fpv"]:
+		for veh in ["camera", "fpv", "ugv"]:
 			for k in Curriculum.lessons(veh, m) + Curriculum.missions(veh, m):
 				if FlightTask.implemented(k):
 					keys.append([veh, k])
@@ -92,7 +92,11 @@ func _flights() -> void:
 			await _frames(2)
 			var f = main.flight
 			assert(f != null)
-			var ap = Autopilot.new() if f.sim is not FpvSim else load("res://tests/fpv_autopilot.gd").new()
+			var ap = Autopilot.new()
+			if f.sim is FpvSim:
+				ap = load("res://tests/fpv_autopilot.gd").new()
+			elif f.sim is UgvSim:
+				ap = load("res://tests/ugv_autopilot.gd").new()
 			ap.height = 3.0
 			ap.target = f.world.hold_mark
 			if key == "MIS_CAM_KITTEN":
@@ -104,6 +108,17 @@ func _flights() -> void:
 				for v in ["chase", "pilot", "fpv"]:
 					f.set_view(v)
 					await _shot("uk-%s-flight-%s-%s-%s" % [theme, m, key, v])
+			if key == "UGV_EVACUATION":
+				for v in ["chase", "pilot", "ugv"]:
+					f.set_view(v)
+					await _shot("uk-%s-flight-%s-%s-%s" % [theme, m, key, v])
+			if key == "MIS_UGV_EVAC":
+				f._paused = true
+				f.task.link_ok = false
+				f.task.say("HINT_LINK_LOST")
+				await _shot("uk-%s-flight-%s-%s-nolink" % [theme, m, key])
+				f.task.link_ok = true
+				f._paused = false
 			if key == "CAM_HOLD":
 				for v in ["chase", "drone", "pilot"]:
 					f.set_view(v)

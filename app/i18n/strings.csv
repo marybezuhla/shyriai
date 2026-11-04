@@ -87,23 +87,23 @@ FPV_ACRO_GOAL,In Acro mode the drone never levels itself: the stick sets how fas
 FPV_ACRO_PASS,4 balls | Acro,4 кулі | Acro
 UGV_DRIVE,Driving and turns,Їзда й повороти
 UGV_DRIVE_NOTE,Each stick drives one side,Кожен стік веде свій бік
-UGV_DRIVE_GOAL,Drive a winding track by steering the tracks.,"Проїдь доріжкою з поворотами, керуючи гусеницями."
-UGV_DRIVE_PASS,Track | Stay on it,Доріжка | Не з’їхати
+UGV_DRIVE_GOAL,"Drive a winding dirt road. The left stick drives the left track, the right stick the right one: both forward and the robot goes straight.","Проїдь ґрунтовою дорогою з поворотами. Лівий стік веде ліву гусеницю, правий — праву: обидва вперед — робот їде прямо."
+UGV_DRIVE_PASS,The road | Stay on it,Дорога | Не з’їжджати
 UGV_PIVOT,Turning on the spot,Розворот на місці
 UGV_PIVOT_NOTE,Tracks in opposite directions,Гусениці в різні боки
-UGV_PIVOT_GOAL,Turn the robot round in a tight spot and drive back out.,Розверни робота в тісному місці й виїдь назад.
+UGV_PIVOT_GOAL,"Drive into a dead-end alley, turn round on the spot and drive out. To turn on the spot the tracks go opposite ways: one stick forward, the other back.","Заїдь у глухий провулок, розвернися на місці й виїдь. Для розвороту гусениці крутяться в різні боки: один стік уперед, другий назад."
 UGV_PIVOT_PASS,180° turn | Without touching walls,Розворот 180° | Без дотику стін
 UGV_TERRAIN,Slopes and mud,Схил і бруд
 UGV_TERRAIN_NOTE,Terrain changes the ride,Рельєф змінює хід
-UGV_TERRAIN_GOAL,Get over a slope and mud without tipping the robot over.,"Подолай схил і грязюку, не перекинувши робота."
-UGV_TERRAIN_PASS,20° slope | No rollover,Схил 20° | Без перекидання
+UGV_TERRAIN_GOAL,"Get over a hill and through mud. Uphill and in mud the robot is slower. In Adult mode, driving off the edge of the hill tips it over.","Подолай пагорб і бруд. Угору й у бруді робот повільніший. У дорослому режимі, якщо з’їхати з краю пагорба, робот перекинеться."
+UGV_TERRAIN_PASS,20° hill | Mud | No rollover,Пагорб 20° | Бруд | Без перекидання
 UGV_DELIVERY,Delivery,Доставка
 UGV_DELIVERY_NOTE,Cargo to a point,Вантаж у точку
-UGV_DELIVERY_GOAL,Carry cargo along a route and stop right at the mark.,Довези вантаж за маршрутом і зупинись точно біля мітки.
-UGV_DELIVERY_PASS,Cargo intact | Within 1 m of the mark,Вантаж цілий | До 1 м від мітки
+UGV_DELIVERY_GOAL,Carry the cargo along the road past the barrels and stop on the mark. Touch anything and the cargo is damaged.,Довези вантаж дорогою повз бочки й зупинись на мітці. Зачепиш щось — вантаж пошкоджено.
+UGV_DELIVERY_PASS,No collisions | Within 1 m of the mark,Без зіткнень | До 1 м від мітки
 UGV_EVACUATION,Evacuation,Евакуація
 UGV_EVACUATION_NOTE,"Gently, with video delay","Плавно, з затримкою відео"
-UGV_EVACUATION_GOAL,"Bring a wounded person out gently, without sharp jolts, while the video lags.","Вивези пораненого плавно, без різких поштовхів, коли відео запізнюється."
+UGV_EVACUATION_GOAL,"Drive to the casualty and stop so they can be put on the stretcher, then take them to the van. Sharp starts, braking and turns hurt: watch the meter. The video arrives late.","Доїдь до пораненого й зупинись, щоб його поклали на ноші, а тоді вези до машини. Різкі старти, гальмування й повороти завдають болю: стеж за шкалою. Відео приходить із затримкою."
 UGV_EVACUATION_PASS,No jolts | 0.5 s delay,"Без поштовхів | Затримка 0,5 с"
 MIS_CAM_KITTEN,Kitten on the roof,Кошеня на даху
 MIS_CAM_KITTEN_DESC,Find the kitten and show the rescuers where to go.,"Знайди кошеня й покажи рятувальникам, куди йти."
@@ -374,3 +374,73 @@ HINT_TREES_LOW,Between the trees: below 5 m,Між деревами: нижче 
 SUM_TREES,Through the tree line and back without a single touch.,Лісосмугу пройдено двічі без жодного дотику.
 FAIL_TREES,The drone touched a tree. Between trees fly slower and give more room.,Дрон зачепив дерево. Між деревами лети повільніше й тримай більший запас.
 FAIL_TREES_OVER,Flying over the tree line does not count: the task is to fly between the trees.,Над лісосмугою літати не можна: завдання — пролетіти між деревами.
+STICK_TRACK_L,Left track,Ліва гусениця
+STICK_TRACK_R,Right track,Права гусениця
+STICK_DRIVE,Drive,Хід
+STICK_TURN,Turn,Поворот
+NO_SIGNAL,No signal,Немає сигналу
+CRASHED_UGV,The robot is damaged,Робота пошкоджено
+CRASHED_UGV_TIP,"The robot tipped over: a %s° lean. On a slope drive straight up or down, not across, and keep off the edge.","Робот перекинувся: нахил %s°. На схилі їдь прямо вгору чи вниз, а не впоперек, і не з’їжджай з краю."
+CRASHED_UGV_HIT,It hit at %s m/s. Slow down near obstacles.,Удар на швидкості %s м/с. Перед перешкодами пригальмовуй.
+UGV_DRIVE_NOTE_KIDS,Follow the road,Їдь дорогою
+UGV_DRIVE_GOAL_KIDS,Drive along the road to the balls. Left stick: forward and back; right stick: turning.,"Їдь дорогою до кульок. Лівий стік — уперед і назад, правий — повороти."
+UGV_DRIVE_PASS_KIDS,The road,Дорога
+UGV_PIVOT_NOTE_KIDS,Turn in an alley,Розворот у провулку
+UGV_PIVOT_GOAL_KIDS,"Drive into the alley, turn round and drive back out.","Заїдь у провулок, розвернися й виїдь назад."
+UGV_PIVOT_PASS_KIDS,Turn round,Розворот
+UGV_TERRAIN_NOTE_KIDS,A hill and mud,Гірка й бруд
+UGV_TERRAIN_GOAL_KIDS,Drive up the hill and through the mud puddle.,Заїдь на гірку і проїдь калюжу бруду.
+UGV_TERRAIN_PASS_KIDS,Hill | Mud,Гірка | Бруд
+UGV_DELIVERY_NOTE_KIDS,Deliver a box,Довези коробку
+UGV_DELIVERY_GOAL_KIDS,Deliver the box and stop in the gold circle.,Довези коробку й зупинись у золотому колі.
+UGV_DELIVERY_PASS_KIDS,Box | Circle,Коробка | Коло
+UGV_EVACUATION_NOTE_KIDS,"Gently, gently",Плавно-плавно
+UGV_EVACUATION_GOAL_KIDS,Bring the casualty to the rescuers’ van. Drive gently so nothing shakes.,"Привези пораненого до машини рятувальників. Їдь плавно-плавно, щоб не трусило."
+UGV_EVACUATION_PASS_KIDS,Gently,Плавно
+HINT_UGV_START_TANK,Both sticks forward: the robot goes straight,Обидва стіки вперед: робот їде прямо
+HINT_UGV_START_CAR,Left stick forward: off we go!,Лівий стік уперед: поїхали!
+HINT_UGV_DRIVE_GO,Drive along the road to the ball: %d to go,Їдь дорогою до кулі: ще %d
+HINT_UGV_OFF,Back onto the road!,Повертайся на дорогу!
+FAIL_UGV_OFF,The robot left the road. Slow down before a bend and turn more gently.,Робот з’їхав з дороги. Перед поворотом пригальмуй і повертай плавніше.
+SUM_UGV_DRIVE,The road driven without leaving it once.,"Дорогу пройдено, жодного разу не з’їхавши."
+SUM_UGV_DRIVE_KIDS,"Hooray, we made it!","Ура, доїхали!"
+HINT_PIVOT_IN,Drive into the alley to the ball,Заїдь у провулок до кулі
+HINT_PIVOT_TURN_TANK,"Turn on the spot: one stick forward, the other back","Розвернися на місці: один стік уперед, другий назад"
+HINT_PIVOT_TURN_CAR,Turn round: right stick to the side,Розвертайся: правий стік убік
+HINT_PIVOT_OUT,Now drive out of the alley,Тепер виїжджай із провулка
+FAIL_UGV_WALL,"The robot touched a wall. Turn on the spot, not while moving.","Робот зачепив стіну. Розвертайся на місці, а не на ходу."
+SUM_UGV_PIVOT,A turn in a tight alley without a single touch.,Розворот у тісному провулку без жодного дотику.
+SUM_UGV_PIVOT_KIDS,The robot turned round and drove out!,Робот розвернувся й виїхав!
+HINT_TERRAIN_RAMP,Drive up the hill: uphill the robot is slower,Заїдь на пагорб: угору робот повільніший
+HINT_TERRAIN_MUD,Now through the mud: the tracks slip here,Тепер через бруд: тут гусениці буксують
+HINT_TERRAIN_FINISH,"A little more, to the ball","Ще трохи, до кулі"
+SUM_UGV_TERRAIN,Hill and mud done.,Пагорб і бруд подолано.
+SUM_UGV_TERRAIN_KIDS,Over the hill and through the mud!,Гірку й бруд подолано!
+HINT_LINK_LOST,"No link: the robot has stopped. Wait, the link will come back","Немає зв’язку: робот зупинився. Зачекай, зв’язок повернеться"
+METER_PATIENT,Casualty’s comfort,Комфорт пораненого
+METER_KITTEN,Kitten’s calm,Спокій кошеняти
+METER_CARGO,Cargo condition,Цілість вантажу
+HINT_JOLT_STRETCHER,Too sharp! It hurts the casualty,Різко! Пораненому боляче
+HINT_JOLT_KITTEN,"Careful, the kitten got scared","Обережно, кошеня злякалося"
+HINT_JOLT_CARGO,Shaking! The cargo could break,Трясе! Вантаж може розбитися
+FAIL_JOLT_STRETCHER,"The casualty was shaken too much. Start and brake gently, turn slowly, and take potholes slowly.","Пораненого надто трясло. Рушай і гальмуй плавно, повертай повільно, а ями проїжджай поволі."
+FAIL_JOLT_CARGO,The cargo broke from the jolts. Slow down before potholes.,Вантаж розбився від поштовхів. Перед ямами пригальмовуй.
+FAIL_CARGO_BUMP,The robot touched an obstacle and the cargo is damaged. Give obstacles room.,"Робот зачепив перешкоду, і вантаж пошкоджено. Об’їжджай із запасом."
+HINT_ROUTE_LOADING,"Holding still, loading…","Стоїмо, вантажимо…"
+HINT_ROUTE_LOADED_STRETCHER,"The casualty is on the stretcher. Take them to the van, gently","Пораненого поклали на ноші. Вези до машини, плавно"
+HINT_ROUTE_LOADED_KITTEN,The kitten is in the box! Off to the vet,Кошеня в коробці! Вези до ветеринарки
+HINT_ROUTE_PICKUP_STRETCHER,Drive to the casualty and stop beside them,Їдь до пораненого й зупинись поруч
+HINT_ROUTE_PICKUP_KITTEN,Drive to the kitten and stop beside it,Їдь до кошеняти й зупинись поруч
+HINT_ROUTE_GO_CARGO,Take the cargo to the mark and stop,Вези вантаж до мітки й зупинись
+HINT_ROUTE_GO_STRETCHER,"Take the casualty to the van, gently","Вези пораненого до машини, плавно"
+HINT_ROUTE_GO_KITTEN,Take the kitten to the vet,Вези кошеня до ветеринарки
+HINT_ROUTE_GO_PARCEL,Take the parcel to granny and stop by the house,Вези посилку бабусі й зупинись біля хати
+SUM_UGV_DELIVERY,The cargo arrived intact.,Вантаж доставлено цілим.
+SUM_UGV_DELIVERY_KIDS,The box is delivered!,Коробку доставлено!
+SUM_UGV_EVACUATION,The casualty is safe. Comfort on the way: %d %%.,Пораненого довезено. Комфорт у дорозі: %d %%.
+SUM_UGV_EVACUATION_KIDS,The casualty is with the rescuers!,Пораненого довезено до рятувальників!
+SUM_UGV_VET,The kitten is at the vet. Calm on the way: %d %%.,Кошеня у ветеринарки. Спокій у дорозі: %d %%.
+SUM_UGV_VET_KIDS,The kitten is at the vet! It is calm and happy.,Кошеня у ветеринарки! Воно спокійне й задоволене.
+SUM_UGV_PARCEL,The parcel is delivered! Sunflowers: %d of %d.,Посилку доставлено! Соняшників: %d з %d.
+SUM_UGV_CARGO,Water and medicine delivered. Cargo condition: %d %%.,Воду й ліки доставлено. Цілість вантажу: %d %%.
+SUM_UGV_EVAC,"The casualty is evacuated, even with the link dropping. Comfort: %d %%.","Пораненого евакуйовано, навіть попри втрату зв’язку. Комфорт: %d %%."

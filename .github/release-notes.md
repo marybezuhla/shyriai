@@ -1,37 +1,29 @@
-**Ширяй 0.4.0** — тренажер пілотування для Android: без інтернету, акаунтів і реклами. Українська та англійська.
+**Ширяй 0.5.0** — тренажер пілотування для Android: без інтернету, акаунтів і реклами. Українська та англійська.
 
-**Нове: FPV-дрон.**
+**Нове: наземний робот (НРК).**
 
-- 🥽 **Політ очима дрона.** Висоту тримаєш ти: лівий стік — газ, він не повертається до центру, як на справжньому пульті. Режими Angle, Horizon і Acro.
-- 🎯 **6 уроків FPV:** газ висіння, політ уперед, вісімка, ворота, Horizon і Acro (останні два — лише в Дорослому режимі).
-- 🎈 **Місії FPV:** для дітей — «Обручі» та «Кульки й мішень», для дорослих — «Траса на час» і «Між деревами».
+- 🚜 **Гусеничне керування:** кожен стік веде свою гусеницю, а в різні боки — розворот на місці. У Дитячому режимі робот керується простіше, як машинка.
+- 🎯 **5 уроків:** дорога з поворотами, розворот у глухому провулку, пагорб і бруд, доставка вантажу, евакуація пораненого.
+- 📦 **Місії:** для дітей — «Кошеня до ветеринарки» і «Посилка бабусі», для дорослих — «Доставка вантажу» розбитою дорогою та «Евакуація пораненого».
+- 🩹 **Плавність має значення:** різкі старти, гальмування, повороти й ями зменшують комфорт пораненого чи цілість вантажу.
+- 📡 **Як по-справжньому:** відео з камери робота може запізнюватися, а зв’язок — на мить зникати. Тоді робот сам зупиняється.
 
-**Виправлено за відгуками:**
-
-- Кожен режим має **свій прогрес**: дитячі уроки не змішуються з дорослими.
-- У Дитячому режимі уроки й підказки **без цифр**: «Злітай до золотої кульки!» замість «Підніми на 2 м».
-- **Більший текст** підказок під час польоту.
-
-НРК — у наступній версії. Потрібен Android 7 або новіший.
+Тепер у Ширяї є всі три машини. Наступний крок — незалежний аудит перед першим релізом для людей. Потрібен Android 7 або новіший.
 
 📲 Завантажте файл .apk нижче й відкрийте його на телефоні. 🔄 Для оновлень — Obtainium (є в F-Droid): «Додати застосунок» → `github.com/Marybezu/shyriai`.
 
 ---
 
-**Shyriai 0.4.0** — a piloting trainer for Android: no internet, no accounts, no ads. Ukrainian and English.
+**Shyriai 0.5.0** — a piloting trainer for Android: no internet, no accounts, no ads. Ukrainian and English.
 
-**New: the FPV drone.**
+**New: the ground robot (UGV).**
 
-- 🥽 **Fly through the drone's eyes.** You hold the height: the left stick is the throttle and does not spring back, as on a real radio. Angle, Horizon and Acro modes.
-- 🎯 **6 FPV lessons:** hover throttle, flying forward, figure eight, gates, Horizon and Acro (the last two in Adult mode only).
-- 🎈 **FPV missions:** for kids, Hoops and Balloons and target; for adults, Timed course and Between the trees.
+- 🚜 **Tank steering:** each stick drives one track, and opposite ways turn it on the spot. In Kids mode it steers more simply, like a toy car.
+- 🎯 **5 lessons:** a winding road, a turn in a dead-end alley, a hill and mud, cargo delivery, casualty evacuation.
+- 📦 **Missions:** for kids, Kitten to the vet and A parcel for granny; for adults, Cargo delivery over a broken road and Casualty evacuation.
+- 🩹 **Smoothness matters:** sharp starts, braking, turns and potholes cost the casualty's comfort or the cargo's condition.
+- 📡 **As in real life:** the robot's video may arrive late and the link may drop for a moment; then the robot stops by itself.
 
-**Fixed from feedback:**
-
-- Each mode keeps **its own progress**: kids' lessons no longer mix with adults'.
-- In Kids mode, lessons and hints have **no numbers**: "Fly up to the gold ball!" instead of "Lift to 2 m".
-- **Larger hint text** in flight.
-
-The UGV comes in the next version. Requires Android 7 or newer.
+Shyriai now has all three vehicles. Next comes an independent audit before the first release for everyone. Requires Android 7 or newer.
 
 📲 Download the .apk file below and open it on your phone. 🔄 For updates, use Obtainium (on F-Droid): Add App → `github.com/Marybezu/shyriai`.

@@ -10,6 +10,7 @@ const COLORS := ["#FFC321", "#E5708B", "#5B9BD5", "#7DBE6A"]
 
 
 func setup_world() -> void:
+	counter_shown = true
 	var normals := normals_along(POINTS, world.pad)
 	for i in POINTS.size():
 		var p := POINTS[i]

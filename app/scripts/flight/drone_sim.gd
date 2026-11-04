@@ -29,6 +29,8 @@ const CRASH_FALL := 3.0  # m/s into the ground, Adult mode only
 
 var p: Dictionary
 var gps := true
+## Collision radius; a ground robot is wider than a drone.
+var radius := RADIUS
 
 var pos := Vector3.ZERO
 var vel := Vector3.ZERO
@@ -192,25 +194,25 @@ func _collide() -> void:
 			var c := pos.clamp(box.position, box.end)
 			var d := pos - c
 			var dist := d.length()
-			if dist >= RADIUS:
+			if dist >= radius:
 				continue
 			if dist < 1e-4:
 				# Centre inside the box: push out through the nearest face (upwards on a roof).
 				d = Vector3.UP
 				dist = 0.0
-			push = d.normalized() * (RADIUS - dist)
+			push = d.normalized() * (radius - dist)
 		elif o.has("cyl"):
 			var c2: Vector2 = o["cyl"]
 			var r: float = o["r"]
 			var base_y: float = o.get("y", 0.0)
-			if pos.y > base_y + float(o["h"]) + RADIUS or pos.y < base_y - RADIUS:
+			if pos.y > base_y + float(o["h"]) + radius or pos.y < base_y - radius:
 				continue
 			var d2 := Vector2(pos.x, pos.z) - c2
 			var dist2 := d2.length()
-			if dist2 >= r + RADIUS:
+			if dist2 >= r + radius:
 				continue
 			var n := d2.normalized() if dist2 > 1e-4 else Vector2(1, 0)
-			push = Vector3(n.x, 0, n.y) * (r + RADIUS - dist2)
+			push = Vector3(n.x, 0, n.y) * (r + radius - dist2)
 		else:
 			continue
 		var normal := push.normalized()

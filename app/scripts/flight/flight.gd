@@ -18,7 +18,14 @@ var autopilot := Callable()
 var sim: DroneSim
 var task: FlightTask
 var world: FlightWorld
-var drone: DroneView
+var drone: Node3D  # DroneView or UgvView
+## The robot's camera pose a moment ago, for late video: [pos, basis] per physics step.
+var _cam_history: Array = []
+var _shown_load := ""
+var _nolink: Control
+var _meter_box: Control
+var _meter_fill: Panel
+var _meter_text: Label
 var cam := Camera3D.new()
 var view := "pilot"
 
@@ -64,7 +71,11 @@ func _ready() -> void:
 	if task.view_hint != "":
 		view = task.view_hint
 
-	if vehicle == "fpv" and mode != "kids":
+	if vehicle == "ugv":
+		var u := UgvSim.new(mode, 11)
+		u.grip = world.grip
+		sim = u
+	elif vehicle == "fpv" and mode != "kids":
 		var f := FpvSim.new(mode, 11)
 		f.flight_mode = task.flight_mode
 		sim = f
@@ -80,9 +91,15 @@ func _ready() -> void:
 	sim.obstacles = world.obstacles
 	sim.place(task.start_position(), task.start_heading())
 
-	drone = DroneView.new()
-	world.add_child(drone)
-	drone.build(world.pal["drone"], world.pal["drone_front"])
+	if vehicle == "ugv":
+		drone = UgvView.new()
+		world.add_child(drone)
+		drone.build(world.pal["drone"], world.pal["drone_front"], task.load_kind)
+		_shown_load = task.load_kind
+	else:
+		drone = DroneView.new()
+		world.add_child(drone)
+		drone.build(world.pal["drone"], world.pal["drone_front"])
 	drone.sync(sim, 0.0)
 
 	cam.fov = 60.0
@@ -106,8 +123,14 @@ func _physics_process(_delta: float) -> void:
 	if _paused or _finished:
 		return
 	_read_sticks()
+	if not task.link_ok:
+		# No radio link: the robot gets no commands and stops by itself.
+		_sticks = {"throttle": 0.0, "yaw": 0.0, "pitch": 0.0, "roll": 0.0}
 	sim.step(STEP, _sticks["throttle"], _sticks["yaw"], _sticks["pitch"], _sticks["roll"])
 	task.step(STEP, sim, _sticks)
+	_cam_history.append([sim.pos, sim.orientation()])
+	if _cam_history.size() > 90:
+		_cam_history.pop_front()
 	if task.done:
 		_finish()
 	elif task.failed:
@@ -187,6 +210,16 @@ func _place_camera(delta: float) -> void:
 		cam.position = sim.pos + sim.forward() * 0.45 + Vector3(0, 0.2, 0)
 		cam.rotation = Vector3(deg_to_rad(-25.0), sim.yaw, 0)
 		cam.fov = 75.0
+	elif view == "ugv":
+		# The robot's own camera on its mast. Some tasks show its video late, as over a slow radio link.
+		var pose: Array = [sim.pos, sim.orientation()]
+		var back := int(round(task.video_delay / STEP))
+		if back > 0 and _cam_history.size() > back:
+			pose = _cam_history[_cam_history.size() - 1 - back]
+		var b: Basis = pose[1]
+		cam.global_basis = b * Basis(Vector3.RIGHT, deg_to_rad(-8.0))
+		cam.position = pose[0] + b * Vector3(0, 1.2, -0.6)
+		cam.fov = 80.0
 	elif view == "chase":
 		var back := -sim.forward() * 6.0 + Vector3(0, 2.6, 0)
 		var want := target + back
@@ -216,6 +249,25 @@ func set_view(v: String) -> void:
 # --- HUD --------------------------------------------------------------------
 
 func _build_hud() -> void:
+	# "No signal" over the robot's video while the radio link is down.
+	var nl := ColorRect.new()
+	nl.color = Color(0.16, 0.11, 0.23, 0.82)
+	nl.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	nl.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var nl_center := CenterContainer.new()
+	nl_center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	nl_center.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var nl_text := Label.new()
+	nl_text.text = tr("NO_SIGNAL")
+	nl_text.add_theme_font_override("font", Pal.font(600, true))
+	nl_text.add_theme_font_size_override("font_size", 26)
+	nl_text.add_theme_color_override("font_color", Color("#FFF0D5"))
+	nl_center.add_child(nl_text)
+	nl.add_child(nl_center)
+	nl.visible = false
+	add_child(nl)
+	_nolink = nl
+
 	_hud.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_hud.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_hud)
@@ -263,6 +315,21 @@ func _build_hud() -> void:
 		_bar_text = UI.label("0 %", 12, 700, "muted", false, false)
 		bar_row.add_child(_bar_text)
 	chip.add_child(bar_row)
+	# A second bar for how the load is doing, e.g. the casualty's comfort.
+	if task.meter >= 0.0:
+		var mrow := UI.hbox(8)
+		var mbar := Panel.new()
+		mbar.custom_minimum_size = Vector2(120, 6)
+		mbar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		mbar.add_theme_stylebox_override("panel", UI.box(Pal.c("line"), 3, 0))
+		_meter_fill = Panel.new()
+		_meter_fill.add_theme_stylebox_override("panel", UI.box(Color("#7DBE6A"), 3, 0))
+		_meter_fill.size = Vector2(120, 6)
+		mbar.add_child(_meter_fill)
+		mrow.add_child(mbar)
+		_meter_text = UI.label(tr(task.meter_label), 12, 700, "muted", false, false)
+		mrow.add_child(_meter_text)
+		chip.add_child(mrow)
 	top.add_child(UI.panel(chip, glass, 16, 10))
 
 	var gap := Control.new()
@@ -271,7 +338,7 @@ func _build_hud() -> void:
 	top.add_child(gap)
 
 	if mode == "kids":
-		if task.counter_max > 0 or task.is_mission:
+		if task.counter_shown:
 			var row := UI.hbox(8)
 			# Sunflowers are what the kitten mission collects; other counts need no picture.
 			if task.key == "MIS_CAM_KITTEN":
@@ -286,7 +353,9 @@ func _build_hud() -> void:
 		var names := ["ALT", "TIME"]
 		if mode == "pro":
 			names = ["ALT", "SPEED", "BATTERY", "TIME"]
-		elif vehicle == "fpv":
+		if vehicle == "ugv":
+			names = ["SPEED", "BATTERY", "TIME"] if mode == "pro" else ["SPEED", "TIME"]
+		elif vehicle == "fpv" and mode != "pro":
 			names = ["ALT", "SPEED", "TIME"]
 		for n in names:
 			var s := UI.vbox(1)
@@ -330,11 +399,16 @@ func _build_hud() -> void:
 	if vehicle == "fpv" and mode != "kids":
 		_left.spring_y = false
 		_left.value.y = -1.0
-	bottom.add_child(_stick_with_label(_left, tr("STICK_LEFT_FPV" if not _left.spring_y else "STICK_LEFT")))
+	var left_label := "STICK_LEFT_FPV" if not _left.spring_y else "STICK_LEFT"
+	var right_label := "STICK_RIGHT"
+	if sim is UgvSim:
+		left_label = "STICK_TRACK_L" if sim.tank else "STICK_DRIVE"
+		right_label = "STICK_TRACK_R" if sim.tank else "STICK_TURN"
+	bottom.add_child(_stick_with_label(_left, tr(left_label)))
 	_view_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_view_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	bottom.add_child(_view_box)
-	bottom.add_child(_stick_with_label(_right, tr("STICK_RIGHT")))
+	bottom.add_child(_stick_with_label(_right, tr(right_label)))
 	col.add_child(bottom)
 	_build_view_toggle()
 
@@ -364,7 +438,8 @@ func _build_view_toggle() -> void:
 	fill.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	fill.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_view_box.add_child(fill)
-	var views := [["fpv", tr("VIEW_FPV")], ["chase", tr("VIEW_CHASE")], ["pilot", tr("VIEW_PILOT")]] if vehicle == "fpv" \
+	var views := [["ugv", tr("VIEW_DRONE")], ["chase", tr("VIEW_CHASE")], ["pilot", tr("VIEW_PILOT")]] if vehicle == "ugv" \
+		else [["fpv", tr("VIEW_FPV")], ["chase", tr("VIEW_CHASE")], ["pilot", tr("VIEW_PILOT")]] if vehicle == "fpv" \
 		else [["pilot", tr("VIEW_PILOT")], ["chase", tr("VIEW_CHASE")], ["drone", tr("VIEW_DRONE")]]
 	var seg := UI.segmented(views, view, set_view)
 	seg.custom_minimum_size = Vector2(360, 0)
@@ -400,6 +475,16 @@ func _update_choice() -> void:
 
 
 func _update_hud() -> void:
+	if vehicle == "ugv" and task.load_kind != _shown_load:
+		_shown_load = task.load_kind
+		drone.set_load(_shown_load)
+	if _meter_fill:
+		var m := clampf(task.meter / 100.0, 0.0, 1.0)
+		_meter_fill.size = Vector2(120.0 * m, 6)
+		var col := Color("#7DBE6A") if m > 0.5 else (Color("#F29B50") if m > 0.25 else Color("#E5708B"))
+		(_meter_fill.get_theme_stylebox("panel") as StyleBoxFlat).bg_color = col
+	if _nolink:
+		_nolink.visible = not task.link_ok and view == "ugv"
 	_update_choice()
 	_bar_fill.size = Vector2(120.0 * task.progress, 6)
 	if _bar_text:
@@ -416,7 +501,7 @@ func _update_hud() -> void:
 			_hint.custom_minimum_size = Vector2(520, 0) if w > 520.0 else Vector2.ZERO
 	_hint_panel.visible = task.hint != ""
 	if _counter:
-		_counter.text = "%d / %d" % [task.counter, task.counter_max] if task.counter_max > 0 else "0"
+		_counter.text = "%d / %d" % [task.counter, task.counter_max]
 	if _stats.has("ALT"):
 		_stats["ALT"].text = tr("UNIT_M") % ("%.1f" % maxf(0.0, sim.altitude()))
 	if _stats.has("SPEED"):
@@ -549,6 +634,19 @@ func _finish() -> void:
 
 
 func _crashed() -> void:
+	if sim is UgvSim:
+		_finished = true
+		var c := UI.vbox(12)
+		c.add_child(UI.label(tr("CRASHED_UGV"), 22, 600, "text", true))
+		var tipped := false
+		for e in sim.events:
+			tipped = tipped or e["type"] == "tipped"
+		var why := tr("CRASHED_UGV_TIP") if tipped else tr("CRASHED_UGV_HIT")
+		c.add_child(UI.label(why % ("%.0f" % sim.crash_speed if tipped else "%.1f" % sim.crash_speed), 14, 500, "muted"))
+		c.add_child(UI.primary(tr("AGAIN"), restart, "play"))
+		c.add_child(_secondary(tr("EXIT"), leave))
+		_show_overlay(c)
+		return
 	_finished = true
 	var col := UI.vbox(12)
 	col.add_child(UI.label(tr("CRASHED"), 22, 600, "text", true))

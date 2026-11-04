@@ -14,6 +14,7 @@ const PALETTES := {
 		"pad": Color("#FFF0D5"), "pad_ring": Color("#FFC321"), "pad_mark": Color("#463161"),
 		"sun": Color("#FFFFFF"), "sun_energy": 0.55, "ambient": Color("#DDE6EC"), "ambient_energy": 0.5,
 		"drone": Color("#463161"), "drone_front": Color("#FFC321"),
+		"road": Color("#E2D3AE"), "mud": Color("#8A6B4E"), "barrier": Color("#D8CBB6"),
 	},
 	"dusk": {
 		"sky_top": Color("#35244D"), "sky_horizon": Color("#7A5A8E"),
@@ -23,6 +24,7 @@ const PALETTES := {
 		"pad": Color("#FFF0D5"), "pad_ring": Color("#FFC321"), "pad_mark": Color("#463161"),
 		"sun": Color("#FFC98A"), "sun_energy": 0.7, "ambient": Color("#B9A6D6"), "ambient_energy": 0.7,
 		"drone": Color("#FFF0D5"), "drone_front": Color("#FFC321"),
+		"road": Color("#6A5884"), "mud": Color("#3B2B3E"), "barrier": Color("#8E7BA8"),
 	},
 }
 
@@ -68,6 +70,12 @@ func build(look: String, seed_ := 7) -> void:
 func add_kitten(house: int) -> void:
 	kitten = houses[house]["pos"] + Vector3(0, 6.15, 0)
 	_kitten(kitten)
+
+
+## A kitten sitting on the ground (for the ground robot to fetch).
+func add_kitten_at(at: Vector3) -> Node3D:
+	_kitten(Vector3(at.x, height(at.x, at.z), at.z))
+	return _kitten_node
 
 
 func add_van(at: Vector3) -> void:
@@ -302,6 +310,156 @@ func add_tree_belt(z_from: float, z_to: float, half_width: float, seed_: int) ->
 	return out
 
 
+# --- For the ground robot ---------------------------------------------------------
+
+var _hills: Array[Dictionary] = []
+## Potholes: x, z = centre, y = radius.
+var _dips: Array[Vector3] = []
+var _muds: Array[Vector3] = []
+
+
+## A ramp along Z: up over `up` metres to `top` m high, flat for `flat` m, then down again. Width `w`.
+func add_ramp(start_z: float, x: float, w: float, top: float, up: float, flat: float) -> void:
+	var h := {"x": x, "z0": start_z, "w": w, "top": top, "up": up, "flat": flat}
+	_hills.append(h)
+	# Its own mesh, built from the height function, a little above the field.
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var total := up * 2.0 + flat
+	var nx := 6
+	var nz := int(total / 0.5)
+	for i in nx:
+		for j in nz:
+			var x0 := x - w / 2.0 + w * i / nx
+			var x1 := x - w / 2.0 + w * (i + 1) / nx
+			var z0 := start_z - total * j / nz
+			var z1 := start_z - total * (j + 1) / nz
+			var a := Vector3(x0, height(x0, z0) + 0.02, z0)
+			var b := Vector3(x1, height(x1, z0) + 0.02, z0)
+			var c := Vector3(x0, height(x0, z1) + 0.02, z1)
+			var d := Vector3(x1, height(x1, z1) + 0.02, z1)
+			for v in [a, c, b, b, c, d]:
+				st.add_vertex(v)
+	st.generate_normals()
+	var mi := MeshInstance3D.new()
+	mi.mesh = st.commit()
+	mi.material_override = _mat(pal["hill_b"])
+	add_child(mi)
+
+
+func _hill_height(h: Dictionary, x: float, z: float) -> float:
+	if absf(x - h["x"]) > h["w"] / 2.0:
+		return 0.0
+	var d: float = h["z0"] - z  # distance along the ramp
+	var up: float = h["up"]
+	var flat: float = h["flat"]
+	if d <= 0.0 or d >= up * 2.0 + flat:
+		return 0.0
+	if d < up:
+		return h["top"] * d / up
+	if d < up + flat:
+		return h["top"]
+	return h["top"] * (up * 2.0 + flat - d) / up
+
+
+func add_mud(center: Vector3, r: float) -> void:
+	_muds.append(Vector3(center.x, r, center.z))
+	var disc := CylinderMesh.new()
+	disc.top_radius = r
+	disc.bottom_radius = r
+	disc.height = 0.04
+	disc.radial_segments = 20
+	_mesh(disc, pal["mud"], Vector3(center.x, height(center.x, center.z) + 0.03, center.z))
+
+
+## Speed factor of the ground: mud halves it.
+func grip(x: float, z: float) -> float:
+	for m in _muds:
+		if Vector2(x - m.x, z - m.z).length() < m.y:
+			return 0.45
+	return 1.0
+
+
+func add_pothole(at: Vector3, r := 0.45) -> void:
+	_dips.append(Vector3(at.x, r, at.z))
+	var disc := CylinderMesh.new()
+	disc.top_radius = r
+	disc.bottom_radius = r
+	disc.height = 0.02
+	disc.radial_segments = 12
+	_mesh(disc, pal["mud"].darkened(0.2), Vector3(at.x, 0.015, at.z))
+
+
+## A dirt road along points, `w` wide, drawn just above the field.
+func add_road(points: Array[Vector3], w: float) -> void:
+	for i in points.size() - 1:
+		var a := points[i]
+		var b := points[i + 1]
+		var d := Vector3(b.x - a.x, 0, b.z - a.z)
+		var strip := _box(Vector3(w, 0.02, d.length() + w * 0.6))
+		var mid := (a + b) / 2.0
+		_mesh(strip, pal["road"], Vector3(mid.x, height(mid.x, mid.z) + 0.02, mid.z), atan2(d.x, d.z))
+
+
+## An axis-aligned wall from `a` to `b` on the ground (one of x or z the same).
+func add_wall(a: Vector3, b: Vector3, h := 1.2, t := 0.3) -> void:
+	var lo := Vector3(minf(a.x, b.x) - t / 2.0, 0, minf(a.z, b.z) - t / 2.0)
+	var hi := Vector3(maxf(a.x, b.x) + t / 2.0, h, maxf(a.z, b.z) + t / 2.0)
+	_mesh(_box(hi - lo), pal["barrier"], (lo + hi) / 2.0)
+	obstacles.append({"box": AABB(lo, hi - lo)})
+
+
+func add_barrel(at: Vector3) -> void:
+	var cyl := CylinderMesh.new()
+	cyl.top_radius = 0.35
+	cyl.bottom_radius = 0.35
+	cyl.height = 0.9
+	cyl.radial_segments = 12
+	_mesh(cyl, pal["roof"], Vector3(at.x, height(at.x, at.z) + 0.45, at.z))
+	obstacles.append({"cyl": Vector2(at.x, at.z), "r": 0.35, "h": 0.9, "y": height(at.x, at.z)})
+
+
+## A small round sign on a post, e.g. a paw for the vet.
+func add_sign(at: Vector3, color: Color) -> void:
+	_mesh(_box(Vector3(0.1, 2.0, 0.1)), pal["barrier"], at + Vector3(0, 1.0, 0))
+	var disc := CylinderMesh.new()
+	disc.top_radius = 0.45
+	disc.bottom_radius = 0.45
+	disc.height = 0.06
+	disc.radial_segments = 20
+	var mi := _mesh(disc, color, at + Vector3(0, 2.2, 0))
+	mi.rotation.x = PI / 2.0
+
+
+## A small low-poly person lying on a stretcher, for the evacuation tasks.
+func add_casualty(at: Vector3) -> Node3D:
+	var n := Node3D.new()
+	n.position = Vector3(at.x, height(at.x, at.z), at.z)
+	add_child(n)
+	var parts := [
+		[_box(Vector3(0.7, 0.08, 1.9)), pal["barrier"], Vector3(0, 0.2, 0)],
+		[_box(Vector3(0.42, 0.22, 0.9)), Color("#5B7D4E"), Vector3(0, 0.35, 0.25)],
+		[_box(Vector3(0.38, 0.2, 0.7)), Color("#39254F"), Vector3(0, 0.34, -0.5)],
+	]
+	for part in parts:
+		var mi := MeshInstance3D.new()
+		mi.mesh = part[0]
+		mi.material_override = _mat(part[1])
+		mi.position = part[2]
+		n.add_child(mi)
+	var head := SphereMesh.new()
+	head.radius = 0.13
+	head.height = 0.26
+	head.radial_segments = 8
+	head.rings = 4
+	var hm := MeshInstance3D.new()
+	hm.mesh = head
+	hm.material_override = _mat(Color("#E7B992"))
+	hm.position = Vector3(0, 0.4, 0.82)
+	n.add_child(hm)
+	return n
+
+
 ## A see-through gold sphere at the next target, on a thin pole, so its height and place are clear.
 func show_beacon(at: Vector3, radius: float) -> void:
 	var on := radius > 0.0 and at != Vector3.INF
@@ -349,8 +507,20 @@ func _make_beacon() -> void:
 	add_child(_beacon_pole)
 
 
-## Ground height at (x, z): flat around the pad, rolling hills further out.
+## Ground height at (x, z): flat around the pad, rolling hills further out, plus what a lesson adds
+## (a ramp, potholes).
 func height(x: float, z: float) -> float:
+	var extra := 0.0
+	for h in _hills:
+		extra += _hill_height(h, x, z)
+	for d in _dips:
+		var dd := Vector2(x - d.x, z - d.z).length()
+		if dd < d.y:
+			extra -= 0.16 * (0.5 + 0.5 * cos(PI * dd / d.y))
+	return extra + _base_height(x, z)
+
+
+func _base_height(x: float, z: float) -> float:
 	var r := Vector2(x, z).length()
 	if r <= FLAT:
 		return 0.0

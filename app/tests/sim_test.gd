@@ -5,6 +5,7 @@ extends Node
 
 const Autopilot := preload("res://tests/autopilot.gd")
 const FpvAutopilot := preload("res://tests/fpv_autopilot.gd")
+const UgvAutopilot := preload("res://tests/ugv_autopilot.gd")
 const DT := 1.0 / 60.0
 
 var failures := 0
@@ -41,6 +42,11 @@ func _ready() -> void:
 		await test_fpv_task("MIS_FPV_RACE", mode)
 		await test_fpv_task("MIS_FPV_TREES", mode)
 	await test_trees_over_fails()
+	test_ugv_physics()
+	for mode in Prefs.MODES:
+		for key in Curriculum.lessons("ugv", mode) + Curriculum.missions("ugv", mode):
+			await test_ugv_task(key, mode)
+	await test_ugv_rough_driving_fails()
 	for mode in ["simple", "pro"]:
 		await test_search_mission(mode)
 		await test_survey_mission(mode)
@@ -193,7 +199,11 @@ func _flight(key: String, mode: String, vehicle := "camera") -> Array:
 	task.world = world
 	task.setup_world()
 	var sim: DroneSim
-	if vehicle == "fpv" and mode != "kids":
+	if vehicle == "ugv":
+		var u := UgvSim.new(mode, 11)
+		u.grip = world.grip
+		sim = u
+	elif vehicle == "fpv" and mode != "kids":
 		var f := FpvSim.new(mode, 11)
 		f.flight_mode = task.flight_mode
 		sim = f
@@ -213,6 +223,8 @@ func _flight(key: String, mode: String, vehicle := "camera") -> Array:
 func _fly(task: FlightTask, sim: DroneSim, seconds: float, pick: Callable) -> bool:
 	for i in int(seconds / DT):
 		var s: Dictionary = pick.call(i * DT)
+		if not task.link_ok:
+			s = {"throttle": 0.0, "yaw": 0.0, "pitch": 0.0, "roll": 0.0}
 		sim.step(DT, s["throttle"], s["yaw"], s["pitch"], s["roll"])
 		task.step(DT, sim, s)
 		if task.done:
@@ -561,5 +573,103 @@ func test_trees_over_fails() -> void:
 	ap.height = 12.0
 	_fly(f[0], f[1], 60.0, func(_t): return ap.sticks(f[1]))
 	check(f[0].failed and f[0].summary == "FAIL_TREES_OVER", "simple: flying over the tree line does not count")
+	f[2].queue_free()
+	await get_tree().process_frame
+
+
+# --- Ground robot ------------------------------------------------------------------
+
+func test_ugv_physics() -> void:
+	var sim := UgvSim.new("simple")
+	sim.place(Vector3.ZERO)
+	run(sim, 3.0, 1.0, 0, 1.0, 0)
+	check(sim.pos.z < -6.0 and absf(sim.pos.x) < 0.1, "UGV: both tracks forward drives straight")
+	var heading := sim.yaw
+	run(sim, 1.0, 1.0, 0, -1.0, 0)
+	check(absf(wrapf(sim.yaw - heading, -PI, PI)) > deg_to_rad(45.0), "UGV: tracks in opposite directions turn on the spot")
+	run(sim, 2.0, 0, 0, 0, 0)
+	check(sim.vel.length() < 0.05, "UGV: let go and it stops")
+	var mud := UgvSim.new("simple")
+	mud.grip = func(_x, _z): return 0.45
+	mud.place(Vector3.ZERO)
+	run(mud, 3.0, 1.0, 0, 1.0, 0)
+	check(mud.pos.z > -4.0, "UGV: mud slows it down")
+	var car := UgvSim.new("kids")
+	car.place(Vector3.ZERO)
+	run(car, 2.0, 1.0, 0, 0, 0)
+	check(car.pos.z < -2.0, "UGV kids: left stick forward drives (car steering)")
+
+
+func test_ugv_task(key: String, mode: String) -> void:
+	var f := _flight(key, mode, "ugv")
+	var task: FlightTask = f[0]
+	var sim: UgvSim = f[1]
+	var world: FlightWorld = f[2]
+	var ap := UgvAutopilot.new()
+	var gentle := task.meter >= 0.0 or key.contains("EVAC") or key == "MIS_UGV_VET"
+	ap.gentle = gentle
+	ap.top = 0.35 if gentle else 0.7
+	if key == "MIS_UGV_CARGO":
+		ap.top = 0.22
+	var road: Array[Vector3] = []
+	if task.get("road") != null:
+		road.assign(task.road)
+	var leg := [1]
+	var back := [false]
+	var plan := func(_t: float) -> Dictionary:
+		if key == "UGV_PIVOT":
+			match task._stage:
+				0:
+					ap.target = Vector3(0, 0, -12.8)
+				1:
+					ap.target = sim.pos + Vector3(0, 0, 6)  # turn round to face out
+					ap.stop = false
+				2:
+					ap.target = Vector3(0, 0, 0)
+			return ap.sticks(sim)
+		if task.cps.size() > 0:
+			var t := task.course_world_target()
+			if t != Vector3.INF:
+				ap.target = t
+			return ap.sticks(sim)
+		# Routes: follow the road there, then (when it brings something back) the road home.
+		var going_back: bool = task.loaded and task.pickup != Vector3.INF
+		var pts := road.duplicate()
+		if going_back:
+			pts.reverse()
+			pts.append(task.dest)
+		else:
+			pts.append(task.dest if task.pickup == Vector3.INF else task.pickup)
+		if going_back and not back[0]:
+			leg[0] = 1
+			back[0] = true
+		var i := mini(leg[0], pts.size() - 1)
+		ap.target = pts[i]
+		if FlightTask.flat_distance(sim.pos, pts[i]) < 1.0 and i < pts.size() - 1:
+			leg[0] += 1
+		return ap.sticks(sim)
+	var ok := _fly(task, sim, 300.0, plan)
+	check(ok, "%s: UGV %s passes%s" % [mode, key, "" if ok else " — %s %s meter=%.0f crashed=%s" % [task.hint_base, task.summary, task.meter, sim.crashed]])
+	world.queue_free()
+	await get_tree().process_frame
+
+
+func test_ugv_rough_driving_fails() -> void:
+	var f := _flight("UGV_EVACUATION", "simple", "ugv")
+	var task: FlightTask = f[0]
+	var sim: UgvSim = f[1]
+	# Full stick forward and back, again and again, once the casualty is aboard.
+	var ap := UgvAutopilot.new()
+	ap.top = 0.4
+	var plan := func(t: float) -> Dictionary:
+		if not task.loaded:
+			ap.target = task.road[1] if FlightTask.flat_distance(sim.pos, task.road[1]) > 1.0 and t < 4.0 else task.pickup
+			if FlightTask.flat_distance(sim.pos, task.road[1]) < 1.0 or t > 4.0:
+				ap.target = task.road[2] if FlightTask.flat_distance(sim.pos, task.road[2]) > 1.0 and t < 12.0 else task.pickup
+			return ap.sticks(sim)
+		var k := 1.0 if int(t * 2.0) % 2 == 0 else -1.0
+		return {"throttle": k, "yaw": 0.0, "pitch": k, "roll": 0.0}
+	_fly(task, sim, 120.0, plan)
+	check(task.failed and task.summary == "FAIL_JOLT_STRETCHER", "simple: jerky driving with a casualty does not pass (%s)" % task.summary)
 	f[2].queue_free()
 	await get_tree().process_frame

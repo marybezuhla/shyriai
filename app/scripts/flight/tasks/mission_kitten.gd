@@ -15,6 +15,7 @@ func configure() -> void:
 
 
 func setup_world() -> void:
+	counter_shown = true
 	var rng := RandomNumberGenerator.new()
 	rng.seed = task_seed
 	world.add_kitten(rng.randi_range(0, 3))  # one of the houses in front of the pilot

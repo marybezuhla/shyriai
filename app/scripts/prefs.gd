@@ -8,7 +8,7 @@ const PATH := "user://prefs.cfg"
 const MODES := ["kids", "simple", "pro"]
 const THEMES := ["dusk", "day", "system"]
 const LANGUAGES := ["system", "uk", "en"]
-const VIEWS := ["pilot", "chase", "drone", "fpv"]
+const VIEWS := ["pilot", "chase", "drone", "fpv", "ugv"]
 
 var mode := "simple"
 ## The theme the grown-up chose. Kids mode shows "morning" instead, without changing this.
@@ -92,7 +92,7 @@ func mark_mission(key: String) -> void:
 ## The FPV drone is flown through its own camera. With the camera drone, kids follow it from
 ## behind and everyone else sees it as a pilot on the ground does. Kept per mode and vehicle.
 func view_for(m: String, vehicle := "camera") -> String:
-	var fallback := "fpv" if vehicle == "fpv" else ("chase" if m == "kids" else "pilot")
+	var fallback := "fpv" if vehicle == "fpv" else ("chase" if m == "kids" else ("ugv" if vehicle == "ugv" else "pilot"))
 	return views.get(m + "/" + vehicle, fallback)
 
 

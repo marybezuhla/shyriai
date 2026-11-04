@@ -15,6 +15,7 @@ var _normal := Vector3(0, 0, 1)
 
 
 func setup_world() -> void:
+	counter_shown = true
 	for i in BALLOONS.size():
 		world.add_balloon(BALLOONS[i], Color(COLORS[i]))
 	world.add_target(TARGET, _normal)

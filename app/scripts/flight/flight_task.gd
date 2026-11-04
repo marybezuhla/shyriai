@@ -26,6 +26,15 @@ const FILES := {
 	"MIS_FPV_BALLOONS": "res://scripts/flight/tasks/mission_balloons.gd",
 	"MIS_FPV_RACE": "res://scripts/flight/tasks/fpv_gates.gd",
 	"MIS_FPV_TREES": "res://scripts/flight/tasks/mission_trees.gd",
+	"UGV_DRIVE": "res://scripts/flight/tasks/ugv_drive.gd",
+	"UGV_PIVOT": "res://scripts/flight/tasks/ugv_pivot.gd",
+	"UGV_TERRAIN": "res://scripts/flight/tasks/ugv_terrain.gd",
+	"UGV_DELIVERY": "res://scripts/flight/tasks/ugv_route.gd",
+	"UGV_EVACUATION": "res://scripts/flight/tasks/ugv_route.gd",
+	"MIS_UGV_VET": "res://scripts/flight/tasks/ugv_route.gd",
+	"MIS_UGV_PARCEL": "res://scripts/flight/tasks/ugv_route.gd",
+	"MIS_UGV_CARGO": "res://scripts/flight/tasks/ugv_route.gd",
+	"MIS_UGV_EVAC": "res://scripts/flight/tasks/ugv_route.gd",
 }
 ## The racing gates of the FPV lessons and the race, in order, centre 2.2 m up.
 const GATE_COURSE: Array[Vector3] = [
@@ -53,9 +62,10 @@ var marker := Vector3.INF
 var ring := 0.0
 ## A see-through sphere of this radius at the marker. 0 = none.
 var beacon := 0.0
-## Collected items, e.g. sunflowers. counter_max 0 = none.
+## Collected items, e.g. sunflowers or hoops, shown when counter_shown is set.
 var counter := 0
 var counter_max := 0
+var counter_shown := false
 ## Shown on the "Passed" or "Not this time" card. A translation key and arguments.
 var summary := ""
 var summary_args: Array = []
@@ -63,6 +73,15 @@ var summary_args: Array = []
 var choice := {}
 ## The camera this task starts with, if it matters (nose-in needs the pilot's view). "" = the saved one.
 var view_hint := ""
+
+## Ground robot: what it carries ("", "cargo", "stretcher", "kitten", "parcel"), a meter such as the
+## casualty's comfort (0-100; below 0 = none) with its label, whether the radio link is up, and how
+## late the robot's video arrives, in seconds.
+var load_kind := ""
+var meter := -1.0
+var meter_label := ""
+var link_ok := true
+var video_delay := 0.0
 
 ## FPV only: "angle", "horizon" or "acro".
 var flight_mode := "angle"
