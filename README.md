@@ -2,7 +2,7 @@
 
 Тренажер пілотування для Android: камерні й FPV-дрони та наземні роботизовані комплекси (НРК). Для дітей і дорослих. Українська та англійська. Безкоштовно, без реклами й акаунтів, без інтернету. Потрібен Android 7 або новіший і OpenGL ES 3.0.
 
-> **Тестова версія.** У версії 0.5.1 є всі три машини: камерний дрон (8 уроків, 3 місії), FPV-дрон (6 уроків, 4 місії) і НРК (5 уроків, 4 місії), а також картки теорії. Наступний крок — незалежний аудит перед першим релізом для людей.
+> **Тестова версія.** У версії 0.5.2 є всі три машини: камерний дрон (8 уроків, 3 місії), FPV-дрон (6 уроків, 4 місії) і НРК (5 уроків, 4 місії), а також картки теорії. Наступний крок — незалежний аудит перед першим релізом для людей.
 
 ## Задум
 
@@ -40,7 +40,7 @@
 
 A piloting trainer for Android: camera and FPV drones, and ground robots (UGVs). For kids and adults. Ukrainian and English. Free, no ads, no accounts, no internet. Requires Android 7 or newer and OpenGL ES 3.0.
 
-> **Test version.** Version 0.5.1 has all three vehicles: the camera drone (8 lessons, 3 missions), the FPV drone (6 lessons, 4 missions) and the UGV (5 lessons, 4 missions), plus the theory cards. Next comes an independent audit before the first release for everyone.
+> **Test version.** Version 0.5.2 has all three vehicles: the camera drone (8 lessons, 3 missions), the FPV drone (6 lessons, 4 missions) and the UGV (5 lessons, 4 missions), plus the theory cards. Next comes an independent audit before the first release for everyone.
 
 ## The idea
 
