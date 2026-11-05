@@ -12,7 +12,7 @@
 
 ## Що підтримується
 
-Лише остання версія з [Releases](https://github.com/Marybezu/shyriai/releases/latest).
+Лише остання версія з [Releases](https://github.com/marybezuhla/shyriai/releases/latest).
 
 ## Мінімальна версія Android
 
@@ -39,7 +39,7 @@ Please do not open a public issue. Use GitHub's private reporting: **Security �
 
 ## Supported versions
 
-Only the latest version on [Releases](https://github.com/Marybezu/shyriai/releases/latest).
+Only the latest version on [Releases](https://github.com/marybezuhla/shyriai/releases/latest).
 
 ## Minimum Android version
 

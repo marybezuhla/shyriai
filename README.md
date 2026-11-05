@@ -18,8 +18,8 @@
 
 ## Встановлення
 
-- 📲 **Напряму:** завантажте файл `.apk` звідси: [github.com/Marybezu/shyriai/releases/latest](https://github.com/Marybezu/shyriai/releases/latest).
-- 🔄 **З оновленнями:** скористайтеся безкоштовним застосунком Obtainium. Його можна встановити з F-Droid: [f-droid.org/packages/dev.imranr.obtainium.fdroid](https://f-droid.org/packages/dev.imranr.obtainium.fdroid). В Obtainium натисніть «Додати застосунок» і вставте посилання `github.com/Marybezu/shyriai`.
+- 📲 **Напряму:** завантажте файл `.apk` звідси: [github.com/marybezuhla/shyriai/releases/latest](https://github.com/marybezuhla/shyriai/releases/latest).
+- 🔄 **З оновленнями:** скористайтеся безкоштовним застосунком Obtainium. Його можна встановити з F-Droid: [f-droid.org/packages/dev.imranr.obtainium.fdroid](https://f-droid.org/packages/dev.imranr.obtainium.fdroid). В Obtainium натисніть «Додати застосунок» і вставте посилання `github.com/marybezuhla/shyriai`.
 
 ## Прозорість
 
@@ -32,7 +32,7 @@
 - **Як створено:** код написано за допомогою ШІ (Claude, Anthropic) під керівництвом і з тестуванням авторки.
 - **Застереження:** тренажер не замінює занять з інструктором і не дає права на польоти. Перед справжнім польотом дізнайтеся, де і як дозволено літати.
 
-© 2026 Marybezu. Godot 4.7 · GDScript. Ліцензія GPL-3.0 або новіша. Шрифти Unbounded і Manrope — SIL Open Font License 1.1.
+© 2026 marybezuhla. Godot 4.7 · GDScript. Ліцензія GPL-3.0 або новіша. Шрифти Unbounded і Manrope — SIL Open Font License 1.1.
 
 ---
 
@@ -56,8 +56,8 @@ Shyriai teaches piloting itself. There are no combat or tactical scenarios, so i
 
 ## Install
 
-- 📲 **Directly:** download the `.apk` file from [github.com/Marybezu/shyriai/releases/latest](https://github.com/Marybezu/shyriai/releases/latest).
-- 🔄 **With updates:** use the free app Obtainium, available on F-Droid: [f-droid.org/packages/dev.imranr.obtainium.fdroid](https://f-droid.org/packages/dev.imranr.obtainium.fdroid). In Obtainium tap "Add App" and paste `github.com/Marybezu/shyriai`.
+- 📲 **Directly:** download the `.apk` file from [github.com/marybezuhla/shyriai/releases/latest](https://github.com/marybezuhla/shyriai/releases/latest).
+- 🔄 **With updates:** use the free app Obtainium, available on F-Droid: [f-droid.org/packages/dev.imranr.obtainium.fdroid](https://f-droid.org/packages/dev.imranr.obtainium.fdroid). In Obtainium tap "Add App" and paste `github.com/marybezuhla/shyriai`.
 
 ## Transparency
 
@@ -70,4 +70,4 @@ Shyriai teaches piloting itself. There are no combat or tactical scenarios, so i
 - **How it was made:** the code was written with AI (Claude, Anthropic), directed and tested by the author.
 - **Disclaimer:** the trainer does not replace lessons with an instructor and gives no right to fly. Before a real flight, find out where and how flying is allowed.
 
-© 2026 Marybezu. Godot 4.7 · GDScript. GPL-3.0-or-later licence. Unbounded and Manrope fonts: SIL Open Font License 1.1.
+© 2026 marybezuhla. Godot 4.7 · GDScript. GPL-3.0-or-later licence. Unbounded and Manrope fonts: SIL Open Font License 1.1.
