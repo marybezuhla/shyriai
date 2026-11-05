@@ -30,6 +30,10 @@ func update(_dt: float, sim: DroneSim, _sticks: Dictionary) -> void:
 	if in_belt(sim.pos) and sim.altitude() > LOW:
 		fail_with("FAIL_TREES_OVER")
 		return
+	# Going round the end of the belt does not count either: the way is through it.
+	if sim.pos.z < BELT_FROM and sim.pos.z > BELT_TO and absf(sim.pos.x) > HALF + 1.5:
+		fail_with("FAIL_TREES_AROUND")
+		return
 	var r := course_step(sim)
 	progress = float(cp) / cps.size()
 	if r == "done":

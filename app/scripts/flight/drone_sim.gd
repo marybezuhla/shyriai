@@ -46,7 +46,8 @@ var events: Array[Dictionary] = []
 
 ## Ground height at (x, z). Replaced by the world; flat by default.
 var ground: Callable = func(_x: float, _z: float) -> float: return 0.0
-## Obstacles: {"box": AABB} or {"cyl": Vector2(x, z), "r": float, "h": float, "y": float}
+## Obstacles: {"box": AABB}, {"cyl": Vector2(x, z), "r": float, "h": float, "y": float}
+## or {"seg": [Vector3, Vector3], "r": float}
 var obstacles: Array[Dictionary] = []
 
 var _wind_dir := 0.0
@@ -201,6 +202,18 @@ func _collide() -> void:
 				d = Vector3.UP
 				dist = 0.0
 			push = d.normalized() * (radius - dist)
+		elif o.has("seg"):
+			# A bar from a to b with radius r, e.g. the top of a racing gate.
+			var a: Vector3 = o["seg"][0]
+			var b: Vector3 = o["seg"][1]
+			var ab := b - a
+			var t := clampf((pos - a).dot(ab) / maxf(ab.length_squared(), 1e-6), 0.0, 1.0)
+			var d3 := pos - (a + ab * t)
+			var dist3 := d3.length()
+			var reach := float(o["r"]) + radius
+			if dist3 >= reach:
+				continue
+			push = (d3.normalized() if dist3 > 1e-4 else Vector3.UP) * (reach - dist3)
 		elif o.has("cyl"):
 			var c2: Vector2 = o["cyl"]
 			var r: float = o["r"]

@@ -7,6 +7,7 @@ const R := 4.0
 const LIMIT := 60.0
 
 var _t := 0.0
+var _wrong := 0.0
 
 
 func configure() -> void:
@@ -34,6 +35,17 @@ func update(dt: float, sim: DroneSim, _sticks: Dictionary) -> void:
 		_t = 0.0
 		say_for("HINT_NOSE_SLOW")
 		return
+	# Outside Kids mode the nose must face the pilot the whole lap, not only at each sphere.
+	if mode != "kids" and cp > 0 and not sim.on_ground and not nose_ok(sim):
+		_wrong += dt
+		if _wrong > 1.5:
+			cp = 0
+			_t = 0.0
+			_wrong = 0.0
+			say_for("HINT_NOSE_RESET")
+			return
+	else:
+		_wrong = 0.0
 	var r := course_step(sim)
 	progress = float(cp) / cps.size()
 	if r == "done":

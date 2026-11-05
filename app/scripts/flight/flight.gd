@@ -3,6 +3,8 @@
 extends Control
 
 const STEP := 1.0 / 60.0
+## The dark edge round gold marks, so they show on a bright sky or field.
+const OUTLINE := Color("#2A1D3B")
 const DEADZONE := 0.08
 
 var app: Node  # main.gd
@@ -23,9 +25,7 @@ var drone: Node3D  # DroneView or UgvView
 var _cam_history: Array = []
 var _shown_load := ""
 var _nolink: Control
-var _meter_box: Control
 var _meter_fill: Panel
-var _meter_text: Label
 var cam := Camera3D.new()
 var view := "pilot"
 
@@ -71,25 +71,7 @@ func _ready() -> void:
 	if task.view_hint != "":
 		view = task.view_hint
 
-	if vehicle == "ugv":
-		var u := UgvSim.new(mode, 11)
-		u.grip = world.grip
-		sim = u
-	elif vehicle == "fpv" and mode != "kids":
-		var f := FpvSim.new(mode, 11)
-		f.flight_mode = task.flight_mode
-		sim = f
-	else:
-		# Kids fly the FPV drone with the camera drone's help: it holds its height for them.
-		sim = DroneSim.new(mode, 11)
-		if vehicle == "fpv":
-			sim.p["vmax"] = 4.0
-	sim.gps = task.gps
-	if task.wind >= 0.0:
-		sim.set_wind(task.wind, task.gust)
-	sim.ground = world.height
-	sim.obstacles = world.obstacles
-	sim.place(task.start_position(), task.start_heading())
+	sim = task.make_sim(vehicle)
 
 	if vehicle == "ugv":
 		drone = UgvView.new()
@@ -123,9 +105,8 @@ func _physics_process(_delta: float) -> void:
 	if _paused or _finished:
 		return
 	_read_sticks()
-	if not task.link_ok:
-		# No radio link: the robot gets no commands and stops by itself.
-		_sticks = {"throttle": 0.0, "yaw": 0.0, "pitch": 0.0, "roll": 0.0}
+	# No radio link: the robot gets no commands and stops by itself.
+	_sticks = task.controls(_sticks)
 	sim.step(STEP, _sticks["throttle"], _sticks["yaw"], _sticks["pitch"], _sticks["roll"])
 	task.step(STEP, sim, _sticks)
 	_cam_history.append([sim.pos, sim.orientation()])
@@ -137,6 +118,10 @@ func _physics_process(_delta: float) -> void:
 		_not_this_time()
 	elif sim.crashed:
 		_crashed()
+	elif sim.p.get("battery_s", 0.0) > 0.0 and sim.battery <= 0.0 and (sim.on_ground or sim is UgvSim):
+		# The battery ran out and the drone has come down (or the robot has stopped): say so.
+		task.fail_with("FAIL_BATTERY_UGV" if sim is UgvSim else "FAIL_BATTERY")
+		_not_this_time()
 
 
 func _process(delta: float) -> void:
@@ -146,6 +131,9 @@ func _process(delta: float) -> void:
 	world.show_beacon(task.marker, task.beacon)
 	_update_hud()
 	_marks.queue_redraw()
+
+
+var _joy_throttle := false
 
 
 func _read_sticks() -> void:
@@ -167,8 +155,13 @@ func _read_sticks() -> void:
 		if _left.spring_y:
 			t = _bigger(t, -_axis(dev, JOY_AXIS_LEFT_Y))
 		elif not _left.touched:
-			# A gamepad or radio drives the throttle until the screen stick is touched.
-			t = -Input.get_joy_axis(dev, JOY_AXIS_LEFT_Y)
+			# A gamepad or radio drives the throttle until the screen stick is touched, but only once
+			# its stick has been moved: a self-centring gamepad would otherwise start at half throttle.
+			var a := Input.get_joy_axis(dev, JOY_AXIS_LEFT_Y)
+			if absf(a) > 0.2:
+				_joy_throttle = true
+			if _joy_throttle:
+				t = -a
 		y = _bigger(y, _axis(dev, JOY_AXIS_LEFT_X))
 		p = _bigger(p, -_axis(dev, JOY_AXIS_RIGHT_Y))
 		r = _bigger(r, _axis(dev, JOY_AXIS_RIGHT_X))
@@ -234,7 +227,8 @@ func _place_camera(delta: float) -> void:
 		cam.position = world.pilot
 		var d := cam.position.distance_to(target)
 		cam.fov = lerpf(cam.fov, clampf(70.0 - d * 0.9, 32.0, 62.0), 1.0 - exp(-delta * 2.0))
-		if d > 0.5:
+		# Straight overhead, looking up would need another "up": just keep the last view there.
+		if d > 0.5 and Vector2(target.x - world.pilot.x, target.z - world.pilot.z).length() > 0.3:
 			var look_at := target.lerp(world.pilot + (target - world.pilot) * 0.5, 0.15)
 			cam.look_at(look_at, Vector3.UP)
 
@@ -298,7 +292,7 @@ func _build_hud() -> void:
 	top.add_child(UI.icon_button("pause", pause, tr("PAUSE"), glass))
 
 	var chip := UI.vbox(6)
-	var title := tr(task_key)
+	var title := Curriculum.label(task_key)
 	if not task.is_mission:
 		title = tr("LESSON_N") % (Curriculum.lessons(vehicle, mode).find(task_key) + 1) + " · " + title
 	chip.add_child(UI.label(title, 14, 700, "text", false, false))
@@ -327,8 +321,8 @@ func _build_hud() -> void:
 		_meter_fill.size = Vector2(120, 6)
 		mbar.add_child(_meter_fill)
 		mrow.add_child(mbar)
-		_meter_text = UI.label(tr(task.meter_label), 12, 700, "muted", false, false)
-		mrow.add_child(_meter_text)
+		var meter_text := UI.label(tr(task.meter_label), 12, 700, "muted", false, false)
+		mrow.add_child(meter_text)
 		chip.add_child(mrow)
 	top.add_child(UI.panel(chip, glass, 16, 10))
 
@@ -391,7 +385,9 @@ func _build_hud() -> void:
 	# Sticks and the view switch at the bottom.
 	var bottom := HBoxContainer.new()
 	bottom.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var stick_px := 150 if mode == "kids" else 128
+	# Sticks as big as fit beside the camera switch (narrow phones in landscape get a little less).
+	var room := get_viewport_rect().size.x - 32.0 - float(ins["left"]) - float(ins["right"]) - 344.0
+	var stick_px := int(clampf(room / 2.0, 104.0, 150.0 if mode == "kids" else 128.0))
 	for s in [_left, _right]:
 		s.kids = mode == "kids"
 		s.custom_minimum_size = Vector2(stick_px, stick_px)
@@ -425,9 +421,14 @@ func _stick_with_label(s: Stick, text: String) -> Control:
 	v.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	v.add_child(s)
 	if mode != "kids":
-		var l := UI.label(text, 11, 700, "muted", false, false)
+		# On a small glass pill, so the label reads over any part of the world.
+		var l := UI.label(text, 12, 700, "text", false, false)
 		l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		v.add_child(l)
+		var glass := Pal.c("bg")
+		glass.a = 0.78
+		var pill := UI.panel(l, glass, 10, 4)
+		pill.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		v.add_child(pill)
 	return v
 
 
@@ -438,9 +439,9 @@ func _build_view_toggle() -> void:
 	fill.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	fill.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_view_box.add_child(fill)
-	var views := [["ugv", tr("VIEW_DRONE")], ["chase", tr("VIEW_CHASE")], ["pilot", tr("VIEW_PILOT")]] if vehicle == "ugv" \
-		else [["fpv", tr("VIEW_FPV")], ["chase", tr("VIEW_CHASE")], ["pilot", tr("VIEW_PILOT")]] if vehicle == "fpv" \
-		else [["pilot", tr("VIEW_PILOT")], ["chase", tr("VIEW_CHASE")], ["drone", tr("VIEW_DRONE")]]
+	var views := [["ugv", Curriculum.label("VIEW_DRONE")], ["chase", Curriculum.label("VIEW_BEHIND")], ["pilot", Curriculum.label("VIEW_PILOT")]] if vehicle == "ugv" \
+		else [["fpv", Curriculum.label("VIEW_FPV")], ["chase", Curriculum.label("VIEW_CHASE")], ["pilot", Curriculum.label("VIEW_PILOT")]] if vehicle == "fpv" \
+		else [["pilot", Curriculum.label("VIEW_PILOT")], ["chase", Curriculum.label("VIEW_CHASE")], ["drone", Curriculum.label("VIEW_DRONE")]]
 	var seg := UI.segmented(views, view, set_view)
 	seg.custom_minimum_size = Vector2(360, 0)
 	var center := CenterContainer.new()
@@ -475,13 +476,24 @@ func _update_choice() -> void:
 
 
 func _update_hud() -> void:
+	var hints: Dictionary = task.stick_hint if _overlay == null else {}
+	_left.hint = hints.get("left", Vector2.ZERO)
+	_right.hint = hints.get("right", Vector2.ZERO)
 	if vehicle == "ugv" and task.load_kind != _shown_load:
 		_shown_load = task.load_kind
 		drone.set_load(_shown_load)
 	if _meter_fill:
 		var m := clampf(task.meter / 100.0, 0.0, 1.0)
 		_meter_fill.size = Vector2(120.0 * m, 6)
-		var col := Color("#7DBE6A") if m > 0.5 else (Color("#F29B50") if m > 0.25 else Color("#E5708B"))
+		# Darker shades on light looks, so the bar shows against its track.
+		var light := Pal.c("bg").get_luminance() > 0.5
+		var col: Color
+		if m > 0.5:
+			col = Color("#3E8E2F") if light else Color("#7DBE6A")
+		elif m > 0.25:
+			col = Color("#B85F10") if light else Color("#F29B50")
+		else:
+			col = Color("#B8324F") if light else Color("#E5708B")
 		(_meter_fill.get_theme_stylebox("panel") as StyleBoxFlat).bg_color = col
 	if _nolink:
 		_nolink.visible = not task.link_ok and view == "ugv"
@@ -503,14 +515,14 @@ func _update_hud() -> void:
 	if _counter:
 		_counter.text = "%d / %d" % [task.counter, task.counter_max]
 	if _stats.has("ALT"):
-		_stats["ALT"].text = tr("UNIT_M") % ("%.1f" % maxf(0.0, sim.altitude()))
+		_stats["ALT"].text = tr("UNIT_M") % FlightTask.num(maxf(0.0, sim.altitude()))
 	if _stats.has("SPEED"):
-		_stats["SPEED"].text = tr("UNIT_MS") % ("%.1f" % Vector2(sim.vel.x, sim.vel.z).length())
+		_stats["SPEED"].text = tr("UNIT_MS") % FlightTask.num(Vector2(sim.vel.x, sim.vel.z).length())
 	if _stats.has("BATTERY"):
 		_stats["BATTERY"].text = "%d %%" % int(ceil(sim.battery * 100.0))
 	if _stats.has("TIME"):
 		var t := int(sim.time)
-		_stats["TIME"].text = "%d:%02d" % [t / 60, t % 60]
+		_stats["TIME"].text = FlightTask.clock(t)
 
 
 ## Markers drawn over the 3D view: where to fly, and where the drone is when it is small.
@@ -535,7 +547,11 @@ func _draw_marks() -> void:
 			var tip := c + dir * t
 			var side := Vector2(-dir.y, dir.x)
 			var col := Pal.c("accent")
-			_marks.draw_colored_polygon(PackedVector2Array([tip + dir * 12, tip - dir * 6 + side * 11, tip - dir * 6 - side * 11]), col)
+			var arrow := PackedVector2Array([tip + dir * 12, tip - dir * 6 + side * 11, tip - dir * 6 - side * 11])
+			_marks.draw_colored_polygon(arrow, col)
+			# A dark edge keeps the gold arrow visible against a bright sky.
+			arrow.append(arrow[0])
+			_marks.draw_polyline(arrow, OUTLINE, 2.0, true)
 		if task.ring > 0.0:
 			_ground_ring(task.marker, task.ring)
 	# A thin ring round the drone when it is far and tiny.
@@ -551,7 +567,7 @@ func _draw_marks() -> void:
 func _diamond(p: Vector2, r: float) -> void:
 	var col := Pal.c("accent")
 	_marks.draw_colored_polygon(PackedVector2Array([p + Vector2(0, -r), p + Vector2(r, 0), p + Vector2(0, r), p + Vector2(-r, 0)]), col)
-	_marks.draw_polyline(PackedVector2Array([p + Vector2(0, -r), p + Vector2(r, 0), p + Vector2(0, r), p + Vector2(-r, 0), p + Vector2(0, -r)]), Color("#2A1D3B"), 1.5, true)
+	_marks.draw_polyline(PackedVector2Array([p + Vector2(0, -r), p + Vector2(r, 0), p + Vector2(0, r), p + Vector2(-r, 0), p + Vector2(0, -r)]), OUTLINE, 2.0, true)
 
 
 func _ground_ring(center: Vector3, radius: float) -> void:
@@ -564,7 +580,7 @@ func _ground_ring(center: Vector3, radius: float) -> void:
 			return
 		pts.append(cam.unproject_position(w))
 	var col := Pal.c("accent")
-	col.a = 0.85
+	_marks.draw_polyline(pts, OUTLINE, 5.0, true)
 	_marks.draw_polyline(pts, col, 3.0, true)
 
 
@@ -589,8 +605,9 @@ func resume() -> void:
 	_hide_overlay()
 
 
+## "Start over" keeps the same layout (the same house, the same field); "Again" after a result too.
 func restart() -> void:
-	app.open_flight(vehicle, task_key)
+	app.open_flight(vehicle, task_key, flight_seed)
 
 
 func leave() -> void:
@@ -599,10 +616,9 @@ func leave() -> void:
 
 ## Android Back and Escape: pause first, then resume.
 func on_back() -> void:
-	if _finished:
+	# The first Back pauses; a second Back leaves, so "Back, Back" always gets out.
+	if _finished or _paused:
 		leave()
-	elif _paused:
-		resume()
 	else:
 		pause()
 
@@ -642,7 +658,7 @@ func _crashed() -> void:
 		for e in sim.events:
 			tipped = tipped or e["type"] == "tipped"
 		var why := tr("CRASHED_UGV_TIP") if tipped else tr("CRASHED_UGV_HIT")
-		c.add_child(UI.label(why % ("%.0f" % sim.crash_speed if tipped else "%.1f" % sim.crash_speed), 14, 500, "muted"))
+		c.add_child(UI.label(why % (FlightTask.num(sim.crash_speed, 0) if tipped else FlightTask.num(sim.crash_speed)), 14, 500, "muted"))
 		c.add_child(UI.primary(tr("AGAIN"), restart, "play"))
 		c.add_child(_secondary(tr("EXIT"), leave))
 		_show_overlay(c)
@@ -650,7 +666,7 @@ func _crashed() -> void:
 	_finished = true
 	var col := UI.vbox(12)
 	col.add_child(UI.label(tr("CRASHED"), 22, 600, "text", true))
-	col.add_child(UI.label(tr("CRASHED_TEXT") % ("%.1f" % sim.crash_speed), 14, 500, "muted"))
+	col.add_child(UI.label(tr("CRASHED_TEXT") % FlightTask.num(sim.crash_speed), 14, 500, "muted"))
 	col.add_child(UI.primary(tr("AGAIN"), restart, "play"))
 	col.add_child(_secondary(tr("EXIT"), leave))
 	_show_overlay(col)
@@ -690,6 +706,10 @@ func _secondary(text: String, on_press: Callable) -> Control:
 
 func _show_overlay(content: Control) -> void:
 	_hide_overlay()
+	# Touches behind a card must not move the sticks.
+	for st in [_left, _right]:
+		st.release()
+		st.enabled = false
 	_overlay = ColorRect.new()
 	var dim := Pal.c("bg")
 	dim.a = 0.55
@@ -706,6 +726,8 @@ func _show_overlay(content: Control) -> void:
 
 
 func _hide_overlay() -> void:
+	_left.enabled = true
+	_right.enabled = true
 	if _overlay:
 		_overlay.queue_free()
 		_overlay = null

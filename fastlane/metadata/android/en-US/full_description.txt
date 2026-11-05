@@ -1,0 +1,22 @@
+Shyriai is a piloting trainer for Android: a camera drone, an FPV drone and a ground robot (UGV). For kids and adults.
+
+<b>Three modes, each with its own progress</b>
+• Kids: crashing is impossible, playful tasks, a light look and larger text, an optional grown-ups' lock.
+• Simple: the drone helps you level out, with hints.
+• Adult: full physics with inertia, wind and battery, FPV all the way to Acro mode.
+
+<b>Lessons and missions</b>
+Lessons from easy to hard, each with clear pass conditions. Missions use the same skills in a story: a search in a field, a gate course, cargo delivery, casualty evacuation. For kids: a kitten on a roof, hoops, a parcel for granny. No combat scenarios.
+
+<b>Controls</b>
+On-screen sticks, a gamepad, or a real radio over USB. Three cameras: from the ground, behind, and from the vehicle itself.
+
+<b>Theory</b>
+Short cards: before you fly, battery safety, lost signal, flying rules in Ukraine.
+
+<b>Privacy</b>
+No internet, no accounts, no ads, no permissions that concern you or your phone. Progress stays on the phone.
+
+The trainer does not replace lessons with an instructor and gives no right to fly.
+
+The code was written with AI (Claude, Anthropic), directed and tested by the author. GPL-3.0-or-later licence.

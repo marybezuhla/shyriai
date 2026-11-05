@@ -16,7 +16,6 @@ var _frame := VBoxContainer.new()
 var _scroll := ScrollContainer.new()
 var _pad := MarginContainer.new()
 var _nav := PanelContainer.new()
-var _bottom_inset := 0.0
 var _insets := {"top": 0.0, "bottom": 0.0, "left": 0.0, "right": 0.0}
 var flight: Control = null
 var _gate: Control = null
@@ -127,7 +126,7 @@ func start(vehicle: String, key: String) -> void:
 		open_soon(tr(key))
 
 
-func open_flight(vehicle: String, key: String) -> void:
+func open_flight(vehicle: String, key: String, seed_ := -1) -> void:
 	if flight:
 		flight.queue_free()
 		remove_child(flight)
@@ -137,7 +136,10 @@ func open_flight(vehicle: String, key: String) -> void:
 	flight = load("res://scripts/flight/flight.gd").new()
 	flight.setup(self, vehicle, key)
 	# Missions change a little each attempt: another house, another place in the field.
-	flight.flight_seed = randi_range(1, 9999) if key.begins_with("MIS_") else 7
+	if seed_ >= 0:
+		flight.flight_seed = seed_
+	else:
+		flight.flight_seed = randi_range(1, 9999) if key.begins_with("MIS_") else 7
 	add_child(flight)
 
 
@@ -174,7 +176,9 @@ func _set_landscape(on: bool) -> void:
 		DisplayServer.screen_set_orientation(DisplayServer.SCREEN_SENSOR_LANDSCAPE if on else DisplayServer.SCREEN_PORTRAIT)
 	elif DisplayServer.get_name() != "headless":
 		# On a computer the window turns instead of the screen.
-		get_window().size = Vector2i(844, 390) if on else Vector2i(390, 844)
+		var w := get_window().size
+		if (w.x < w.y) == on:
+			get_window().size = Vector2i(w.y, w.x)
 
 
 func _make(path: String) -> Screen:
@@ -214,7 +218,7 @@ func _build_nav() -> void:
 	style.border_color = Pal.c("surface2")
 	style.border_width_top = 1
 	style.content_margin_top = 8
-	style.content_margin_bottom = 10 + _bottom_inset
+	style.content_margin_bottom = 10 + float(_insets.get("bottom", 0.0))
 	style.content_margin_left = 12
 	style.content_margin_right = 12
 	_nav.add_theme_stylebox_override("panel", style)
@@ -255,7 +259,6 @@ func _apply_insets() -> void:
 			bottom = maxf(0.0, (win.y - safe.end.y) * k.y)
 			left = maxf(0.0, safe.position.x * k.x)
 			right = maxf(0.0, (win.x - safe.end.x) * k.x)
-	_bottom_inset = bottom
 	_insets = {"top": top - 16.0 if OS.has_feature("mobile") else 0.0, "bottom": bottom, "left": left, "right": right}
 	_pad.add_theme_constant_override("margin_left", UI.GUTTER + int(left))
 	_pad.add_theme_constant_override("margin_right", UI.GUTTER + int(right))

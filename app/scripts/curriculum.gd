@@ -41,6 +41,11 @@ static func lessons(vehicle: String, mode := "") -> Array:
 	return all.filter(func(k): return k not in PRO_ONLY)
 
 
+## A name or text as the pilot sees it now: Kids mode gets its own wording where there is one.
+static func label(key: String) -> String:
+	return String(TranslationServer.translate(text_key(key, Prefs.mode)))
+
+
 ## Kids mode has its own wording for many texts: KEY_KIDS, when it exists.
 static func text_key(key: String, mode: String) -> String:
 	if mode == "kids":

@@ -1,21 +1,34 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # Goes through every screen, theme, language and mode; CI fails on any script error.
 # Not shipped in the APK (see export_presets.cfg). Optional screenshots: SHYRIAI_SHOTS=<dir>.
+# SHYRIAI_STORE=<dir> instead takes only the 8 store screenshots per language, phone-sized.
 extends Node
 
 var shots := OS.get_environment("SHYRIAI_SHOTS")
+var store := OS.get_environment("SHYRIAI_STORE")
 var main: Node
 
 
 func _ready() -> void:
+	get_tree().create_timer(1100.0).timeout.connect(func(): printerr("SMOKE TIMEOUT"); get_tree().quit(1))
 	main = load("res://scenes/main.tscn").instantiate()
 	get_tree().root.add_child.call_deferred(main)
 	await _frames(3)
+	if store != "":
+		# The store pass erases progress: never let it touch a real settings file.
+		if OS.get_environment("SHYRIAI_PREFS") == "":
+			printerr("SHYRIAI_STORE needs SHYRIAI_PREFS pointing at a scratch file")
+			get_tree().quit(1)
+			return
+		await _store_shots()
+		get_tree().quit(0)
+		return
 	for lang in ["uk", "en"]:
 		Prefs.set_language(lang)
 		for theme in ["dusk", "day"]:
 			Prefs.set_theme(theme)
 			await _visit(lang, theme)
+	await _big_text_and_tablet()
 	Prefs.set_language("uk")
 	await _flights()
 	await _gate()
@@ -134,7 +147,13 @@ func _flights() -> void:
 				await _frames(2)
 			f.pause()
 			await _shot("uk-%s-flight-%s-%s-pause" % [theme, m, key])
-			f.resume()
+			main.back()  # Back on pause leaves; Back in flight only pauses
+			await _frames(2)
+			assert(main.flight == null)
+			main.start(veh, key)
+			await _frames(2)
+			f = main.flight
+			assert(f != null)
 			f.task.pass_with("SUM_STICKS")
 			await _frames(3)
 			await _shot("uk-%s-flight-%s-%s-passed" % [theme, m, key])
@@ -195,6 +214,37 @@ func _gate() -> void:
 	main.open_settings()
 	main.back()
 	Prefs.set_kids_lock(false)
+	# Start a mode over, then erase everything, through the settings screen; Undo puts it all back.
+	Prefs.set_mode("simple")
+	Prefs.mark_passed("camera", 0)
+	var before: Dictionary = Prefs._data()
+	main.open_settings()
+	var st = main.stack.back()
+	st._confirm = "mode"
+	st.rebuild()
+	await _shot("uk-dusk-settings-reset-ask")
+	st.confirm_erase()
+	await _shot("uk-dusk-settings-reset-done")
+	assert(Prefs.passed_count("camera") == 0 and Prefs.undo_kind() == "mode")
+	Prefs.undo_reset()
+	assert(Prefs._data() == before)
+	st._confirm = "all"
+	st.rebuild()
+	await _shot("uk-dusk-settings-erase-ask")
+	st.confirm_erase()
+	await _shot("uk-dusk-settings-erase-done")
+	assert(Prefs.passed_count("camera") == 0 and Prefs.undo_kind() == "all")
+	Prefs.undo_reset()
+	assert(Prefs._data() == before)
+	# Changing any setting after an erase makes its Undo go away instead of reverting the change.
+	Prefs.erase_all()
+	Prefs.set_text_size("large")
+	assert(Prefs.undo_kind() == "")
+	Prefs._apply(before)
+	Prefs._apply_theme()
+	assert(Prefs._data() == before)
+	st.rebuild()
+	main.back()
 
 
 func _seconds(t: float) -> void:
@@ -212,3 +262,87 @@ func _shot(name: String) -> void:
 		return
 	await RenderingServer.frame_post_draw
 	get_viewport().get_texture().get_image().save_png(shots.path_join(name + ".png"))
+
+
+## The 8 screenshots for the app pages (F-Droid, Komora), most important first,
+## with made-up progress only.
+func _store_shots() -> void:
+	get_window().size = Vector2i(1080, 2337)
+	for lang in [["uk", "uk"], ["en", "en-US"]]:
+		Prefs.erase_all()
+		Prefs.set_language(lang[0])
+		for i in 4:
+			Prefs.mark_passed("camera", i)
+		Prefs.mark_passed("fpv", 0)
+		var dir: String = store.path_join(lang[1])
+		DirAccess.make_dir_recursive_absolute(dir)
+		Prefs.set_theme("day")
+		Prefs.set_mode("simple")
+		main.open_tab("learn")
+		await _store(dir, "01_home")
+		await _store_flight(dir, "02_camera", "camera", "CAM_SQUARE", "chase", Vector3(1.5, 3.0, -4.0))
+		Prefs.set_mode("kids")
+		main.open_tab("learn")
+		await _store(dir, "03_kids")
+		Prefs.set_mode("simple")
+		main.open_lessons("camera")
+		await _store(dir, "04_lessons")
+		main.back()
+		await _store_flight(dir, "05_fpv", "fpv", "FPV_GATES", "fpv", Vector3(0.0, 2.5, -2.0))
+		Prefs.set_theme("dusk")
+		main.open_tab("learn")
+		await _store(dir, "06_home_dusk")
+		main.open_settings()
+		await _store(dir, "07_settings")
+		main.back()
+		main.open_about()
+		await _store(dir, "08_about")
+		main.back()
+	Prefs.erase_all()
+
+
+func _store(dir: String, name_: String) -> void:
+	await _frames(6)
+	await RenderingServer.frame_post_draw
+	get_viewport().get_texture().get_image().save_png(dir.path_join(name_ + ".png"))
+
+
+func _store_flight(dir: String, name_: String, vehicle: String, key: String, view: String, at: Vector3) -> void:
+	Prefs.set_view(Prefs.mode, vehicle, view)
+	main.start(vehicle, key)
+	await _frames(3)
+	var f = main.flight
+	f.sim.place(at, 0.0)
+	await _frames(30)
+	await _store(dir, name_)
+	main.back()
+	main.back()
+	await _frames(2)
+
+
+## The largest text on a phone, and a tablet: nothing may be cut off.
+func _big_text_and_tablet() -> void:
+	Prefs.set_language("uk")
+	Prefs.set_theme("day")
+	Prefs.set_text_size("larger")
+	for m in Prefs.MODES:
+		Prefs.set_mode(m)
+		main.open_tab("learn")
+		await _shot("uk-larger-home-%s" % m)
+		main.open_lessons("fpv")
+		await _shot("uk-larger-lessons-fpv-%s" % m)
+		main.back()
+	Prefs.set_mode("simple")
+	main.open_settings()
+	await _shot("uk-larger-settings")
+	main.back()
+	Prefs.set_text_size("normal")
+	if DisplayServer.get_name() != "headless":
+		var phone := get_window().size
+		get_window().size = Vector2i(1200, 1600)
+		main.open_tab("learn")
+		await _shot("uk-tablet-home")
+		main.open_lessons("camera")
+		await _shot("uk-tablet-lessons")
+		main.back()
+		get_window().size = phone

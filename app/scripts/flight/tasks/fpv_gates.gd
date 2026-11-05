@@ -39,7 +39,7 @@ func update(dt: float, sim: DroneSim, _sticks: Dictionary) -> void:
 		world.highlight_gate(-1)
 		var t := int(ceil(_t))
 		if key == "MIS_FPV_RACE":
-			pass_with("SUM_RACE", [t / 60, t % 60])
+			pass_with("SUM_RACE", [floori(t / 60.0), t % 60])
 		else:
 			pass_with("SUM_GATES", [t])
 	elif sim.on_ground:

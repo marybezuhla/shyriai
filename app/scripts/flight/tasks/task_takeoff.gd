@@ -21,10 +21,12 @@ func update(dt: float, sim: DroneSim, _sticks: Dictionary) -> void:
 			beacon = 0.6
 			progress = clampf(alt / 2.0, 0.0, 1.0) / 3.0
 			say("HINT_TAKEOFF_UP")
+			stick_hint = {"left": Vector2.UP} if sim.on_ground else {}
 			if alt >= LOW and alt <= HIGH and not sim.on_ground:
 				_phase = 1
 				_timer = 0.0
 		1:
+			stick_hint = {}
 			if alt >= LOW and alt <= HIGH:
 				_timer += dt
 				say("HINT_TAKEOFF_HOLD", [ceili(HOLD - _timer)])
@@ -40,6 +42,7 @@ func update(dt: float, sim: DroneSim, _sticks: Dictionary) -> void:
 			ring = PAD
 			progress = (2.0 + clampf(1.0 - alt / 2.0, 0.0, 0.95)) / 3.0
 			say("HINT_TAKEOFF_LAND")
+			stick_hint = {"left": Vector2.DOWN} if mode == "kids" else {}
 	for e in sim.events:
 		if e["type"] != "landed" or _phase != 2:
 			continue
@@ -47,7 +50,7 @@ func update(dt: float, sim: DroneSim, _sticks: Dictionary) -> void:
 			say_for("HINT_TAKEOFF_MISSED")
 			_phase = 0
 		elif e["speed"] > SOFT:
-			say_for("HINT_TAKEOFF_HARD", ["%.1f" % e["speed"]])
+			say_for("HINT_TAKEOFF_HARD", [num(e["speed"])])
 			_phase = 0
 		else:
-			pass_with("SUM_TAKEOFF", ["%.1f" % e["speed"]])
+			pass_with("SUM_TAKEOFF", [num(e["speed"])])

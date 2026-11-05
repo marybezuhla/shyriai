@@ -75,7 +75,7 @@ FPV_EIGHT_GOAL,"Fly a figure eight round two poles, twice. Tilt, turn and thrott
 FPV_EIGHT_PASS,2 figure eights | Under 90 s,2 вісімки | До 90 с
 FPV_GATES,Gates,Ворота
 FPV_GATES_NOTE,Precision at speed,Точність на швидкості
-FPV_GATES_GOAL,Fly through six gates in order. The next one is gold. Touch a frame and you start again.,Пролети шість воріт по черзі. Наступні — золоті. Зачепив раму — починай знову.
+FPV_GATES_GOAL,Fly through six gates in order. The next one is gold. Touch a frame and you start again.,Пролети шість воріт по черзі. Наступні — золоті. Зачепиш раму — почнеш знову.
 FPV_GATES_PASS,6 gates | No collisions,6 воріт | Без зіткнень
 FPV_HORIZON,Horizon mode,Режим Horizon
 FPV_HORIZON_NOTE,Less help,Менше допомоги
@@ -113,8 +113,8 @@ MIS_CAM_SURVEY,Survey after a storm,Огляд після негоди
 MIS_CAM_SURVEY_DESC,Fly over the village and mark damaged roofs.,Облети село й познач пошкоджені дахи.
 MIS_FPV_HOOPS,Hoops,Обручі
 MIS_FPV_HOOPS_DESC,Fly through every colourful hoop.,Пролети крізь усі кольорові обручі.
-MIS_FPV_BALLOONS,Balloons and target,Кульки й мішень
-MIS_FPV_BALLOONS_DESC,"Pop the balloons and hit the bullseye, like darts.","Лопни кульки й влуч у центр мішені, як у дартсі."
+MIS_FPV_BALLOONS,Balloons and landing,Кульки й посадка
+MIS_FPV_BALLOONS_DESC,"Pop the balloons, then land right in the middle of the target.","Лопни кульки, а тоді сядь у самісінький центр мішені."
 MIS_FPV_RACE,Timed course,Траса на час
 MIS_FPV_RACE_DESC,"Gate after gate, and every second counts.","Ворота одні за одними, і кожна секунда рахується."
 MIS_FPV_TREES,Between the trees,Між деревами
@@ -148,7 +148,7 @@ ABOUT_LICENSE_T,Licence,Ліцензія
 ABOUT_LICENSE,"Free software under the GNU GPL 3.0 or later: you may use, study, change and share it. It comes with no warranty of any kind.","Вільна програма за ліцензією GNU GPL 3.0 або новішою: її можна використовувати, вивчати, змінювати й поширювати. Вона надається без жодних гарантій."
 ABOUT_SOURCE_T,Source code,Сирцевий код
 ABOUT_MADE_T,How it was made,Як створено
-ABOUT_MADE,"Written with AI assistance (Claude, Anthropic), directed and tested by the author.","Код написано за допомогою ШІ (Claude, Anthropic) під керівництвом і з тестуванням авторки."
+ABOUT_MADE,"The code was written with AI (Claude, Anthropic), directed and tested by the author.","Код написано за допомогою ШІ (Claude, Anthropic) під керівництвом і з тестуванням авторки."
 ABOUT_PARTS_T,What’s inside,Що всередині
 ABOUT_PARTS,"Godot Engine (MIT) © Godot Engine contributors, Juan Linietsky, Ariel Manzur. Unbounded and Manrope fonts (SIL Open Font License 1.1) © The Unbounded Project Authors, The Manrope Project Authors.","Godot Engine (MIT) © Godot Engine contributors, Juan Linietsky, Ariel Manzur. Шрифти Unbounded і Manrope (SIL Open Font License 1.1) © The Unbounded Project Authors, The Manrope Project Authors."
 ABOUT_FULL_LICENSES,Full licence texts,Повні тексти ліцензій
@@ -205,10 +205,10 @@ GATE_WRONG,Not quite. Here is another one.,Не те. Ось інший прик
 CANCEL,Cancel,Скасувати
 VIEW_DRONE,Camera,Камера
 NOT_THIS_TIME,Not this time,Цього разу не вийшло
-CAM_NOSE_IN_PASS_KIDS,1 lap | No rush,1 коло | Без поспіху
+CAM_NOSE_IN_PASS_KIDS,One round,Одне коло
 CAM_SQUARE_PASS_KIDS,Square | Circle,Квадрат | Коло
-CAM_LANDING_PASS_KIDS,3 landings | On the pad,3 посадки | На майданчик
-CAM_WIND_PASS_KIDS,4 points | A light wind,4 точки | Легкий вітер
+CAM_LANDING_PASS_KIDS,Three landings,Три посадки
+CAM_WIND_PASS_KIDS,Four spots,Чотири точки
 CAM_EXAM_PASS_KIDS,Everything together | No rush,Усе разом | Без поспіху
 HINT_NOSE_UP,Take off: the drone is already facing you,Злітай: дрон уже дивиться на тебе
 HINT_NOSE_FACE,Turn the drone to face you with the left stick,Поверни дрон носом до себе лівим стіком
@@ -217,8 +217,8 @@ HINT_NOSE_SLOW,A minute has passed. Let’s start the lap again,Хвилина �
 SUM_NOSE_IN,A nose-in lap in %d s.,Коло носом до себе за %d с.
 HINT_SQUARE_UP,Take off and fly to the first sphere,Злітай і лети до першої кулі
 HINT_SQUARE_NOSE,Fly nose first: turn the drone with the left stick,Лети носом уперед: поверни дрон лівим стіком
-HINT_SQUARE_GO,Square: %d spheres to go,Квадрат: ще %d кулі
-HINT_CIRCLE_GO,Now the circle: %d spheres to go,Тепер коло: ще %d кулі
+HINT_SQUARE_GO,"Square, spheres left: %d","Квадрат, куль лишилось: %d"
+HINT_CIRCLE_GO,"Now the circle, spheres left: %d","Тепер коло, куль лишилось: %d"
 SUM_SQUARE,Square and circle flown nose first.,Квадрат і коло пройдено носом уперед.
 HINT_LAND_UP,Take off and fly to the sphere,Злітай і лети до кулі
 HINT_LAND_TAKEOFF,Take off and fly to the next sphere,Злітай і лети до наступної кулі
@@ -235,7 +235,7 @@ HINT_WIND_OUT,A gust pushed it out. Back into the sphere,Порив виніс �
 SUM_WIND,Route flown. The wind at the end: %s m/s.,Маршрут пройдено. Вітер наприкінці: %s м/с.
 HINT_EXAM_UP,Exam: take off to 2 m,Іспит: злітай на 2 м
 HINT_EXAM_ROUTE,"Route, nose first: %d to go",Маршрут носом уперед: ще %d
-HINT_EXAM_SWEEP,"Now sideways, nose towards you: %d to go","Тепер боком, носом до себе: ще %d"
+HINT_EXAM_SWEEP,"Now sideways, nose towards you. Left: %d","Тепер боком, носом до себе. Лишилось: %d"
 SUM_EXAM,Exam passed in %d:%02d.,Іспит складено за %d:%02d.
 FAIL_EXAM_BUMP,The drone touched an obstacle. In the exam nothing may be touched: give obstacles room.,Дрон зачепив перешкоду. На іспиті не можна торкатися нічого: облітай з запасом.
 FAIL_EXAM_TIME,"Three minutes have passed. Fly steadily, without rushing, and try again.","Три хвилини минули. Літай упевнено, але без поспіху, і спробуй ще."
@@ -263,13 +263,13 @@ TH_BATTERY_BODY,"Charge only with a matching charger, on a surface that cannot b
 TH_BATTERY_KIDS,"Only a grown-up charges the battery.|If a battery has puffed up like a pillow, do not touch it; tell a grown-up.|Is a battery hot or smelly? Step away and call a grown-up.","Батарею заряджає тільки дорослий.|Якщо батарея надулася, як подушка, не чіпай її і скажи дорослому.|Батарея гріється чи пахне? Відійди й клич дорослого."
 TH_SIGNAL_BODY,"If the link to the radio drops, a camera drone usually hovers and then flies back to its home point by itself.|That is why the return-to-home height should be above trees and buildings.|Do not panic: let go of the sticks, move closer, or turn the radio’s antennas towards the drone.|In Ukraine GPS is often jammed. Without GPS the drone cannot hold its place and the wind carries it, as in the Hold a spot lesson.|An FPV drone without a link does what its failsafe is set to do: usually it stops the motors.|A ground robot without a link should stop where it is.","Якщо зв’язок з пультом зник, камерний дрон зазвичай зависає, а потім сам повертається до точки старту.|Тому висоту автоповернення варто ставити вище за дерева й будівлі.|Не панікуй: відпусти стіки, підійди ближче чи підніми пульт антенами до дрона.|В Україні GPS часто глушать. Без GPS дрон не тримає точку, і вітер його зносить, як в уроці «Утримати точку».|FPV-дрон без зв’язку діє так, як налаштовано на випадок втрати сигналу: зазвичай вимикає мотори.|Наземний робот без зв’язку має зупинитися на місці."
 TH_SIGNAL_KIDS,"Sometimes the drone loses the radio, like a phone loses its signal.|Then a smart drone hovers and flies home by itself.|Do not worry, and let go of the sticks.","Іноді дрон «губить» пульт, як телефон губить мережу.|Тоді розумний дрон зависає і сам летить додому.|Не хвилюйся і відпусти стіки."
-TH_RULES_BODY,"While martial law is in force, launching a civilian drone without permission is forbidden, even over your own yard: once airborne, it is in the national airspace.|Permission comes from the General Staff of the Armed Forces of Ukraine, only in exceptional cases: in the interests of the state or the Armed Forces, or to inspect destroyed property. Requests go in at least 10 days ahead.|Without permission you may fly only indoors.|Always, in peacetime too, flying is forbidden over nuclear and hydro power plants, dams, important state sites, nature reserves and hazardous plants.|Do not film or publish soldiers, equipment, fortifications or the results of strikes: this is a criminal offence.|Shyriai is a trainer. Practise here, and fly for real only with permission. Rules change: check them with your local military administration.","Поки діє воєнний стан, запускати цивільні дрони без дозволу заборонено, навіть над власним подвір’ям: дрон уже в повітряному просторі.|Дозвіл дає Генеральний штаб ЗСУ лише у виняткових випадках: у інтересах держави чи ЗСУ або для огляду зруйнованого майна. Заявку подають щонайменше за 10 днів.|Без дозволу літати можна лише в закритому приміщенні.|Завжди, і в мирний час, заборонено літати над АЕС, ГЕС, дамбами, важливими державними об’єктами, заповідниками й небезпечними підприємствами.|Не знімай і не публікуй військових, техніку, укріплення й наслідки ударів: за це є кримінальна відповідальність.|Ширяй — тренажер. Тренуйся тут, а справжні польоти — лише з дозволом. Правила змінюються: перевіряй їх у своїй військовій адміністрації."
+TH_RULES_BODY,"While martial law is in force, launching a civilian drone without permission is forbidden, even over your own yard: once airborne, it is in the national airspace.|Permission comes from the General Staff of the Armed Forces of Ukraine, and only in exceptional cases. Some regions have their own procedure through the military administration. Drone work is also agreed with the Security Service of Ukraine.|Without permission you may fly only indoors.|Always, in peacetime too, flying is forbidden over nuclear and hydro power plants, dams, important state sites, nature reserves and hazardous plants.|Do not film or publish soldiers, equipment, fortifications or the results of strikes: this is a criminal offence.|Shyriai is a trainer. Practise here, and fly for real only with permission. Rules change: check them with your local military administration.","Поки діє воєнний стан, запускати цивільні дрони без дозволу заборонено, навіть над власним подвір’ям: дрон уже в повітряному просторі.|Дозвіл дає Генеральний штаб ЗСУ, і лише у виняткових випадках. У деяких областях є свій порядок через військову адміністрацію. Роботу з дроном також погоджують із СБУ.|Без дозволу літати можна лише в закритому приміщенні.|Завжди, і в мирний час, заборонено літати над АЕС, ГЕС, дамбами, важливими державними об’єктами, заповідниками й небезпечними підприємствами.|Не знімай і не публікуй військових, техніку, укріплення й наслідки ударів: за це є кримінальна відповідальність.|Ширяй — тренажер. Тренуйся тут, а справжні польоти — лише з дозволом. Правила змінюються: перевіряй їх у своїй військовій адміністрації."
 TH_RULES_KIDS,"Right now, real drones may fly only with permission.|A small drone can fly in a room, together with a grown-up.|And in Shyriai you can fly as much as you like!","Справжні дрони зараз можна запускати лише з дозволом.|Маленький дрон можна запускати в кімнаті, разом з дорослими.|А в Ширяї можна літати скільки завгодно!"
-TH_RULES_SOURCES,"Oster community, Procedure for drone flight permits under martial law, 22 Dec 2025. Sud.ua, Where drones may not be launched, 2026. CEDEM, Using drones in wartime, 2023. As of November 2026.","Остерська громада, «Порядок отримання дозволів на польоти БпЛА під час воєнного стану», 22.12.2025. Судово-юридична газета (sud.ua), «Де не можна запускати дрони», 2026. ЦЕДЕМ, «Використання дронів під час воєнного часу», 2023. Станом на листопад 2026 року."
+TH_RULES_SOURCES,"Air Code of Ukraine, article 30. Regulation on the use of the airspace of Ukraine, Cabinet of Ministers resolution No. 954 of 2017. Free legal aid system of Ukraine, quoted in Fakty, How to get permission to fly a drone, 5 Nov 2024. Sud.ua, Where drones may not be launched, 2026. CEDEM, Using drones in wartime, 2023. As of November 2026.","Повітряний кодекс України, стаття 30. Положення про використання повітряного простору України, постанова Кабінету Міністрів № 954, 2017. Система безоплатної правничої допомоги, цитата у «Фактах», «Як отримати дозвіл на політ дрона», 05.11.2024. Судово-юридична газета (sud.ua), «Де не можна запускати дрони», 2026. ЦЕДЕМ, «Використання дронів під час воєнного часу», 2023. Станом на листопад 2026 року."
 TH_BATTERY_SOURCES,LiPo safety rules of the University of Maryland drone lab and of battery makers.,Правила безпеки LiPo-батарей лабораторії дронів Університету Меріленду та виробників батарей.
 CAM_STICKS_NOTE_KIDS,Try every stick,Спробуй усі стіки
 CAM_STICKS_GOAL_KIDS,Wiggle each stick and see what the drone does. Nothing can break here!,"Поворушь кожен стік і подивись, що робить дрон. Тут нічого не зламаєш!"
-CAM_STICKS_PASS_KIDS,All 4 moves,Усі 4 рухи
+CAM_STICKS_PASS_KIDS,Every move,Усі рухи
 CAM_TAKEOFF_NOTE_KIDS,Up to the ball and back,До кульки й назад
 CAM_TAKEOFF_GOAL_KIDS,"Fly up to the gold ball over the pad, stay in it a little, then land again.","Злети до золотої кульки над майданчиком, побудь у ній трішки й сядь назад."
 CAM_TAKEOFF_PASS_KIDS,Gold ball | Soft landing,Золота кулька | М’яка посадка
@@ -295,11 +295,11 @@ HINT_HOLD_GO_KIDS,Fly to the big gold ball,Лети до великої золо
 HINT_HOLD_KEEP_KIDS,Keep the drone in the ball until the bar is full!,"Тримай дрон у кулі, поки смужка не заповниться!"
 HINT_HOLD_OUT_KIDS,The breeze blew it out. Back into the ball!,Вітерець здув дрон. Повертайся в кулю!
 SUM_HOLD_KIDS,The breeze did not win: the drone held on!,Вітерець не переміг: дрон утримався!
-HINT_NOSE_GO_KIDS,Fly from ball to ball: %d to go,Лети від кульки до кульки: ще %d
+HINT_NOSE_GO_KIDS,Fly from ball to ball,Лети від кульки до кульки
 HINT_NOSE_FACE_KIDS,Turn the drone so it looks at you,"Поверни дрон, щоб він дивився на тебе"
 SUM_NOSE_IN_KIDS,"A whole circle, and the drone looked at you all the way!","Ціле коло, а дрон весь час дивився на тебе!"
-HINT_SQUARE_GO_KIDS,Square: %d balls to go,Квадрат: ще %d кульки
-HINT_CIRCLE_GO_KIDS,Now the circle: %d balls to go,Тепер коло: ще %d кульки
+HINT_SQUARE_GO_KIDS,Square: a few more balls,Квадрат: ще кілька кульок
+HINT_CIRCLE_GO_KIDS,Now the circle: a few more balls,Тепер коло: ще кілька кульок
 HINT_SQUARE_UP_KIDS,Take off and fly to the first ball,Злітай і лети до першої кульки
 HINT_LAND_UP_KIDS,Take off and fly to the ball,Злітай і лети до кульки
 HINT_LAND_TAKEOFF_KIDS,Take off and fly to the next ball,Злітай і лети до наступної кульки
@@ -309,14 +309,14 @@ HINT_LAND_MISS_KIDS,A little off. Take off and try again!,Трішки мимо.
 HINT_LAND_GOOD_KIDS,Right on target!,Точно в ціль!
 SUM_LANDING_KIDS,Three spot-on landings!,Три влучні посадки!
 HINT_WIND_UP_KIDS,Take off: the wind is blowing,Злітай: вітер уже дме
-HINT_WIND_GO_KIDS,Fly to the ball: %d to go,Лети до кулі: ще %d
+HINT_WIND_GO_KIDS,Fly to the ball,Лети до кулі
 HINT_WIND_HOLD_KIDS,Stay in the ball!,Тримайся в кулі!
 HINT_WIND_OUT_KIDS,The wind pushed it out. Come back!,Вітер виніс дрон. Повертайся!
 SUM_WIND_KIDS,Even a strong wind could not stop you!,Навіть сильний вітер тобі не завадив!
 HINT_EXAM_UP_KIDS,Exam time! Take off,Іспит! Злітай
-HINT_EXAM_ROUTE_KIDS,Fly from ball to ball: %d to go,Лети від кульки до кульки: ще %d
-HINT_EXAM_SWEEP_KIDS,Now %d more balls closer to you,Тепер ще %d кульки ближче до тебе
-SUM_EXAM_KIDS,Exam passed! You are a real camera drone pilot.,Іспит складено! Ти справжній пілот камерного дрона.
+HINT_EXAM_ROUTE_KIDS,Fly from ball to ball,Лети від кульки до кульки
+HINT_EXAM_SWEEP_KIDS,"Now a few more balls, closer to you","Тепер ще кілька кульок, ближче до тебе"
+SUM_EXAM_KIDS,Exam passed! Real camera drone piloting.,Іспит складено! Справжнє пілотування камерного дрона.
 VIEW_FPV,FPV,FPV
 STICK_LEFT_FPV,Throttle · turn,Газ · поворот
 LESSON_PRO_ONLY,Horizon and Acro lessons are in Adult mode only.,Уроки Horizon і Acro є лише в дорослому режимі.
@@ -325,13 +325,13 @@ FPV_THROTTLE_GOAL_KIDS,You see everything through the drone’s eyes! Fly up int
 FPV_THROTTLE_PASS_KIDS,Gold ball | Full bar,Золота куля | Смужка повна
 FPV_FORWARD_NOTE_KIDS,On to the balls,Вперед до куль
 FPV_FORWARD_GOAL_KIDS,Fly through three gold balls.,Пролети крізь три золоті кулі.
-FPV_FORWARD_PASS_KIDS,3 balls,3 кулі
+FPV_FORWARD_PASS_KIDS,Three balls,Три кулі
 FPV_EIGHT_NOTE_KIDS,Round the poles,Довкола стовпів
-FPV_EIGHT_GOAL_KIDS,"Fly round two poles like the number 8, from ball to ball.","Облети два стовпи, як цифру 8, від кульки до кульки."
+FPV_EIGHT_GOAL_KIDS,"Fly round two poles in a figure of eight, from ball to ball.","Облети два стовпи вісімкою, від кульки до кульки."
 FPV_EIGHT_PASS_KIDS,Two eights | No rush,Дві вісімки | Без поспіху
 FPV_GATES_NOTE_KIDS,Through the gates,Крізь ворота
 FPV_GATES_GOAL_KIDS,Fly through six gates. The next gate is gold.,Пролети крізь шість воріт. Наступні ворота золоті.
-FPV_GATES_PASS_KIDS,6 gates,6 воріт
+FPV_GATES_PASS_KIDS,Six gates,Шість воріт
 HINT_FPV_THR_UP,Add throttle gently with the left stick: it does not spring back,Плавно додай газу лівим стіком: він не повертається до центру
 HINT_FPV_THR_UP_KIDS,Take off!,Злітай!
 HINT_FPV_THR_GO,Keep the drone in the ball: a little more or less throttle,Тримай дрон у кулі: трохи більше чи менше газу
@@ -343,7 +343,7 @@ HINT_FPV_THR_OUT_KIDS,Back into the ball!,Повертайся в кулю!
 SUM_FPV_THR,10 seconds in the ball: you found the hover throttle.,10 секунд у кулі: газ висіння знайдено.
 SUM_FPV_THR_KIDS,You kept the drone in the ball!,Дрон утримався в кулі!
 HINT_FPV_FORWARD_GO,"Fly to the ball, adding throttle as you tilt: %d to go","Лети до кулі, додаючи газ на нахилі: ще %d"
-HINT_FPV_FORWARD_GO_KIDS,Fly to the ball: %d to go,Лети до кулі: ще %d
+HINT_FPV_FORWARD_GO_KIDS,Fly to the ball,Лети до кулі
 HINT_FPV_GROUND,The drone touched the ground. The route starts again,Дрон торкнувся землі. Маршрут починається знову
 SUM_FPV_FORWARD,Three balls without touching the ground.,Три кулі без дотику до землі.
 SUM_FPV_FORWARD_KIDS,All three balls!,Усі три кулі!
@@ -363,10 +363,10 @@ HINT_HOOPS_GO,Through the hoops: %d to go,Крізь обручі: ще %d
 SUM_HOOPS,Every hoop done!,Усі обручі пройдено!
 HINT_BALLOONS_UP,Take off and pop the balloons,Злітай і лопай кульки
 HINT_BALLOONS_GO,Touch a balloon to pop it: %d to go,"Торкнись кульки, щоб лопнути: ще %d"
-HINT_TARGET_GO,Now fly into the middle of the target!,Тепер лети в центр мішені!
+HINT_TARGET_GO,Now land in the middle of the target on the ground!,Тепер сядь у центр мішені на землі!
 SUM_TARGET_CENTRE,Right in the middle! Every balloon popped.,У самісінький центр! Усі кульки лопнули.
-SUM_TARGET_MIDDLE,"A hit! Next time, closer to the middle.",Влучання в мішень! Наступного разу — ближче до центру.
-SUM_TARGET_EDGE,A hit on the edge. Try for the middle!,Влучання в край мішені. Спробуй у центр!
+SUM_TARGET_MIDDLE,"Landed on the target! Next time, closer to the middle.",Посадка на мішень! Наступного разу — ближче до центру.
+SUM_TARGET_EDGE,Landed on the edge. Try for the middle!,Посадка на краю мішені. Спробуй у центр!
 SUM_RACE,Course done in %d:%02d.,Траса пройдена за %d:%02d.
 HINT_TREES_THERE,"Fly between the trees to the ball beyond the tree line, below the tops","Лети між деревами до кулі за лісосмугою, нижче за верхівки"
 HINT_TREES_BACK,Now the same way back,А тепер так само назад
@@ -440,7 +440,37 @@ SUM_UGV_DELIVERY_KIDS,The box is delivered!,Коробку доставлено!
 SUM_UGV_EVACUATION,The casualty is safe. Comfort on the way: %d %%.,Пораненого довезено. Комфорт у дорозі: %d %%.
 SUM_UGV_EVACUATION_KIDS,The casualty is with the rescuers!,Пораненого довезено до рятувальників!
 SUM_UGV_VET,The kitten is at the vet. Calm on the way: %d %%.,Кошеня у ветеринарки. Спокій у дорозі: %d %%.
-SUM_UGV_VET_KIDS,The kitten is at the vet! It is calm and happy.,Кошеня у ветеринарки! Воно спокійне й задоволене.
+SUM_UGV_VET_KIDS,The kitten is at the vet! Calm and happy.,Кошеня у ветеринарки! Спокійне й задоволене.
 SUM_UGV_PARCEL,The parcel is delivered! Sunflowers: %d of %d.,Посилку доставлено! Соняшників: %d з %d.
 SUM_UGV_CARGO,Water and medicine delivered. Cargo condition: %d %%.,Воду й ліки доставлено. Цілість вантажу: %d %%.
 SUM_UGV_EVAC,"The casualty is evacuated, even with the link dropping. Comfort: %d %%.","Пораненого евакуйовано, навіть попри втрату зв’язку. Комфорт: %d %%."
+SET_TEXT_SIZE,Text size,Розмір тексту
+SIZE_NORMAL,Normal,Звичайний
+SIZE_LARGE,Large,Більший
+SIZE_LARGER,Largest,Найбільший
+SET_PROGRESS,Progress,Прогрес
+RESET_PROGRESS,Start over in “%s” mode,Почати спочатку в режимі «%s»
+RESET_ASK,Clear all lessons and missions in “%s” mode? The other modes stay as they are.,Стерти всі уроки й місії в режимі «%s»? Інші режими лишаться як є.
+RESET_YES,"Yes, start over","Так, почати спочатку"
+RESET_DONE,Progress in “%s” mode is cleared.,Прогрес у режимі «%s» стерто.
+RESET_UNDO,Undo,Повернути
+A11Y_DONE,done,пройдено
+A11Y_LOCKED,locked,ще закрито
+ABOUT_COPYRIGHT,© 2026 Marybezu,© 2026 Marybezu
+FAIL_BATTERY,The battery ran out and the drone landed by itself.,"Батарея сіла, і дрон приземлився сам."
+FAIL_TREES_AROUND,That went round the trees. The task is to fly between them.,Це в обхід дерев. Завдання — пролетіти між ними.
+HINT_PIVOT_FORWARD,"Turn round on the spot first, then drive forward into the alley","Спершу розвернися на місці, а тоді їдь уперед у прохід"
+HINT_NOSE_RESET,Nose turned away: back to the start of this side,Ніс відвернувся: назад на початок цієї сторони
+HINT_TARGET_MISS,Missed the target. Take off and land in the middle!,Повз мішень. Злітай і сідай у центр!
+VIEW_BEHIND,Behind,Ззаду
+VEH_UGV_KIDS,Robot,Робот
+VEH_UGV_DESC_KIDS,A robot on tracks that brings things and helps,"Робот на гусеницях, що привозить речі й допомагає"
+VIEW_FPV_KIDS,Drone’s eyes,Очима дрона
+UGV_EVACUATION_KIDS,Helping a casualty,Допомога пораненому
+HINT_TERRAIN_MUD_KIDS,"Now through the mud. Slowly, it is slippery!","Тепер через бруд. Повільно, тут слизько!"
+HINT_TREES_LOW_KIDS,"Fly low, below the treetops","Лети низенько, нижче за верхівки"
+ERASE_ALL,Erase all data,Стерти всі дані
+ERASE_ASK,Erase progress in every mode and all settings? The app will be as if just installed.,Стерти прогрес у всіх режимах і всі налаштування? Застосунок стане як щойно встановлений.
+ERASE_YES,"Yes, erase everything","Так, стерти все"
+ERASE_DONE,All data is erased.,Усі дані стерто.
+FAIL_BATTERY_UGV,The battery ran out and the robot stopped.,"Батарея сіла, і робот зупинився."

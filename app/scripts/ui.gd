@@ -8,13 +8,13 @@ const RADIUS_CARD := 18
 const RADIUS_PILL := 14
 
 
-static func label(text: String, px: int, weight := 500, token := "text", display := false, wrap := true) -> Label:
+static func label(text: String, px: int, weight := 500, token := "text", display := false, wraps := true) -> Label:
 	var l := Label.new()
 	l.text = text
 	l.add_theme_font_override("font", Pal.font(weight, display))
 	l.add_theme_font_size_override("font_size", roundi(px * Pal.text_scale()))
 	l.add_theme_color_override("font_color", Pal.c(token))
-	if wrap:
+	if wraps:
 		l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	l.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	return l
@@ -69,10 +69,12 @@ static func panel(content: Control, bg: Color, radius := RADIUS_CARD, pad := 14)
 
 ## A whole card that can be tapped. The card is drawn by a panel; an invisible button on top
 ## takes the touch, keyboard focus and the screen-reader name.
-static func tappable(content: Control, bg: Color, on_press: Callable, a11y_name := "", radius := RADIUS_CARD, pad := 14) -> PanelContainer:
+static func tappable(content: Control, bg: Color, on_press: Callable, a11y_name := "", radius := RADIUS_CARD, pad := 14, outline := false) -> PanelContainer:
 	var p := PanelContainer.new()
-	var normal := box(bg, radius, pad)
-	var pressed := box(bg.lerp(Pal.c("text"), 0.08), radius, pad)
+	# An outline marks the chosen option, so it stands out even where gold is pale on white.
+	var edge := Pal.c("on_accent") if outline else Color.TRANSPARENT
+	var normal := box(bg, radius, pad, edge, 2 if outline else 0)
+	var pressed := box(bg.lerp(Pal.c("text"), 0.08), radius, pad, edge, 2 if outline else 0)
 	p.add_theme_stylebox_override("panel", normal)
 	p.add_child(content)
 	_ignore_mouse(content)
@@ -107,7 +109,7 @@ static func tappable(content: Control, bg: Color, on_press: Callable, a11y_name 
 ## A round icon-only button, 44×44 so it is easy to hit.
 static func icon_button(icon: String, on_press: Callable, a11y_name: String, bg: Color) -> PanelContainer:
 	var c := CenterContainer.new()
-	c.custom_minimum_size = Vector2(44, 44)
+	c.custom_minimum_size = Vector2(48, 48)
 	c.add_child(Glyph.make(icon, 22, Pal.c("text")))
 	return tappable(c, bg, on_press, a11y_name, 22, 0)
 
@@ -119,10 +121,18 @@ static func segmented(options: Array, selected: String, on_pick: Callable) -> Pa
 	for opt in options:
 		var on: bool = opt[0] == selected
 		var c := CenterContainer.new()
-		c.custom_minimum_size = Vector2(0, 44)
-		c.add_child(label(opt[1], 15, 700 if on else 600, "on_accent" if on else "text", false, false))
+		c.custom_minimum_size = Vector2(0, 48)
+		var l := label(opt[1], 15, 700 if on else 600, "on_accent" if on else "text", false, false)
+		# Three options share one row on a narrow phone: larger text would no longer fit, so it stays fixed.
+		l.add_theme_font_size_override("font_size", 14)
+		c.add_child(l)
 		var id: String = opt[0]
-		var t := tappable(c, Pal.c("accent") if on else Color(0, 0, 0, 0), func(): on_pick.call(id), opt[1], RADIUS_PILL, 0)
+		var t := tappable(c, Pal.c("accent") if on else Color(0, 0, 0, 0), func(): on_pick.call(id), opt[1], RADIUS_PILL, 0, on)
+		var b: Button = t.get_child(1)
+		b.toggle_mode = true
+		b.set_pressed_no_signal(on)
+		# Tapping the chosen option again changes nothing, so its button stays pressed too.
+		b.toggled.connect(func(_p: bool): b.set_pressed_no_signal(on))
 		t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		row.add_child(t)
 	var p := panel(row, Pal.c("surface"), 18, 5)
@@ -182,4 +192,13 @@ class Toggle extends Control:
 		draw_style_box(sb, r)
 		var knob := Pal.c("on_accent") if on else Pal.c("surface")
 		var x := size.x - h / 2.0 if on else h / 2.0
+		if not on:
+			# A visible edge for the "off" track, which is otherwise pale against the card.
+			var edge := StyleBoxFlat.new()
+			edge.draw_center = false
+			edge.border_color = Pal.c("faint")
+			edge.set_border_width_all(2)
+			edge.set_corner_radius_all(int(h / 2.0))
+			edge.anti_aliasing = true
+			draw_style_box(edge, r)
 		draw_circle(Vector2(x, h / 2.0), h / 2.0 - 3.0, knob, true, -1.0, true)

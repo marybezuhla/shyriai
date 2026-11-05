@@ -6,11 +6,14 @@ extends Control
 
 var value := Vector2.ZERO  # x right, y UP, each -1..1
 var kids := false
-var label_text := ""
 ## False for an FPV throttle: up and down stay where the thumb leaves them, and moving the thumb
 ## moves the stick from there (it does not jump to where the thumb lands).
 var spring_y := true
 var touched := false
+## Off while a card (pause, results) covers the screen.
+var enabled := true
+## Which way to push, shown as a ghost knob sliding there (x right, y up). ZERO = no hint.
+var hint := Vector2.ZERO
 
 var _finger := -1
 var _start_local := Vector2.ZERO
@@ -22,7 +25,7 @@ func _init() -> void:
 
 
 func _input(event: InputEvent) -> void:
-	if not is_visible_in_tree():
+	if not is_visible_in_tree() or not enabled:
 		return
 	if event is InputEventScreenTouch:
 		var local := _local(event.position)
@@ -38,6 +41,11 @@ func _input(event: InputEvent) -> void:
 	elif event is InputEventScreenDrag and event.index == _finger:
 		_set_from(_local(event.position))
 		get_viewport().set_input_as_handled()
+
+
+func _process(_delta: float) -> void:
+	if hint != Vector2.ZERO:
+		queue_redraw()
 
 
 func release() -> void:
@@ -82,6 +90,8 @@ func _draw() -> void:
 	var c := size / 2.0
 	var r := _radius()
 	var line := Pal.c("text")
+	# A dark see-through base, so the stick reads over a bright field as well as at dusk.
+	draw_circle(c, r, Color(0.16, 0.11, 0.23, 0.32), true, -1.0, true)
 	var fill := line
 	fill.a = 0.08
 	draw_circle(c, r, fill, true, -1.0, true)
@@ -101,10 +111,19 @@ func _draw() -> void:
 			var back: Vector2 = tip - dir * 8
 			draw_polyline(PackedVector2Array([back + side, tip, back - side]), a, 3.0, true)
 	var travel := r - _knob_radius()
+	if hint != Vector2.ZERO and _finger == -1:
+		# A ghost knob glides from the middle the way to push, again and again.
+		var phase := fmod(Time.get_ticks_msec() / 1000.0, 1.6) / 1.6
+		var g := c + Vector2(hint.x, -hint.y).normalized() * travel * ease(minf(phase * 1.4, 1.0), 0.5)
+		var ghost := Pal.c("accent")
+		ghost.a = 0.55 * (1.0 - phase)
+		draw_circle(g, _knob_radius(), ghost, true, -1.0, true)
+		draw_arc(g, _knob_radius(), 0, TAU, 40, Color(0.16, 0.11, 0.23, 0.6 * (1.0 - phase)), 2.0, true)
 	var k := c + Vector2(value.x, -value.y) * travel
 	var halo := Pal.c("accent")
 	halo.a = 0.2
 	draw_circle(k, _knob_radius() + 6, halo, true, -1.0, true)
 	draw_circle(k, _knob_radius(), Pal.c("accent"), true, -1.0, true)
+	draw_arc(k, _knob_radius(), 0, TAU, 40, Color("#2A1D3B"), 2.0, true)
 	if kids:
 		draw_arc(k, _knob_radius() - 1.5, 0, TAU, 40, Pal.c("on_accent"), 3.0, true)

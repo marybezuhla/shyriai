@@ -44,6 +44,8 @@ const GATE_COURSE: Array[Vector3] = [
 ## The nose counts as pointing somewhere when it is within this angle of it.
 const FACING := deg_to_rad(50.0)
 
+## The underlying key of the hint, e.g. for tests; hint may be its Kids wording.
+var hint_base := ""
 var key := ""
 var mode := "simple"
 var vehicle := "camera"
@@ -71,6 +73,8 @@ var summary := ""
 var summary_args: Array = []
 ## A question with buttons during the flight: {"prompt": key, "options": [[id, key], ...]}. Empty = none.
 var choice := {}
+## Which way the on-screen sticks should be pushed now, shown as a ghost knob: {"left": Vector2.UP}.
+var stick_hint := {}
 ## The camera this task starts with, if it matters (nose-in needs the pilot's view). "" = the saved one.
 var view_hint := ""
 
@@ -122,6 +126,39 @@ static func make(task_key: String, mode_: String, seed_ := 7) -> FlightTask:
 	t.is_mission = task_key.begins_with("MIS_")
 	t.configure()
 	return t
+
+
+## The physics for a vehicle in a mode, set up for this task and world. The flight screen and the
+## tests both build it here, so the tests always fly what the app flies.
+func make_sim(vehicle_: String) -> DroneSim:
+	var sim: DroneSim
+	if vehicle_ == "ugv":
+		var u := UgvSim.new(mode, 11)
+		u.grip = world.grip
+		sim = u
+	elif vehicle_ == "fpv" and mode != "kids":
+		var f := FpvSim.new(mode, 11)
+		f.flight_mode = flight_mode
+		sim = f
+	else:
+		# Kids fly the FPV drone with the camera drone's help: it holds its height for them.
+		sim = DroneSim.new(mode, 11)
+		if vehicle_ == "fpv":
+			sim.p["vmax"] = 4.0
+	sim.gps = gps
+	if wind >= 0.0:
+		sim.set_wind(wind, gust)
+	sim.ground = world.height
+	sim.obstacles = world.obstacles
+	sim.place(start_position(), start_heading())
+	return sim
+
+
+## What the vehicle gets from the sticks: nothing while the radio link is down.
+func controls(sticks: Dictionary) -> Dictionary:
+	if link_ok:
+		return sticks
+	return {"throttle": 0.0, "yaw": 0.0, "pitch": 0.0, "roll": 0.0}
 
 
 ## Override: physics settings (gps, wind) before the flight starts.
@@ -187,10 +224,6 @@ func fail_with(summary_key: String, args: Array = []) -> void:
 	summary_args = w[1]
 
 
-## The underlying key, e.g. for tests; hint may be its Kids wording.
-var hint_base := ""
-
-
 func _set_hint(hint_key: String, args: Array) -> void:
 	hint_base = hint_key
 	var w := _wording(hint_key, args)
@@ -204,6 +237,18 @@ func _wording(key_: String, args: Array) -> Array:
 	if k != key_ and not String(TranslationServer.translate(k)).contains("%"):
 		return [k, []]
 	return [k, args]
+
+
+## A number with one decimal, written the way the reader's language writes it (2,5 in Ukrainian).
+static func num(x: float, decimals := 1) -> String:
+	var t := ("%." + str(decimals) + "f") % x
+	return t.replace(".", ",") if TranslationServer.get_locale().begins_with("uk") else t
+
+
+## Minutes and seconds, e.g. 2:05.
+static func clock(seconds: float) -> String:
+	var t := int(ceil(seconds))
+	return "%d:%02d" % [floori(t / 60.0), t % 60]
 
 
 static func flat_distance(a: Vector3, b: Vector3) -> float:

@@ -67,7 +67,7 @@ func sync(sim: DroneSim, delta: float) -> void:
 	position = sim.pos
 	basis = sim.orientation()
 	# The treads shimmer a little as they roll.
-	_roll += absf(sim.vel.length()) * delta
+	_roll += sim.vel.length() * delta
 	for t in _treads:
 		t.scale.y = 1.0 + 0.03 * sin(_roll * 12.0)
 
