@@ -21,6 +21,9 @@ func build() -> void:
 	add_child(UI.label(tr("ABOUT_WHAT"), 15, 500))
 	add_child(UI.label(tr("ABOUT_COPYRIGHT"), 13, 600, "muted"))
 
+	add_child(_letter())
+	add_child(_support())
+
 	add_child(_section(tr("ABOUT_LICENSE_T"), tr("ABOUT_LICENSE")))
 	var src := UI.vbox(6)
 	src.add_child(UI.eyebrow(tr("ABOUT_SOURCE_T")))
@@ -52,3 +55,67 @@ func _section(title: String, body: String) -> Control:
 	v.add_child(UI.eyebrow(title))
 	v.add_child(UI.label(body, 14, 500, "muted"))
 	return v
+
+
+# The author's letter, as in her other apps: how the idea came, the war, the support; her photo and name.
+func _letter() -> Control:
+	var v := UI.vbox(12)
+	for i in range(1, 8):
+		var p := UI.label(tr("LETTER_%d" % i), 15, 500)
+		p.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		v.add_child(p)
+	var sig := UI.label(tr("LETTER_SIGN"), 15, 600, "accent_text")
+	sig.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(sig)
+	v.add_child(_photo(72))
+	var who := UI.label(tr("AUTHOR_NAME"), 14, 600)
+	who.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(who)
+	return UI.panel(v, Pal.c("surface"))
+
+
+# A small round photo: the picture is cut to the circle of its frame.
+func _photo(px: int) -> Control:
+	var frame := PanelContainer.new()
+	var circle := StyleBoxFlat.new()
+	circle.bg_color = Pal.c("surface")
+	circle.set_corner_radius_all(px / 2)
+	frame.add_theme_stylebox_override("panel", circle)
+	frame.clip_children = CanvasItem.CLIP_CHILDREN_ONLY
+	frame.custom_minimum_size = Vector2(px, px)
+	frame.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	var pic := TextureRect.new()
+	pic.texture = load("res://assets/author_photo.jpg")
+	pic.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	pic.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	pic.custom_minimum_size = Vector2(px, px)
+	frame.add_child(pic)
+	return frame
+
+
+# Support Ukraine: official sites only. In Kids mode nothing opens the browser: the address is only shown.
+func _support() -> Control:
+	var v := UI.vbox(10)
+	v.add_child(UI.eyebrow(tr("SUPPORT_TITLE")))
+	v.add_child(UI.label(tr("SUPPORT_KIDS") if Prefs.mode == "kids" else tr("SUPPORT_NOTE"), 13, 500, "muted"))
+	# Learning first (Brave1), then the state's own fundraising
+	for group in [["SUPPORT_DEFENCE", ["BRAVE1", "UNITED24_DEFENCE", "NBU"]], ["SUPPORT_HUMANITARIAN", ["UNITED24_HUMANITARIAN", "REDCROSS"]]]:
+		v.add_child(UI.label(tr(group[0]), 15, 700, "accent_text"))
+		for org in group[1]:
+			v.add_child(_cause(org))
+	v.add_child(UI.label(tr("SUPPORT_ANY"), 13, 500, "muted"))
+	return v
+
+
+func _cause(key: String) -> Control:
+	var base: String = key.trim_suffix("_DEFENCE").trim_suffix("_HUMANITARIAN")
+	var url: String = tr("ORG_%s_URL" % base)
+	var what: String = tr("ORG_%s" % key) if key != base else tr("ORG_%s_WHAT" % base)
+	var col := UI.vbox(2)
+	col.add_child(UI.label(tr("ORG_%s" % base), 15, 700))
+	col.add_child(UI.label(what, 13, 500, "muted"))
+	col.add_child(UI.label(url.trim_prefix("https://").get_slice("/", 0), 13, 700, "accent_text"))
+	if Prefs.mode == "kids":
+		return UI.panel(col, Pal.c("surface"))
+	return UI.tappable(col, Pal.c("surface"), func(): OS.shell_open(url), tr("ORG_%s" % base))
+
