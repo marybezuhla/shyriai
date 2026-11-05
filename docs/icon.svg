@@ -1,22 +1,26 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
   <defs>
-    <radialGradient id="bg" cx="430" cy="330" r="760" gradientUnits="userSpaceOnUse">
+    <!-- Lighter at the top left, deeper at the bottom right: the same light as the other apps' icons -->
+    <linearGradient id="bg" x1="11.5" y1="11.5" x2="1011.5" y2="1011.5" gradientUnits="userSpaceOnUse">
       <stop offset="0" stop-color="#4A3466"/>
       <stop offset="1" stop-color="#3A2651"/>
-    </radialGradient>
+    </linearGradient>
   </defs>
   <circle cx="511.5" cy="511.5" r="500" fill="url(#bg)"/>
-  <g fill="#FFF0D5">
+  <!-- The pad 1.2 times larger and centred, so it fills the circle as much as the other apps' pictures -->
+  <g transform="translate(511.5 511.5) scale(1.2) translate(-511.5 -523)">
+  <g fill="#F9EBCE">
     <rect x="352" y="312" width="34" height="140" rx="17"/>
     <rect x="638" y="312" width="34" height="140" rx="17"/>
     <path d="M511.5 423.5 L330 423.5 C284 423.5 255 447 244 497 L199 664 C190 698 214 734 254 734 C266 734 278 730 292 723 L385 663 C399 653 410 649.5 432 649.5 L511.5 649.5 L591 649.5 C613 649.5 624 653 638 663 L731 723 C745 730 757 734 769 734 C809 734 833 698 824 664 L779 497 C768 447 739 423.5 693 423.5 Z"/>
   </g>
-  <g fill="#FFC321">
+  <g fill="#FDC218">
     <circle cx="387.5" cy="535.5" r="55"/>
     <circle cx="635.5" cy="535.5" r="55"/>
   </g>
   <g fill="#39254F">
     <circle cx="387.5" cy="535.5" r="22.5"/>
     <circle cx="635.5" cy="535.5" r="22.5"/>
+  </g>
   </g>
 </svg>
