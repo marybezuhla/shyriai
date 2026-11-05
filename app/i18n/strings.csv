@@ -456,7 +456,7 @@ RESET_DONE,Progress in “%s” mode is cleared.,Прогрес у режимі 
 RESET_UNDO,Undo,Повернути
 A11Y_DONE,done,пройдено
 A11Y_LOCKED,locked,ще закрито
-ABOUT_COPYRIGHT,© 2026 Marybezu,© 2026 Marybezu
+ABOUT_COPYRIGHT,© 2026 marybezuhla,© 2026 marybezuhla
 FAIL_BATTERY,The battery ran out and the drone landed by itself.,"Батарея сіла, і дрон приземлився сам."
 FAIL_TREES_AROUND,That went round the trees. The task is to fly between them.,Це в обхід дерев. Завдання — пролетіти між ними.
 HINT_PIVOT_FORWARD,"Turn round on the spot first, then drive forward into the alley","Спершу розвернися на місці, а тоді їдь уперед у прохід"

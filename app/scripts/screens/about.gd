@@ -2,7 +2,7 @@
 # Name, version, licence, source code and the authors of everything inside. Required by the GPL.
 extends Screen
 
-const SOURCE_URL := "https://github.com/Marybezu/shyriai"
+const SOURCE_URL := "https://github.com/marybezuhla/shyriai"
 
 
 func build() -> void:
