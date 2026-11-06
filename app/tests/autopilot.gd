@@ -11,6 +11,8 @@ var descend := -0.35  # throttle while landing
 var face := Vector3.INF
 ## Face the way it flies (towards the target).
 var face_travel := false
+## A speed limit over the ground, e.g. for the survey grid.
+var max_speed := INF
 var _int := Vector3.ZERO
 
 
@@ -21,8 +23,9 @@ func sticks(sim: DroneSim, dt := 1.0 / 60.0) -> Dictionary:
 	var vmax: float = sim.p["vmax"]
 	# Speed we want over the ground, then a correction with memory, so wind is beaten too.
 	var want := e * 0.6
-	if want.length() > vmax * 0.7:
-		want = want.normalized() * vmax * 0.7
+	var top := minf(vmax * 0.7, max_speed)
+	if want.length() > top:
+		want = want.normalized() * top
 	var err := want - vh
 	_int += err * dt
 	_int = _int.limit_length(4.0)

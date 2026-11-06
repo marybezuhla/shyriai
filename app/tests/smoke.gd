@@ -96,7 +96,7 @@ func _flights() -> void:
 		Prefs.set_theme(theme)
 		Prefs.set_mode(m)
 		var keys: Array = []
-		for veh in ["camera", "fpv", "ugv"]:
+		for veh in Curriculum.VEHICLES:
 			for k in Curriculum.lessons(veh, m) + Curriculum.missions(veh, m):
 				if FlightTask.implemented(k):
 					keys.append([veh, k])
@@ -138,15 +138,35 @@ func _flights() -> void:
 				for v in ["chase", "drone", "pilot"]:
 					f.set_view(v)
 					await _shot("uk-%s-flight-%s-%s-%s" % [theme, m, key, v])
+			if f.task is PhotoTask and f.task.kit:
+				# The camera buttons: each tilt, then a picture (refused or kept, either way no error).
+				for t in Photo.TILT_ORDER:
+					f.task.tilt = t
+					await _shot("uk-%s-flight-%s-%s-tilt-%s" % [theme, m, key, t])
+				f.shutter()
+				await _frames(3)
 			if key == "MIS_CAM_SURVEY":
-				# Hold the drone still so the question stays up for the picture.
-				f._paused = true
-				f.task._near = 0
-				f.task.choice = {"prompt": "Q_ROOF", "options": [["damaged", "OPT_DAMAGED"], ["ok", "OPT_INTACT"]]}
-				await _shot("uk-%s-flight-%s-%s-choice" % [theme, m, key])
-				f._paused = false
-				f.task.choose("ok")
+				# The report after landing, with a real picture taken from the drone's camera.
+				f.autopilot = Callable()
+				f.sim.pos = f.world.houses[0]["pos"] + Vector3(0, 12, 0)
+				f.sim.on_ground = false
+				f.task.tilt = "down"
+				var shot: Dictionary = {"photo": 0, "prompt": "Q_ROOF", "answer": "ok",
+					"options": [["damaged", "OPT_DAMAGED"], ["ok", "OPT_INTACT"]]}
+				f.task.photos.append({"id": "0", "image": await f._picture()})
+				f.task.report.assign([shot, shot.duplicate()])
+				f.task.photos.append({"id": "1", "image": null})
+				f.task.report[1]["photo"] = 1
+				f.task.report_open = true
+				await _frames(3)
+				await _shot("uk-%s-flight-%s-%s-report" % [theme, m, key])
+				f.report_answer(0, "damaged")
+				f.report_answer(1, "ok")
+				await _frames(4)
+				await _shot("uk-%s-flight-%s-%s-report-result" % [theme, m, key])
+				main.close_flight()
 				await _frames(2)
+				continue
 			f.pause()
 			await _shot("uk-%s-flight-%s-%s-pause" % [theme, m, key])
 			main.back()  # Back on pause leaves; Back in flight only pauses

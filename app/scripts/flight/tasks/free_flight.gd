@@ -1,7 +1,8 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # Free flight: no task and no pass, just the field. The pilot picks the wind and the time of day; gold
-# balls to collect are there for fun. Pause leads out.
-extends FlightTask
+# balls to collect are there for fun. Pause leads out. In the survey course the camera buttons are
+# there too, to practise: any steady picture counts.
+extends PhotoTask
 
 const BALLS := 10
 ## Wind by choice: [steady m/s, gusts m/s].
@@ -12,6 +13,11 @@ var _taken: Array[int] = []
 
 
 func configure() -> void:
+	kit = key == "FREE_SURVEY"
+	if kit:
+		view_hint = "drone"
+		if mode == "kids":
+			tilt = "angled"
 	if mode != "kids":
 		var w: Array = WINDS.get(Prefs.free["wind"], WINDS["none"])
 		wind = w[0]
@@ -68,3 +74,12 @@ func update(_dt: float, sim: DroneSim, _sticks: Dictionary) -> void:
 		say("HINT_FREE_ALL")
 	else:
 		say("HINT_FREE_BALLS", [_balls.size() - _taken.size()])
+
+
+## In free flight anything steady in front of the camera makes a picture.
+func subjects(sim: DroneSim) -> Array:
+	if not kit:
+		return []
+	var ahead := Photo.camera_basis(sim.yaw, tilt) * Vector3(0, 0, -15)
+	return [{"id": "view", "pos": Photo.camera_position(sim.pos, sim.yaw) + ahead, "radius": 6.0, "need": {}}]
+

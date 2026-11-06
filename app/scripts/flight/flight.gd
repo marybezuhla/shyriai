@@ -46,8 +46,8 @@ var _stats := {}
 var _counter: Label
 var _view_box := VBoxContainer.new()
 var _overlay: Control
-var _choice_box := CenterContainer.new()
-var _choice_shown := {}
+## The survey camera's buttons, when the task is flown with a camera.
+var _kit: PhotoKit
 var _paused := false
 var _finished := false
 var _sticks := {"throttle": 0.0, "yaw": 0.0, "pitch": 0.0, "roll": 0.0}
@@ -90,6 +90,9 @@ func _ready() -> void:
 		view = task.view_hint
 
 	sim = task.make_sim(vehicle)
+	if task is PhotoTask:
+		var vp := get_viewport_rect().size
+		task.aspect = vp.x / maxf(vp.y, 1.0)
 
 	if vehicle == "ugv":
 		drone = UgvView.new()
@@ -154,6 +157,8 @@ func _process(delta: float) -> void:
 		_sound.no_link(not task.link_ok, delta)
 	drone.body_visible(view != "fpv" and view != "drone")
 	_place_camera(delta)
+	if task is PhotoTask and task.report_open and _overlay == null and not _finished:
+		_show_overlay(Report.card(self, task))
 	world.show_beacon(task.marker, task.beacon)
 	_update_hud()
 	_marks.queue_redraw()
@@ -271,10 +276,11 @@ func _place_camera(delta: float) -> void:
 		cam.position = sim.pos + b * Vector3(0, 0.12, -0.45)
 		cam.fov = 95.0
 	elif view == "drone":
-		# The drone's own camera on a steady gimbal, tilted down a little.
-		cam.position = sim.pos + sim.forward() * 0.45 + Vector3(0, 0.2, 0)
-		cam.rotation = Vector3(deg_to_rad(-25.0), sim.yaw, 0)
-		cam.fov = 75.0
+		# The drone's own camera on a steady gimbal: tilted down a little, or as far as the survey
+		# camera is tilted. The shutter uses the very same pose.
+		cam.position = Photo.camera_position(sim.pos, sim.yaw)
+		cam.global_basis = Photo.camera_basis(sim.yaw, task.tilt if task is PhotoTask else "forward")
+		cam.fov = Photo.FOV
 	elif view == "ugv":
 		# The robot's own camera on its mast. Some tasks show its video late, as over a slow radio link.
 		var pose: Array = [sim.pos, sim.orientation()]
@@ -463,6 +469,8 @@ func _build_hud() -> void:
 	bottom.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	# Sticks as big as fit beside the camera switch (narrow phones in landscape get a little less).
 	var room := get_viewport_rect().size.x - 32.0 - float(ins["left"]) - float(ins["right"]) - 344.0
+	if task is PhotoTask and task.kit:
+		room -= 80.0  # the camera buttons beside the right stick
 	var stick_px := int(clampf(room / 2.0, 104.0, 150.0 if mode == "kids" else 128.0))
 	for s in [_left, _right]:
 		s.kids = mode == "kids"
@@ -483,16 +491,13 @@ func _build_hud() -> void:
 	_view_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_view_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	bottom.add_child(_view_box)
+	if task is PhotoTask and task.kit:
+		_kit = PhotoKit.new()
+		_kit.build(task, mode == "kids", shutter)
+		bottom.add_child(_kit)
 	bottom.add_child(_stick_with_label(_right, tr(right_label)))
 	col.add_child(bottom)
 	_build_view_toggle()
-
-	# A question with buttons, e.g. "Is this roof damaged?", floats in the middle of the view.
-	_choice_box.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	_choice_box.offset_top = 24
-	_choice_box.offset_bottom = 24
-	_choice_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_hud.add_child(_choice_box)
 
 
 func _stick_with_label(s: Stick, text: String) -> Control:
@@ -529,31 +534,6 @@ func _build_view_toggle() -> void:
 	_view_box.add_child(center)
 
 
-func _update_choice() -> void:
-	if task.choice == _choice_shown:
-		return
-	_choice_shown = task.choice.duplicate(true)
-	for c in _choice_box.get_children():
-		c.queue_free()
-	if task.choice.is_empty():
-		return
-	var glass := Pal.c("bg")
-	glass.a = 0.85
-	var col := UI.vbox(10)
-	var q := UI.label(tr(task.choice["prompt"]), 15, 700, "text", false, false)
-	q.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	col.add_child(q)
-	var row := UI.hbox(10)
-	for opt in task.choice["options"]:
-		var id: String = opt[0]
-		var c := CenterContainer.new()
-		c.custom_minimum_size = Vector2(150, 46)
-		c.add_child(UI.label(tr(opt[1]), 15, 800, "on_accent", false, false))
-		row.add_child(UI.tappable(c, Pal.c("accent"), func(): task.choose(id), tr(opt[1]), 14, 0))
-	col.add_child(row)
-	_choice_box.add_child(UI.panel(col, glass, 18, 12))
-
-
 func _update_hud() -> void:
 	var hints: Dictionary = task.stick_hint if _overlay == null else {}
 	var hl: Vector2 = hints.get("left", Vector2.ZERO)
@@ -583,7 +563,6 @@ func _update_hud() -> void:
 		(_meter_fill.get_theme_stylebox("panel") as StyleBoxFlat).bg_color = col
 	if _nolink:
 		_nolink.visible = not task.link_ok and view == "ugv"
-	_update_choice()
 	if _bar_fill:
 		_bar_fill.size = Vector2(120.0 * task.progress, 6)
 	if _bar_text:
@@ -671,6 +650,56 @@ func _ground_ring(center: Vector3, radius: float) -> void:
 	_marks.draw_polyline(pts, col, 3.0, true)
 
 
+# --- Survey camera ----------------------------------------------------------
+
+## The shutter: the task decides whether the picture will do; a good one is then taken from the
+## drone's own camera, whatever view is on screen.
+func shutter() -> void:
+	if _paused or _finished or task is not PhotoTask or not task.kit:
+		return
+	var r: Dictionary = task.shoot(sim)
+	if not r["ok"]:
+		_sound.play("fail")
+		return
+	_sound.play("shutter")
+	PhotoKit.flash(_hud)
+	var i: int = task.photos.size() - 1
+	var img := await _picture()
+	if img != null and i < task.photos.size():
+		task.photos[i]["image"] = img
+
+
+## Renders the drone camera's view once, small: kept only for this flight's report.
+func _picture() -> Image:
+	# Without a screen (the tests in CI) nothing is drawn, and a frame never finishes drawing.
+	if DisplayServer.get_name() == "headless":
+		return null
+	var sv := SubViewport.new()
+	sv.size = Vector2i(Report.THUMB * 2.0)
+	sv.world_3d = get_viewport().world_3d
+	sv.render_target_update_mode = SubViewport.UPDATE_ONCE
+	var c := Camera3D.new()
+	c.fov = Photo.FOV
+	c.far = cam.far
+	sv.add_child(c)
+	add_child(sv)
+	c.position = Photo.camera_position(sim.pos, sim.yaw)
+	c.global_basis = Photo.camera_basis(sim.yaw, task.tilt)
+	c.current = true
+	await RenderingServer.frame_post_draw
+	var img := sv.get_texture().get_image()
+	sv.queue_free()
+	return img if img != null and not img.is_empty() else null
+
+
+func report_answer(i: int, option: String) -> void:
+	task.answer(i, option)
+	if task.report_open:
+		_show_overlay(Report.card(self, task))
+	else:
+		_hide_overlay()
+
+
 # --- Pause, passed, crashed --------------------------------------------------
 
 func pause() -> void:
@@ -678,14 +707,7 @@ func pause() -> void:
 		return
 	_paused = true
 	_sound.hush(true)
-	_left.release()
-	_right.release()
-	var col := UI.vbox(12)
-	col.add_child(UI.label(tr("PAUSE"), 20, 600, "text", true))
-	col.add_child(UI.primary(tr("RESUME"), resume, "play"))
-	col.add_child(_secondary(tr("RESTART"), restart))
-	col.add_child(_secondary(tr("EXIT"), leave))
-	_show_overlay(col)
+	_show_overlay(FlightCards.pause(self))
 
 
 func resume() -> void:
@@ -716,105 +738,27 @@ func _finish() -> void:
 	_finished = true
 	_sound.stop_motors()
 	_sound.play("chime")
-	_left.release()
-	_right.release()
 	if task.is_mission:
 		Prefs.mark_mission(task_key)
 	else:
 		Prefs.mark_passed(vehicle, Curriculum.lessons(vehicle, mode).find(task_key))
-	var col := UI.vbox(12)
-	col.add_child(UI.label(tr("PASSED_KIDS") if mode == "kids" else tr("PASSED"), 22, 600, "text", true))
-	col.add_child(_rating_block())
-	if task.summary != "":
-		var s := tr(task.summary)
-		if not task.summary_args.is_empty() and s.contains("%"):
-			s = s % task.summary_args
-		col.add_child(UI.label(s, 14, 500, "muted"))
-	var next := _next_task()
-	if next != "":
-		col.add_child(UI.primary(tr("NEXT_LESSON"), func(): app.open_flight(vehicle, next), "play"))
-	else:
-		col.add_child(UI.primary(tr("DONE"), leave, "check"))
-	# Side by side, so the card fits a phone held sideways.
-	var pair := UI.hbox(10)
-	for b in [_secondary(tr("AGAIN"), restart)] + ([_secondary(tr("EXIT"), leave)] if next != "" else []):
-		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		pair.add_child(b)
-	col.add_child(pair)
-	_show_overlay(col)
-
-
-## Sunflowers for this pass, the time against the best one, and what earns the next sunflower.
-func _rating_block() -> Control:
 	var got := Rating.sunflowers(task_key, mode, sim.time, _touches)
 	var before := Prefs.record(task_key, got, sim.time)
-	var box := UI.vbox(6)
-	var row := UI.hbox(6)
-	row.alignment = BoxContainer.ALIGNMENT_CENTER
-	for i in Rating.MAX:
-		var on := i < got
-		row.add_child(Glyph.make("sunflower" if on else "sunflower_off", 40, Pal.c("accent" if on else "line")))
-	box.add_child(row)
-	# Kids see no numbers: the sunflowers and the tip say it all.
-	if mode != "kids":
-		var t := FlightTask.clock(sim.time)
-		var line := ""
-		if before.is_empty():
-			line = tr("RESULT_FIRST") % t
-		elif sim.time < float(before["t"]):
-			line = tr("RESULT_RECORD") % t
-		else:
-			line = tr("RESULT_TIME") % [t, FlightTask.clock(float(Prefs.best_of(task_key)["t"]))]
-		box.add_child(UI.label(line, 14, 600, "text", false, false))
-	var tip := Rating.next_tip(task_key, mode, got)
-	if tip[0] != "":
-		var s := tr(tip[0])
-		if not tip[1].is_empty():
-			s = s % tip[1]
-		box.add_child(UI.label(s, 13, 500, "muted"))
-	return box
+	_show_overlay(FlightCards.passed(self, got, before, _next_task()))
 
 
 func _crashed() -> void:
+	_finished = true
 	_sound.stop_motors()
 	_sound.play("thud")
-	if sim is UgvSim:
-		_finished = true
-		var c := UI.vbox(12)
-		c.add_child(UI.label(tr("CRASHED_UGV"), 22, 600, "text", true))
-		var tipped := false
-		for e in sim.events:
-			tipped = tipped or e["type"] == "tipped"
-		var why := tr("CRASHED_UGV_TIP") if tipped else tr("CRASHED_UGV_HIT")
-		c.add_child(UI.label(why % (FlightTask.num(sim.crash_speed, 0) if tipped else FlightTask.num(sim.crash_speed)), 14, 500, "muted"))
-		c.add_child(UI.primary(tr("AGAIN"), restart, "play"))
-		c.add_child(_secondary(tr("EXIT"), leave))
-		_show_overlay(c)
-		return
-	_finished = true
-	var col := UI.vbox(12)
-	col.add_child(UI.label(tr("CRASHED"), 22, 600, "text", true))
-	col.add_child(UI.label(tr("CRASHED_TEXT") % FlightTask.num(sim.crash_speed), 14, 500, "muted"))
-	col.add_child(UI.primary(tr("AGAIN"), restart, "play"))
-	col.add_child(_secondary(tr("EXIT"), leave))
-	_show_overlay(col)
+	_show_overlay(FlightCards.crashed(self))
 
 
 func _not_this_time() -> void:
 	_finished = true
 	_sound.stop_motors()
 	_sound.play("fail")
-	_left.release()
-	_right.release()
-	var col := UI.vbox(12)
-	col.add_child(UI.label(tr("NOT_THIS_TIME"), 22, 600, "text", true))
-	var s := tr(task.summary)
-	if not task.summary_args.is_empty() and s.contains("%"):
-		s = s % task.summary_args
-	col.add_child(UI.label(s, 14, 500, "muted"))
-	col.add_child(UI.primary(tr("AGAIN"), restart, "play"))
-	col.add_child(_secondary(tr("EXIT"), leave))
-	_show_overlay(col)
+	_show_overlay(FlightCards.not_this_time(self))
 
 
 func _next_task() -> String:
@@ -827,40 +771,13 @@ func _next_task() -> String:
 	return ""
 
 
-func _secondary(text: String, on_press: Callable) -> Control:
-	var c := CenterContainer.new()
-	c.custom_minimum_size = Vector2(0, 48)
-	c.add_child(UI.label(text, 15, 700, "text", false, false))
-	return UI.tappable(c, Pal.c("surface2"), on_press, text, 16, 0)
-
-
 func _show_overlay(content: Control) -> void:
 	_hide_overlay()
 	# Touches behind a card must not move the sticks.
 	for st in [_left, _right]:
 		st.release()
 		st.enabled = false
-	_overlay = ColorRect.new()
-	var dim := Pal.c("bg")
-	dim.a = 0.55
-	(_overlay as ColorRect).color = dim
-	_overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	_overlay.mouse_filter = Control.MOUSE_FILTER_STOP
-	# Centred, and scrollable when the card is taller than the screen (large text, a low phone).
-	var scroll := ScrollContainer.new()
-	scroll.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	_overlay.add_child(scroll)
-	var column := VBoxContainer.new()
-	column.alignment = BoxContainer.ALIGNMENT_CENTER
-	column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	column.custom_minimum_size = Vector2(0, get_viewport_rect().size.y)
-	scroll.add_child(column)
-	var center := CenterContainer.new()
-	column.add_child(center)
-	var card := UI.panel(content, Pal.c("surface"), 22, 20)
-	card.custom_minimum_size = Vector2(360, 0)
-	center.add_child(card)
+	_overlay = FlightCards.overlay(content, get_viewport_rect().size.y)
 	add_child(_overlay)
 
 

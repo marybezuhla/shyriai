@@ -538,3 +538,46 @@ func _van(at: Vector3) -> void:
 			var wi := _mesh(w, Color("#39254F"), at + Vector3(x, 0.35, z))
 			wi.rotation.z = PI / 2.0
 	obstacles.append({"box": AABB(at + Vector3(-1.0, 0, -2.1), Vector3(2.0, 1.8, 4.2))})
+
+
+# --- For the survey course ------------------------------------------------------
+
+## A camp tent: a low prism, the colour of canvas.
+func add_tent(at: Vector3, rot: float) -> void:
+	var prism := PrismMesh.new()
+	prism.size = Vector3(2.2, 1.3, 2.8)
+	var g := height(at.x, at.z)
+	_mesh(prism, Color("#C9B98F"), Vector3(at.x, g + 0.65, at.z), rot)
+
+
+## A white board on a roof's ridge with a big number, readable from above only up close: the lesson
+## about height and detail.
+func add_roof_number(house: int, n: int) -> void:
+	var h: Dictionary = houses[house]
+	var at: Vector3 = h["pos"] + Vector3(0, 6.15, 0)
+	var board := _mesh(_box(Vector3(2.4, 0.06, 1.6)), Color("#F4EEE2"), at, h["rot"])
+	board.rotation.y = h["rot"]
+	var l := Label3D.new()
+	l.text = str(n)
+	l.font = Pal.font(800)
+	l.font_size = 96
+	l.pixel_size = 0.011
+	l.modulate = Color("#2A1D3B")
+	l.outline_size = 0
+	l.position = at + Vector3(0, 0.05, 0)
+	l.rotation = Vector3(-PI / 2.0, h["rot"] + PI, 0)
+	add_child(l)
+
+
+## A water tower: a tall pole with a tank on top, to fly round with the camera on it.
+func add_tower(at: Vector3) -> void:
+	add_pole(at, 9.0)
+	var tank := CylinderMesh.new()
+	tank.top_radius = 1.4
+	tank.bottom_radius = 1.2
+	tank.height = 2.2
+	tank.radial_segments = 14
+	var g := height(at.x, at.z)
+	_mesh(tank, pal["roof"], Vector3(at.x, g + 10.0, at.z))
+	obstacles.append({"cyl": Vector2(at.x, at.z), "r": 1.4, "h": 2.2, "y": g + 8.9})
+

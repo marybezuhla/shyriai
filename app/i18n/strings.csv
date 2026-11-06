@@ -110,7 +110,7 @@ MIS_CAM_KITTEN_DESC,Find the kitten and show the rescuers where to go.,"Знай
 MIS_CAM_SEARCH,Search in a field,Пошук у полі
 MIS_CAM_SEARCH_DESC,Survey the field and find a person who got lost.,"Оглянь поле й знайди людину, яка загубилася."
 MIS_CAM_SURVEY,Survey after a storm,Огляд після негоди
-MIS_CAM_SURVEY_DESC,Fly over the village and mark damaged roofs.,Облети село й познач пошкоджені дахи.
+MIS_CAM_SURVEY_DESC,"Picture every roof from above, land, and mark the damaged ones from the pictures.","Сфотографуй кожен дах згори, сядь і за знімками познач пошкоджені."
 MIS_FPV_HOOPS,Hoops,Обручі
 MIS_FPV_HOOPS_DESC,Fly through every colourful hoop.,Пролети крізь усі кольорові обручі.
 MIS_FPV_BALLOONS,Balloons and landing,Кульки й посадка
@@ -246,16 +246,11 @@ HINT_SEARCH_MARK,Hover over the person: %d more s,Зависни над люди
 HINT_SEARCH_FOUND,Found! The mark has gone to the rescuers,Знайдено! Позначку передано рятувальникам
 HINT_SEARCH_BACK,Fly back and land by the pad,Повертайся й сідай біля майданчика
 SUM_SEARCH,The person was found and the drone was back in %d:%02d.,"Людину знайдено, дрон повернувся за %d:%02d."
-HINT_SURVEY_UP,Take off and look at the roofs from above,Злітай і оглядай дахи згори
-HINT_SURVEY_GO,Fly to the next house: %d to go,Лети до наступної хати: ще %d
-HINT_SURVEY_HIGHER,Climb above the roof: over 7 m,Піднімись вище за дах: понад 7 м
-HINT_SURVEY_LOOK,Look at the roof through the drone camera,Придивися до даху з камери дрона
-HINT_SURVEY_NOTED,Noted,Записано
+HINT_SURVEY_UP,Take off and picture the roofs from above,Злітай і фотографуй дахи згори
+HINT_SURVEY_GO,Next roof: %d to go. Stop over it and shoot,Наступний дах: ще %d. Зупинись над ним і знімай
 Q_ROOF,Is this roof damaged?,Цей дах пошкоджено?
 OPT_DAMAGED,Damaged,Пошкоджено
 OPT_INTACT,Intact,Цілий
-SUM_SURVEY,Every roof assessed correctly: %d of %d.,Усі дахи оглянуто правильно: %d з %d.
-FAIL_SURVEY,"%d of %d right. Damaged roofs have a dark hole, and fallen tiles lie on the ground.","Правильно %d з %d. На пошкоджених дахах темна діра, а на землі лежать уламки черепиці."
 SOURCES,Sources,Джерела
 TH_CHECKLIST_BODY,"The drone and radio batteries are charged; no updates install in the field.|Propellers are whole, without cracks or chips, and fixed tight.|The body, camera and gimbal are undamaged; the battery has clicked into place.|Weather: no rain or fog, and the wind is lighter than the maker allows.|The place: you have permission, and there are no people, wires, trees or buildings in the way.|The return-to-home height is set above the tallest obstacles around.|Wait for the satellites and the home point to be recorded before take-off.|Keep the drone in sight for the whole flight.","Батареї дрона й пульта заряджені, оновлення не встановлюються просто на полі.|Гвинти цілі, без тріщин і щербин, міцно закріплені.|Корпус, камера й підвіс без пошкоджень, кріплення батареї клацнуло.|Погода: без дощу й туману, вітер слабший, ніж дозволяє виробник.|Місце: є дозвіл, поруч немає людей, дротів, дерев і будівель на шляху.|Висоту автоповернення встановлено вище за найвищі перешкоди довкола.|Дочекайся супутників і запису точки старту, перш ніж злітати.|Тримай дрон у полі зору весь політ."
 TH_CHECKLIST_KIDS,"Before a flight, a grown-up checks the drone with you.|Are the propellers whole? Is the battery charged?|No people, animals or trees nearby?|Watch the drone the whole time it flies.","Перед польотом дорослий перевіряє дрон разом з тобою.|Гвинти цілі? Батарея заряджена?|Поруч немає людей, тварин і дерев?|Дивись на дрон увесь час, поки він літає."
@@ -581,3 +576,105 @@ MONTH_9,September,вересня
 MONTH_10,October,жовтня
 MONTH_11,November,листопада
 MONTH_12,December,грудня
+VEH_SURVEY,Aerial survey,Аерозйомка й розвідка
+VEH_SURVEY_DESC,"Camera down, sharp pictures, search and reports","Камера донизу, чіткі знімки, пошук і звіт"
+VEH_SURVEY_KIDS,Photographer,Фотограф
+VEH_SURVEY_DESC_KIDS,Take pictures from the sky,Фотографуй з неба
+TILT,Camera angle,Кут камери
+TILT_FORWARD,Ahead,Уперед
+TILT_ANGLED,Angled,Під кутом
+TILT_DOWN,Down,Донизу
+SHUTTER,Take a picture,Зробити знімок
+PH_OK,Picture taken,Знімок є
+PH_NOT_IN_FRAME,Not in the frame: turn or fly so it is on screen,"Не в кадрі: повернись чи підлети, щоб воно було на екрані"
+PH_CENTER,Put it in the middle of the frame,Візьми його в центр кадру
+PH_TOO_FAR,Too far: the detail is lost. Come closer or lower,Задалеко: деталей не видно. Підлети ближче чи нижче
+PH_TOO_CLOSE,Too close: it does not fit. Back off or climb,Заблизько: не вміщується. Відлети чи піднімися
+PH_BLUR,"Smeared: stop and hold still, then shoot","Змазано: зупинись і зависни, тоді знімай"
+PH_TILT_DOWN,Turn the camera straight down,Поверни камеру прямо донизу
+PH_TILT_ANGLED,Tilt the camera down,Нахили камеру донизу
+PH_TILT_FORWARD,Turn the camera to look ahead,Поверни камеру вперед
+PH_NOT_ALL,Not all of it is in the picture: climb higher,На знімку не все: піднімися вище
+PH_TAKEN,That one is pictured already,Це вже сфотографовано
+PH_NOTHING,Nothing to picture here,Тут нічого фотографувати
+PH_FULL,The camera is full: land,Камера заповнена: сідай
+HINT_PH_UP,Take off: the camera works from the air,Злітай: камера працює з повітря
+REPORT_N,Report · picture %d of %d,Звіт · знімок %d з %d
+REPORT_WRONG,"Picture %d: answered “%s”, in fact “%s”","Знімок %d: відповідь «%s», насправді «%s»"
+SUM_REPORT,Report done: %d of %d right.,Звіт готовий: правильно %d з %d.
+FAIL_REPORT,Report: %d of %d right. Look at the mistakes below and try again.,Звіт: правильно %d з %d. Подивись на помилки нижче й спробуй ще раз.
+HINT_REPORT_LAND,All pictures taken. Fly back and land to write the report,"Усі знімки є. Повертайся й сідай, щоб скласти звіт"
+HINT_SURVEY_TILT,Tilt the camera down to see the roofs,"Нахили камеру донизу, щоб бачити дахи"
+Q_NUMBER,Which number is on the roof?,Яке число на даху?
+Q_FIND_SIDE,"Where is the person, seen from the take-off point?","Де людина, якщо дивитися з місця зльоту?"
+OPT_LEFT,Left,Ліворуч
+OPT_AHEAD,Ahead,Прямо
+OPT_RIGHT,Right,Праворуч
+Q_COUNT,How many tents are in the camp?,Скільки наметів у таборі?
+SRV_TILT,Camera down,Камера донизу
+SRV_TILT_NOTE,The gimbal and a picture from above,Підвіс камери й знімок згори
+SRV_TILT_GOAL,"Hover over the mark, turn the camera straight down and take a picture with the mark in the middle.","Зависни над міткою, поверни камеру прямо донизу й сфотографуй так, щоб мітка була посередині."
+SRV_TILT_PASS,Camera down | Mark in the middle,Камера донизу | Мітка посередині
+HINT_SRV_TILT,Hover over the mark and shoot with it in the middle,"Зависни над міткою й знімай, щоб вона була посередині"
+HINT_SRV_TILT_DOWN,Turn the camera down: the camera angle button,Поверни камеру донизу: кнопка кута камери
+SUM_SRV_TILT,The mark is in the middle of the picture. This is how things are looked at from above.,Мітка посередині знімка. Так оглядають згори.
+SRV_SHARP,A sharp picture,Чіткий знімок
+SRV_SHARP_NOTE,"Stop, aim, shoot","Зупинись, наведи, зніми"
+SRV_SHARP_GOAL,Picture the three round signs. A moving or turning drone smears the picture: stop first.,Сфотографуй три круглі знаки. Знімок у русі чи на повороті змазується: спершу зупинись.
+SRV_SHARP_PASS,3 signs | Sharp,3 знаки | Чітко
+HINT_SRV_SHARP,"Fly to the next sign, stop and shoot","Лети до наступного знака, зупинись і знімай"
+SUM_SRV_SHARP,"Three sharp pictures. Stop, aim, shoot: the rule of every operator.","Три чіткі знімки. Зупинись, наведи, зніми: правило кожного оператора."
+SRV_DETAIL,Height and detail,Висота й деталі
+SRV_DETAIL_NOTE,Read the number on the roof,Прочитай число на даху
+SRV_DETAIL_GOAL,"A number is written on a roof. From high up it cannot be read: find the height where it can, picture it, then say which number it is.","На даху написано число. З великої висоти його не прочитати: знайди висоту, з якої видно, сфотографуй і скажи, яке воно."
+SRV_DETAIL_PASS,Camera down | The right number,Камера донизу | Правильне число
+HINT_SRV_DETAIL,"Come down over the roof until the number can be read, then shoot","Знижуйся над дахом, доки число не стане видно, тоді знімай"
+SUM_SRV_DETAIL,"Read right. Higher up shows more ground, lower shows more detail.","Прочитано правильно. Вище видно більше землі, нижче більше деталей."
+SRV_ORBIT,Around it,Облет навколо
+SRV_ORBIT_NOTE,Turn and slide together,Поворот і рух убік разом
+SRV_ORBIT_GOAL,"Fly a full circle round the water tower, 8 to 18 m from it, keeping its tank in the middle of the camera all the way.","Облети водонапірну вежу по колу на відстані 8–18 м, весь час тримаючи її бак посередині кадру."
+SRV_ORBIT_PASS,Full circle | Tank in the middle,Повне коло | Бак посередині
+HINT_ORBIT_RING,"Keep 8 to 18 m from the tower, 6 to 16 m up","Тримайся 8–18 м від вежі, на висоті 6–16 м"
+HINT_ORBIT_CENTRE,Turn to keep the tank in the middle of the camera,"Повертай дрон, щоб бак був посередині кадру"
+HINT_ORBIT_GO,Slide sideways and turn together: %d %% of the circle,Рух убік і поворот разом: %d %% кола
+SUM_SRV_ORBIT,A full circle with the tower always in view. This is how a thing is looked at from every side.,"Повне коло, і вежа весь час у кадрі. Так оглядають об’єкт з усіх боків."
+SRV_GRID,The grid,Сітка
+SRV_GRID_NOTE,How maps are made,Як роблять карти
+SRV_GRID_GOAL,"Fly over all nine squares of the field in lanes: camera down, 12 to 20 m up, not faster than 5 m/s.","Пролети над усіма дев’ятьма квадратами поля смугами: камера донизу, висота 12–20 м, не швидше за 5 м/с."
+SRV_GRID_PASS,9 squares | 12–20 m | Camera down,9 квадратів | 12–20 м | Камера донизу
+HINT_GRID_HEIGHT,Hold 12 to 20 m,Тримай висоту 12–20 м
+HINT_GRID_SLOW,Slower: no faster than 5 m/s,Повільніше: не швидше за 5 м/с
+HINT_SRV_GRID,Fly over the next square: %d to go,Пролети над наступним квадратом: ще %d
+SUM_SRV_GRID,The whole field is pictured. From such pictures a map is put together.,Усе поле сфотографовано. З таких знімків складають карту.
+SRV_KIDS_FLOWER,Sunflowers,Соняшники
+SRV_KIDS_FLOWER_NOTE,The first picture,Перший знімок
+SRV_KIDS_FLOWER_GOAL,Fly to the sunflowers and take a picture of them.,Підлети до соняшників і сфотографуй їх.
+SRV_KIDS_FLOWER_PASS,Sunflowers | A picture,Соняшники | Знімок
+HINT_SRV_KIDS_FLOWER,Fly to the sunflowers and press the round button,Лети до соняшників і натисни круглу кнопку
+SUM_SRV_KIDS_FLOWER,What a sunny picture!,Який сонячний знімок!
+SRV_KIDS_KITTEN,Kitten,Кошеня
+SRV_KIDS_KITTEN_NOTE,Small and fluffy,Маленьке й пухнасте
+SRV_KIDS_KITTEN_GOAL,Find the kitten in the field and take its picture.,Знайди кошеня в полі й сфотографуй його.
+SRV_KIDS_KITTEN_PASS,Kitten | A picture,Кошеня | Знімок
+HINT_SRV_KIDS_KITTEN,Fly closer to the kitten and take a picture,Підлети ближче до кошеняти й сфотографуй
+SUM_SRV_KIDS_KITTEN,The kitten is in the picture!,Кошеня на знімку!
+SRV_KIDS_VAN,Blue van,Синій фургон
+SRV_KIDS_VAN_NOTE,Big and blue,Великий і синій
+SRV_KIDS_VAN_GOAL,Find the blue van and take its picture.,Знайди синій фургон і сфотографуй його.
+SRV_KIDS_VAN_PASS,Van | A picture,Фургон | Знімок
+HINT_SRV_KIDS_VAN,Fly to the blue van and take a picture,Лети до синього фургона й сфотографуй
+SUM_SRV_KIDS_VAN,A fine picture of the van!,Гарний знімок фургона!
+MIS_SRV_ALBUM,Photo album,Фотоальбом
+MIS_SRV_ALBUM_DESC,"Picture the sunflowers, the kitten and the van in one flight.","Сфотографуй соняшники, кошеня й фургон за один політ."
+HINT_MIS_SRV_ALBUM,"Sunflowers, kitten, van: picture them all","Соняшники, кошеня, фургон: сфотографуй усіх"
+SUM_MIS_SRV_ALBUM,The album is full!,Альбом готовий!
+MIS_SRV_FIND,Search the field,Пошук у полі
+MIS_SRV_FIND_DESC,"Someone in a red jacket is lost. Find them, picture them, and report where they are.","Людина в червоній куртці загубилася. Знайди її, сфотографуй і доповідай, де вона."
+HINT_FIND_UP,Take off: search from the air,Злітай: шукай з повітря
+HINT_FIND_HIGHER,Climb above 8 m to see more of the field,"Піднімись вище 8 м, щоб бачити більше поля"
+HINT_FIND_PATTERN,"Search in a widening square: ahead, left, back, right, each side longer","Шукай розширеним квадратом: уперед, ліворуч, назад, праворуч, щоразу далі"
+MIS_SRV_COUNT,Count the tents,Лічба наметів
+MIS_SRV_COUNT_DESC,A camp has sprung up after a flood. Picture it all at once and count the tents.,Після повені з’явився табір. Сфотографуй його цілком і порахуй намети.
+HINT_COUNT_UP,Take off and fly to the camp,Злітай і лети до табору
+HINT_COUNT_GO,"Climb until every tent fits in the frame, then shoot","Піднімайся, доки всі намети не вмістяться в кадр, тоді знімай"
+FREE_SURVEY,Free flight,Вільний політ

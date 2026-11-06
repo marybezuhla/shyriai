@@ -2,7 +2,7 @@
 
 Тренажер пілотування для Android: камерні й FPV-дрони та наземні роботизовані комплекси (НРК). Для дітей і дорослих. Українська та англійська. Безкоштовно, без реклами й акаунтів, без інтернету. Потрібен Android 7 або новіший і OpenGL ES 3.0.
 
-> **Тестова версія.** Є всі три машини: камерний дрон (8 уроків, 3 місії), FPV-дрон (6 уроків, 4 місії) і НРК (5 уроків, 4 місії), а також картки теорії. До версії 1.0 додаються вільний політ, оцінки за уроки, посвідчення пілота, погода й нові місії, а потім незалежний аудит.
+> **Тестова версія.** Є всі три машини: камерний дрон (8 уроків, 2 місії), FPV-дрон (6 уроків, 4 місії) і НРК (5 уроків, 4 місії), курс аерозйомки й розвідки (5 уроків, 3 місії; для дітей 3 уроки й фотоальбом), а також картки теорії. До версії 1.0 додаються перехоплення на навчальних мішенях, погода й нові місії, а потім незалежний аудит.
 
 ## Задум
 
@@ -12,6 +12,7 @@
 - 👀 **Три камери.** «З землі»: як пілот, що стоїть із пультом, так вчаться літати по-справжньому. «За дроном»: легше для початку. «Камера»: вигляд з самого дрона, для пошуку й огляду.
 - 🎯 **Навчання й місії.** Уроки від простого до складного з чіткими умовами зарахування. Місії — ті самі навички в сюжеті: пошук у полі, траса з воротами, доставка вантажу, евакуація пораненого. Для дітей — кошеня на даху, обручі, посилка бабусі.
 - 🎮 **Керування.** Екранні стіки, геймпад і справжній пульт через USB, щоб моторна памʼять переносилася на реальний дрон. Розкладка Mode 2 або Mode 1 і мʼякші стіки для точних рухів.
+- 📷 **Аерозйомка й розвідка.** Окремий курс: камера донизу, чіткий знімок, висота й деталі, облет, сітка; місії з пошуку людини, огляду дахів і лічби наметів зі звітом після посадки. Для дітей «Фотограф».
 - 🌻 **Соняшники й посвідчення.** За кожен урок від одного до трьох соняшників: за проходження, за політ без дотиків і за швидкість. Найкращий час зберігається. За всі уроки машини видається посвідчення пілота, а в дитячому режимі грамота.
 - 🕊️ **Вільний політ.** Без завдання: вітер, час доби й золоті кулі для розваги.
 - 🔊 **Звук.** Мотори, що відгукуються на газ, дзвіночок за зарахований урок і сигнал втрати звʼязку. Звук створюється в коді, без аудіофайлів, і вимикається в налаштуваннях.
@@ -43,7 +44,7 @@
 
 A piloting trainer for Android: camera and FPV drones, and ground robots (UGVs). For kids and adults. Ukrainian and English. Free, no ads, no accounts, no internet. Requires Android 7 or newer and OpenGL ES 3.0.
 
-> **Test version.** All three vehicles are here: the camera drone (8 lessons, 3 missions), the FPV drone (6 lessons, 4 missions) and the UGV (5 lessons, 4 missions), plus the theory cards. Before version 1.0 come free flight, lesson ratings, a pilot's licence, weather and new missions, then an independent audit.
+> **Test version.** All three vehicles are here: the camera drone (8 lessons, 2 missions), the FPV drone (6 lessons, 4 missions) and the UGV (5 lessons, 4 missions), the aerial survey course (5 lessons, 3 missions; 3 lessons and a photo album for kids), plus the theory cards. Before version 1.0 come interception on training targets, weather and new missions, then an independent audit.
 
 ## The idea
 
@@ -53,6 +54,7 @@ A piloting trainer for Android: camera and FPV drones, and ground robots (UGVs).
 - 👀 **Three cameras.** From the ground: as a pilot standing with the radio, the way real flying is learnt. Behind the drone: easier to start with. Camera: the view from the drone itself, for searching and surveying.
 - 🎯 **Lessons and missions.** Lessons from easy to hard, each with clear pass conditions. Missions use the same skills in a story: a search in a field, a gate course, cargo delivery, casualty evacuation. For kids: a kitten on a roof, hoops, a parcel for granny.
 - 🎮 **Controls.** On-screen sticks, a gamepad, and a real radio over USB, so muscle memory carries over to a real drone. Mode 2 or Mode 1 layout, and softer sticks for fine moves.
+- 📷 **Aerial survey.** A course of its own: camera down, sharp pictures, height and detail, orbit, grid; missions to find a person, check roofs and count tents, with a report after landing. "Photographer" for kids.
 - 🌻 **Sunflowers and licences.** One to three sunflowers per lesson: for passing, for flying without a touch, and for speed. Best times are kept. All of a vehicle's lessons earn a pilot's licence, or a certificate in Kids mode.
 - 🕊️ **Free flight.** No task: wind, time of day and gold balls for fun.
 - 🔊 **Sound.** Motors that answer the throttle, a chime when a lesson counts and a beep when the link drops. The sound is made in code, with no audio files, and can be turned off in settings.
