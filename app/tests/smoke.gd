@@ -67,6 +67,11 @@ func _visit(lang: String, theme: String) -> void:
 	for card in Curriculum.THEORY:
 		main.open_theory(card)
 		await _shot("%s-%s-%s" % [lang, theme, card.to_lower()])
+		# One right and one wrong answer in "Check yourself".
+		var sc = main.stack.back()
+		sc.picked = {"Q_%s_1" % card: "A", "Q_%s_2" % card: "B"}
+		sc.rebuild()
+		await _shot("%s-%s-%s-quiz" % [lang, theme, card.to_lower()])
 		main.back()
 	main.open_soon("Test")
 	await _shot("%s-%s-soon" % [lang, theme])

@@ -656,3 +656,79 @@ static func flap(butterfly: Node3D, t: float) -> void:
 	butterfly.get_node("hinge_l").rotation.z = -a
 	butterfly.get_node("hinge_r").rotation.z = a
 
+
+# --- For the aid drop and the lost dog ---------------------------------------------
+
+## A river across the field: a band of water between `z0` and `z1`. Water does not change the
+## ground height; a falling kit that lands on it is lost.
+var river := Vector2.INF
+
+
+func add_river(z0: float, z1: float) -> void:
+	river = Vector2(z0, z1)
+	var plane := PlaneMesh.new()
+	plane.size = Vector2(200.0, absf(z1 - z0))
+	var mi := MeshInstance3D.new()
+	mi.mesh = plane
+	mi.material_override = _shared_mat(Color("#5B9BD5"))
+	mi.position = Vector3(0, 0.06, (z0 + z1) / 2.0)
+	add_child(mi)
+	# Low banks of darker earth along both sides.
+	for z in [z0, z1]:
+		_mesh(_box(Vector3(200.0, 0.1, 0.6)), pal["mud"], Vector3(0, 0.05, z))
+
+
+func in_river(at: Vector3) -> bool:
+	return river != Vector2.INF and at.z <= maxf(river.x, river.y) and at.z >= minf(river.x, river.y)
+
+
+## A first-aid kit: a white box with a red cross, small enough to carry under the drone.
+func add_kit() -> Node3D:
+	var n := Node3D.new()
+	add_child(n)
+	var box := MeshInstance3D.new()
+	box.mesh = _box(Vector3(0.36, 0.22, 0.26))
+	box.material_override = _shared_mat(Color("#FFFFFF"))
+	n.add_child(box)
+	for size in [Vector3(0.22, 0.01, 0.07), Vector3(0.07, 0.01, 0.2)]:
+		var c := MeshInstance3D.new()
+		c.mesh = _box(size)
+		c.material_override = _shared_mat(Color("#D9473B"))
+		c.position = Vector3(0, 0.115, 0)
+		n.add_child(c)
+	return n
+
+
+## A small brown dog with a wagging tail, for the kids. Returns its node.
+func add_dog(at: Vector3) -> Node3D:
+	var n := Node3D.new()
+	n.position = Vector3(at.x, height(at.x, at.z), at.z)
+	add_child(n)
+	var fur := _mat(Color("#9C6B43"))
+	var dark := _mat(Color("#5A3B26"))
+	var parts := [
+		[_box(Vector3(0.75, 0.32, 0.32)), fur, Vector3(0, 0.42, 0)],
+		[_box(Vector3(0.3, 0.28, 0.28)), fur, Vector3(0.45, 0.62, 0)],
+		[_box(Vector3(0.12, 0.1, 0.16)), dark, Vector3(0.64, 0.58, 0)],
+	]
+	for leg in [Vector3(0.28, 0.13, 0.12), Vector3(0.28, 0.13, -0.12), Vector3(-0.28, 0.13, 0.12), Vector3(-0.28, 0.13, -0.12)]:
+		parts.append([_box(Vector3(0.09, 0.26, 0.09)), fur, leg])
+	for z in [-0.11, 0.11]:
+		parts.append([_box(Vector3(0.08, 0.16, 0.05)), dark, Vector3(0.42, 0.78, z)])
+	for part in parts:
+		var mi := MeshInstance3D.new()
+		mi.mesh = part[0]
+		mi.material_override = part[1]
+		mi.position = part[2]
+		n.add_child(mi)
+	var tail := Node3D.new()
+	tail.name = "tail"
+	tail.position = Vector3(-0.38, 0.52, 0)
+	n.add_child(tail)
+	var t := MeshInstance3D.new()
+	t.mesh = _box(Vector3(0.06, 0.28, 0.06))
+	t.material_override = fur
+	t.position = Vector3(0, 0.12, 0)
+	tail.add_child(t)
+	return n
+

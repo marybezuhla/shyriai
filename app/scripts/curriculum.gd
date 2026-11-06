@@ -33,7 +33,7 @@ const LESSONS := {
 
 ## Missions per vehicle and mode family: kids get their own stories.
 const MISSIONS := {
-	"camera": {"kids": ["MIS_CAM_KITTEN"], "adult": ["MIS_CAM_SEARCH"]},
+	"camera": {"kids": ["MIS_CAM_KITTEN", "MIS_CAM_DOG"], "adult": ["MIS_CAM_SEARCH", "MIS_CAM_MEDS"]},
 	"fpv": {"kids": ["MIS_FPV_HOOPS", "MIS_FPV_BALLOONS"], "adult": ["MIS_FPV_RACE", "MIS_FPV_TREES"]},
 	"ugv": {"kids": ["MIS_UGV_VET", "MIS_UGV_PARCEL"], "adult": ["MIS_UGV_CARGO", "MIS_UGV_EVAC"]},
 	"survey": {"kids": ["MIS_SRV_ALBUM"], "adult": ["MIS_CAM_SURVEY", "MIS_SRV_FIND", "MIS_SRV_COUNT"]},
@@ -41,6 +41,9 @@ const MISSIONS := {
 }
 
 const THEORY := ["TH_CHECKLIST", "TH_BATTERY", "TH_SIGNAL", "TH_RULES"]
+## "Check yourself" under each theory card: how many questions it has. A question is Q_<card>_<n>
+## (or Q_<card>_KIDS_<n>); its right answer is _A, the others _B and _C, and _WHY says why.
+const QUIZ := {"adult": 3, "kids": 2}
 
 ## Flying without self-levelling is for Adult mode only.
 const PRO_ONLY := ["FPV_HORIZON", "FPV_ACRO"]

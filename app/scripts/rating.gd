@@ -26,6 +26,9 @@ const PAR := {
 	"INT_CHASE": 30, "INT_TURN": 30, "INT_LEAD": 30, "INT_HEADON": 30, "INT_NIGHT": 30,
 	"INT_KIDS_BUTTERFLY": 30, "MIS_INT_KIDS": 50,
 	"MIS_INT_PATROL": 90, "MIS_INT_FAST": 30, "MIS_INT_FOG": 90,
+	"MIS_CAM_MEDS": 35,
+	# The test pilot knows where the puppy is; a child looks for it by "warmer, colder".
+	"MIS_CAM_DOG": 90,
 }
 ## Kids get half as much time again: the third sunflower should be reachable, not a race.
 const KIDS_SLACK := 1.5
