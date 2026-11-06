@@ -38,6 +38,18 @@ const FILES := {
 	"FREE_CAMERA": "res://scripts/flight/tasks/free_flight.gd",
 	"FREE_FPV": "res://scripts/flight/tasks/free_flight.gd",
 	"FREE_UGV": "res://scripts/flight/tasks/free_flight.gd",
+	"FREE_SURVEY": "res://scripts/flight/tasks/free_flight.gd",
+	"SRV_TILT": "res://scripts/flight/tasks/photo_list.gd",
+	"SRV_SHARP": "res://scripts/flight/tasks/photo_list.gd",
+	"SRV_DETAIL": "res://scripts/flight/tasks/srv_detail.gd",
+	"SRV_ORBIT": "res://scripts/flight/tasks/srv_orbit.gd",
+	"SRV_GRID": "res://scripts/flight/tasks/srv_grid.gd",
+	"SRV_KIDS_FLOWER": "res://scripts/flight/tasks/photo_list.gd",
+	"SRV_KIDS_KITTEN": "res://scripts/flight/tasks/photo_list.gd",
+	"SRV_KIDS_VAN": "res://scripts/flight/tasks/photo_list.gd",
+	"MIS_SRV_ALBUM": "res://scripts/flight/tasks/photo_list.gd",
+	"MIS_SRV_FIND": "res://scripts/flight/tasks/mission_find.gd",
+	"MIS_SRV_COUNT": "res://scripts/flight/tasks/mission_count.gd",
 }
 ## The racing gates of the FPV lessons and the race, in order, centre 2.2 m up.
 const GATE_COURSE: Array[Vector3] = [
@@ -76,8 +88,6 @@ var counter_shown := false
 ## Shown on the "Passed" or "Not this time" card. A translation key and arguments.
 var summary := ""
 var summary_args: Array = []
-## A question with buttons during the flight: {"prompt": key, "options": [[id, key], ...]}. Empty = none.
-var choice := {}
 ## Which way the on-screen sticks should be pushed now, shown as a ghost knob: {"left": Vector2.UP}.
 var stick_hint := {}
 ## The camera this task starts with, if it matters (nose-in needs the pilot's view). "" = the saved one.
@@ -189,11 +199,6 @@ func start_heading() -> float:
 
 ## Override: called every physics step.
 func update(_dt: float, _sim: DroneSim, _sticks: Dictionary) -> void:
-	pass
-
-
-## Override: the pilot tapped an option of `choice`.
-func choose(_id: String) -> void:
 	pass
 
 

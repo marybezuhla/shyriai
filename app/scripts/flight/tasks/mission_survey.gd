@@ -1,18 +1,11 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-# Adult mission: after a storm, look at every roof in the village from above and say whether it is damaged.
-# Damaged roofs have a dark hole and fallen tiles on the ground.
-extends FlightTask
-
-const ABOVE := 7.0  # m above the ground, higher than the 6 m ridge
-const NEAR := 9.0  # m from the house
+# Survey mission "After the storm": picture every roof in the village from above, land, then say from
+# the pictures which roofs are damaged, as an operator does for the repair crews. Damaged roofs have a
+# dark hole and fallen tiles on the ground.
+extends PhotoTask
 
 var _damaged: Array[int] = []
-var _answers := {}  # house index -> true if the pilot said "damaged"
-var _near := -1
-
-
-func configure() -> void:
-	view_hint = "drone"
+var _shot: Array[int] = []  # houses in the order they were pictured
 
 
 func setup_world() -> void:
@@ -34,54 +27,64 @@ func truth(house: int) -> bool:
 	return house in _damaged
 
 
+## Simple mode forgives one misread roof; Adult none.
+func allowed_wrong() -> int:
+	return 1 if mode == "simple" else 0
+
+
+func roof(i: int) -> Vector3:
+	return world.houses[i]["pos"] + Vector3(0, 5.0, 0)
+
+
+func subjects(_sim: DroneSim) -> Array:
+	var out := []
+	for i in world.houses.size():
+		if i not in _shot:
+			out.append({"id": str(i), "pos": roof(i), "radius": 4.0,
+				"need": {"tilts": ["angled", "down"], "min_size": 0.3, "max_size": 1.8}})
+	return out
+
+
+func on_photo(id: String, _sim: DroneSim) -> bool:
+	if int(id) in _shot:
+		return false
+	_shot.append(int(id))
+	return true
+
+
 func update(_dt: float, sim: DroneSim, _sticks: Dictionary) -> void:
 	var n: int = world.houses.size()
-	counter = _answers.size()
+	counter = _shot.size()
 	counter_max = n
-	progress = float(_answers.size()) / n
-	_near = -1
-	var best := INF
-	var next := -1
-	for i in n:
-		if _answers.has(i):
-			continue
-		var d := flat_distance(sim.pos, world.houses[i]["pos"])
-		if d < best:
-			best = d
-			next = i
-	if next == -1:
+	progress = 0.9 * _shot.size() / n
+	if report_open or done or failed:
 		return
-	if best <= NEAR and sim.altitude() >= ABOVE:
-		_near = next
-		choice = {"prompt": "Q_ROOF", "options": [["damaged", "OPT_DAMAGED"], ["ok", "OPT_INTACT"]]}
-		marker = Vector3.INF
-		beacon = 0.0
-		say("HINT_SURVEY_LOOK")
-	else:
-		choice = {}
-		marker = world.houses[next]["pos"] + Vector3(0, 9, 0)
-		beacon = 3.0
+	if _shot.size() == n:
+		marker = world.pad
 		if sim.on_ground:
-			say("HINT_SURVEY_UP")
-		elif best <= NEAR:
-			say("HINT_SURVEY_HIGHER")
+			_open_report()
 		else:
-			say("HINT_SURVEY_GO", [n - _answers.size()])
-
-
-func choose(id: String) -> void:
-	if _near < 0:
+			say("HINT_REPORT_LAND")
 		return
-	_answers[_near] = id == "damaged"
-	choice = {}
-	if _answers.size() < world.houses.size():
-		say_for("HINT_SURVEY_NOTED", [], 1.5)
-		return
-	var right := 0
-	for i in _answers.keys():
-		if _answers[i] == (i in _damaged):
-			right += 1
-	if right == world.houses.size():
-		pass_with("SUM_SURVEY", [right, world.houses.size()])
+	var next := -1
+	var best := INF
+	for i in n:
+		if i not in _shot and flat_distance(sim.pos, world.houses[i]["pos"]) < best:
+			best = flat_distance(sim.pos, world.houses[i]["pos"])
+			next = i
+	marker = roof(next) + Vector3(0, 4.0, 0)
+	if sim.on_ground:
+		say("HINT_SURVEY_UP")
+	elif tilt == "forward":
+		say("HINT_SURVEY_TILT")
 	else:
-		fail_with("FAIL_SURVEY", [right, world.houses.size()])
+		say("HINT_SURVEY_GO", [n - _shot.size()])
+
+
+func _open_report() -> void:
+	report.clear()
+	for k in _shot.size():
+		var house: int = _shot[k]
+		report.append({"photo": k, "prompt": "Q_ROOF", "answer": "damaged" if house in _damaged else "ok",
+			"options": [["damaged", "OPT_DAMAGED"], ["ok", "OPT_INTACT"]]})
+	report_open = true

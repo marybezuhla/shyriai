@@ -13,7 +13,7 @@
 - найкращий результат кожного уроку й місії (соняшники й час) і дата посвідчення пілота;
 - імʼя для посвідчення, **лише якщо його вписано** (за бажанням).
 
-Віку, контактів, місця, фото, звуку чи будь-яких ідентифікаторів немає. Імʼя нікуди не надсилається й ніде не показується, крім посвідчення на цьому телефоні.
+Віку, контактів, місця, фото, звуку чи будь-яких ідентифікаторів немає. Знімки з камери дрона в курсі аерозйомки існують лише під час польоту для звіту: вони не зберігаються на телефоні й нікуди не надсилаються. Імʼя нікуди не надсилається й ніде не показується, крім посвідчення на цьому телефоні.
 
 ## Хто їх бачить
 
@@ -47,7 +47,7 @@ One small file on the phone (up to 64 KB), in the app's own folder. It holds:
 - the best result of each lesson and mission (sunflowers and time) and the date of each pilot's licence;
 - a name for the licence, **only if one is typed in** (optional).
 
-No age, contacts, location, photos, sound or identifiers of any kind. The name is never sent anywhere and shows only on the licence on this phone.
+No age, contacts, location, photos, sound or identifiers of any kind. Pictures from the drone camera in the survey course exist only during the flight, for the report: they are not saved on the phone and never sent anywhere. The name is never sent anywhere and shows only on the licence on this phone.
 
 ## Who can see it
 

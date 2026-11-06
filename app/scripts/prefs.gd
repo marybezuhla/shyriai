@@ -318,6 +318,8 @@ func undo_reset() -> void:
 ## behind and everyone else sees it as a pilot on the ground does. Kept per mode and vehicle.
 func view_for(m: String, vehicle := "camera") -> String:
 	var fallback := "fpv" if vehicle == "fpv" else ("chase" if m == "kids" else ("ugv" if vehicle == "ugv" else "pilot"))
+	if vehicle == "survey":
+		fallback = "drone"  # a survey is flown through the camera, kids too
 	return views.get(m + "/" + vehicle, fallback)
 
 

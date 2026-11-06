@@ -61,6 +61,21 @@ func _draw() -> void:
 			draw_rect(Rect2(_p(13.5, 5), Vector2(3.5, 14) * _k), color)
 		"check":
 			_line([[5, 12.5], [10, 17], [19, 7]])
+		"photo":
+			# A camera: the course of aerial photography.
+			_line([[3, 8], [8, 8], [9.5, 5.5], [14.5, 5.5], [16, 8], [21, 8], [21, 19], [3, 19]], true)
+			_ring(12, 13.3, 3.6)
+		"tilt_forward", "tilt_angled", "tilt_down":
+			# A camera lens and where it looks: ahead, down at an angle, straight down.
+			_ring(7, 8, 3.2)
+			var ang: float = {"tilt_forward": 0.0, "tilt_angled": 55.0, "tilt_down": 90.0}[icon]
+			var d := Vector2(cos(deg_to_rad(ang)), sin(deg_to_rad(ang)))
+			var a := Vector2(7, 8) + d * 5.0
+			var b := Vector2(7, 8) + d * 14.0
+			_line([[a.x, a.y], [b.x, b.y]])
+			var l := b - d * 4.0 + d.orthogonal() * 3.0
+			var r := b - d * 4.0 - d.orthogonal() * 3.0
+			_line([[l.x, l.y], [b.x, b.y], [r.x, r.y]])
 		"sunflower":
 			# The rating mark: gold petals round a brown middle. Not a star, on purpose.
 			for i in 8:

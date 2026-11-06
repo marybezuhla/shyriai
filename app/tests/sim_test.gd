@@ -51,9 +51,12 @@ func _ready() -> void:
 	await test_ugv_rough_driving_fails()
 	for mode in ["simple", "pro"]:
 		await test_search_mission(mode)
-		await test_survey_mission(mode)
-	await test_survey_wrong_answers_fail()
 	await test_shortcuts_closed()
+	test_photo_rules()
+	for mode in Prefs.MODES:
+		for key in Curriculum.lessons("survey", mode) + Curriculum.missions("survey", mode):
+			await test_survey_task(key, mode)
+	await test_survey_mistakes()
 	test_rating_rules()
 	test_results_are_kept()
 	test_saved_results_are_checked()
@@ -64,8 +67,9 @@ func _ready() -> void:
 		await test_kitten_mission()
 		for mode in ["simple", "pro"]:
 			await test_search_mission(mode)
-			await test_survey_mission(mode)
-			await test_fpv_task("MIS_FPV_TREES", mode)
+			for key in ["MIS_CAM_SURVEY", "MIS_SRV_FIND", "MIS_SRV_COUNT"]:
+				await test_survey_task(key, mode)
+				await test_fpv_task("MIS_FPV_TREES", mode)
 		for key in ["MIS_UGV_CARGO", "MIS_UGV_EVAC"]:
 			await test_ugv_task(key, "simple")
 	_seed = 7
@@ -93,6 +97,180 @@ func check(ok: bool, what: String) -> void:
 func run(sim: DroneSim, seconds: float, t: float, y: float, p: float, r: float) -> void:
 	for i in int(seconds / DT):
 		sim.step(DT, t, y, p, r)
+
+
+# --- Survey course -------------------------------------------------------------
+
+func test_photo_rules() -> void:
+	var pos := Vector3(0, 10, 0)
+	var basis := Photo.camera_basis(0.0, "down")
+	var below := Photo.look(pos, basis, 2.0, Vector3(0, 0, 0), 2.0)
+	check(below["in_frame"] and (below["at"] as Vector2).length() < 0.01, "camera down: the point below is in the middle")
+	check(not Photo.look(pos, Photo.camera_basis(0.0, "forward"), 2.0, Vector3(0, 0, 0), 2.0)["in_frame"],
+		"camera ahead: the point below is not in the frame")
+	check(not Photo.look(pos, basis, 2.0, Vector3(0, 20, 0), 2.0)["in_frame"], "nothing behind the camera")
+	var far := Photo.look(pos, basis, 2.0, Vector3(0, 0, 0), 0.5)
+	check(Photo.verdict(far, 0.0, 0.0, "down", {"min_size": 0.3}) == "PH_TOO_FAR", "a small thing far below: too far")
+	check(Photo.verdict(below, 1.5, 0.0, "down", {}) == "PH_BLUR", "moving: smeared")
+	check(Photo.verdict(below, 0.0, 1.0, "down", {}) == "PH_BLUR", "turning: smeared")
+	check(Photo.verdict(below, 0.0, 0.0, "forward", {"tilts": ["down"]}) == "PH_TILT_DOWN", "wrong tilt says so")
+	check(Photo.verdict(below, 0.0, 0.0, "down", {"tilts": ["down"], "min_size": 0.1}) == "", "a good picture")
+
+
+## Hover still at a point, set the camera, shoot. True if the picture was kept.
+func _shoot_at(task: PhotoTask, sim: DroneSim, ap, target: Vector3, height: float, face: Vector3, tilt: String) -> bool:
+	ap.target = target
+	ap.height = height
+	ap.face = face
+	ap.land = false
+	task.tilt = tilt
+	var still := 0.0
+	for i in int(60.0 / DT):
+		var s: Dictionary = task.controls(ap.sticks(sim))
+		sim.step(DT, s["throttle"], s["yaw"], s["pitch"], s["roll"])
+		task.step(DT, sim, s)
+		if sim.crashed or task.failed:
+			return false
+		var here := FlightTask.flat_distance(sim.pos, target) < 0.4 and absf(sim.altitude() - height) < 0.4
+		still = still + DT if here and sim.vel.length() < 0.2 and absf(task.turn) < 0.05 else 0.0
+		if still > 1.0:
+			return task.shoot(sim)["ok"]
+	return false
+
+
+## Fly home and land; the report then opens. True once it is open.
+func _land_for_report(task: PhotoTask, sim: DroneSim, world: FlightWorld, ap) -> bool:
+	ap.target = world.pad
+	ap.face = Vector3.INF
+	for i in int(60.0 / DT):
+		ap.land = FlightTask.flat_distance(sim.pos, world.pad) < 1.0
+		var s: Dictionary = task.controls(ap.sticks(sim))
+		sim.step(DT, s["throttle"], s["yaw"], s["pitch"], s["roll"])
+		task.step(DT, sim, s)
+		if task.report_open:
+			return true
+		if sim.crashed or task.failed:
+			return false
+	return false
+
+
+func _answer_all(task: PhotoTask, right := true) -> void:
+	for i in task.report.size():
+		var item: Dictionary = task.report[i]
+		var pick: String = item["answer"]
+		if not right:
+			for o in item["options"]:
+				if o[0] != pick:
+					pick = o[0]
+					break
+		task.answer(i, pick)
+
+
+func test_survey_task(key: String, mode: String) -> void:
+	var f := _flight(key, mode, "survey")
+	var task: PhotoTask = f[0]
+	var sim: DroneSim = f[1]
+	var world: FlightWorld = f[2]
+	var ap := Autopilot.new()
+	var ok := true
+	match key:
+		"SRV_TILT":
+			ok = _shoot_at(task, sim, ap, task.MARK, 7.0, Vector3.INF, "down")
+		"SRV_SHARP":
+			for sgn in task.SIGNS:
+				ok = ok and _shoot_at(task, sim, ap, sgn + Vector3(0, 0, 3.5), 2.2, sgn, "forward")
+		"SRV_DETAIL":
+			ok = _shoot_at(task, sim, ap, world.houses[task.HOUSE]["pos"], 9.0, Vector3.INF, "down")
+			ok = ok and task.report_open
+			_answer_all(task)
+		"SRV_ORBIT":
+			var tower: Vector3 = task.TOWER
+			for k in 80:
+				var a := k * TAU / 72.0
+				ap.target = tower + Vector3(sin(a), 0, cos(a)) * 12.0
+				ap.height = 12.0
+				ap.face = task.tank()
+				for i in int(0.6 / DT):
+					var s: Dictionary = task.controls(ap.sticks(sim))
+					sim.step(DT, s["throttle"], s["yaw"], s["pitch"], s["roll"])
+					task.step(DT, sim, s)
+				if task.done:
+					break
+		"SRV_GRID":
+			task.tilt = "down"
+			ap.height = 15.0
+			ap.max_speed = 4.0
+			for j in task.N:
+				for i in task.N:
+					var col: int = i if j % 2 == 0 else task.N - 1 - i
+					ap.target = task.cell_center(Vector2i(col, j))
+					for n in int(12.0 / DT):
+						var s: Dictionary = task.controls(ap.sticks(sim))
+						sim.step(DT, s["throttle"], s["yaw"], s["pitch"], s["roll"])
+						task.step(DT, sim, s)
+						if FlightTask.flat_distance(sim.pos, ap.target) < 1.0:
+							break
+		"SRV_KIDS_FLOWER", "SRV_KIDS_KITTEN", "SRV_KIDS_VAN", "MIS_SRV_ALBUM":
+			for subj in task._list.duplicate():
+				var at: Vector3 = subj["pos"]
+				ok = ok and _shoot_at(task, sim, ap, at + Vector3(0, 0, 6.0), 5.0, at, task.tilt)
+		"MIS_CAM_SURVEY":
+			for i in world.houses.size():
+				ok = ok and _shoot_at(task, sim, ap, world.houses[i]["pos"], 12.0, Vector3.INF, "down")
+			ok = ok and _land_for_report(task, sim, world, ap)
+			_answer_all(task)
+		"MIS_SRV_FIND":
+			ok = _shoot_at(task, sim, ap, task.person(), 12.0, Vector3.INF, "down")
+			ok = ok and _land_for_report(task, sim, world, ap)
+			_answer_all(task)
+		"MIS_SRV_COUNT":
+			ok = _shoot_at(task, sim, ap, task.camp(), 18.0, Vector3.INF, "down")
+			ok = ok and _land_for_report(task, sim, world, ap)
+			_answer_all(task)
+	# One more step lets a task notice it is done.
+	task.step(DT, sim, {"throttle": 0.0, "yaw": 0.0, "pitch": 0.0, "roll": 0.0})
+	check(ok and task.done, "%s: %s passes with the camera" % [mode, key])
+	if task.done:
+		_passed(task, sim)
+	world.queue_free()
+	await get_tree().process_frame
+
+
+## A smeared picture is refused, the wrong tilt is named, and a wrong report does not pass in Adult.
+func test_survey_mistakes() -> void:
+	var f := _flight("SRV_TILT", "pro", "survey")
+	var task: PhotoTask = f[0]
+	var sim: DroneSim = f[1]
+	sim.pos = task.MARK + Vector3(0, 7, 0)
+	sim.vel = Vector3(2, 0, 0)
+	task.tilt = "down"
+	check(not task.shoot(sim)["ok"] and task.hint_base == "PH_BLUR", "moving: the picture is smeared")
+	sim.vel = Vector3.ZERO
+	task.tilt = "forward"
+	check(not task.shoot(sim)["ok"] and task.hint_base == "PH_TILT_DOWN", "camera ahead: told to turn it down")
+	f[2].queue_free()
+	for m in ["simple", "pro"]:
+		f = _flight("MIS_SRV_COUNT", m, "survey")
+		task = f[0]
+		task.photos.append({"id": "camp", "image": null})
+		task.report = [{"photo": 0, "prompt": "Q_COUNT", "answer": "6", "options": [["5", "5"], ["6", "6"], ["7", "7"]]}]
+		task.report_open = true
+		_answer_all(task, false)
+		check(task.failed and task.wrong == [0], "%s: a wrong count does not pass, and is listed" % m)
+		f[2].queue_free()
+	f = _flight("MIS_CAM_SURVEY", "simple", "survey")
+	task = f[0]
+	for i in 6:
+		task.photos.append({"id": str(i), "image": null})
+	task.report = []
+	for i in 6:
+		task.report.append({"photo": i, "prompt": "Q_ROOF", "answer": "ok", "options": [["damaged", "x"], ["ok", "y"]]})
+	task.report_open = true
+	for i in 6:
+		task.answer(i, "damaged" if i == 0 else "ok")
+	check(task.done and task.wrong == [0], "simple: one misread roof still passes, and is listed")
+	f[2].queue_free()
+	await get_tree().process_frame
 
 
 # --- Sunflowers, results, licences, free flight ------------------------------
@@ -313,16 +491,20 @@ func _flight(key: String, mode: String, vehicle := "camera") -> Array:
 	return [task, task.make_sim(vehicle), world]
 
 
+func _passed(task: FlightTask, sim: DroneSim) -> void:
+	_flown[task.key + "/" + task.mode] = true
+	# The third sunflower must be in reach: the autopilot is well inside the par time.
+	check(sim.time <= Rating.par(task.key, task.mode),
+		"%s %s autopilot %.0f s within par %.0f s" % [task.mode, task.key, sim.time, Rating.par(task.key, task.mode)])
+
+
 func _fly(task: FlightTask, sim: DroneSim, seconds: float, pick: Callable) -> bool:
 	for i in int(seconds / DT):
 		var s: Dictionary = task.controls(pick.call(i * DT))
 		sim.step(DT, s["throttle"], s["yaw"], s["pitch"], s["roll"])
 		task.step(DT, sim, s)
 		if task.done:
-			_flown[task.key + "/" + task.mode] = true
-			# The third sunflower must be in reach: the autopilot is well inside the par time.
-			check(sim.time <= Rating.par(task.key, task.mode),
-				"%s %s autopilot %.0f s within par %.0f s" % [task.mode, task.key, sim.time, Rating.par(task.key, task.mode)])
+			_passed(task, sim)
 			return true
 		if sim.crashed or task.failed:
 			return false
@@ -497,40 +679,6 @@ func test_search_mission(mode: String) -> void:
 		return ap.sticks(f[1])
 	var ok := _fly(task, f[1], 240.0, plan)
 	check(ok, "%s: the search mission passes%s" % [mode, "" if ok else " — " + task.hint])
-	f[2].queue_free()
-	await get_tree().process_frame
-
-
-func test_survey_mission(mode: String) -> void:
-	var f := _flight("MIS_CAM_SURVEY", mode)
-	var task: FlightTask = f[0]
-	var ap := Autopilot.new()
-	ap.height = 9.0
-	var plan := func(_t: float) -> Dictionary:
-		if not task.choice.is_empty():
-			task.choose("damaged" if task.truth(task._near) else "ok")
-		if task.marker != Vector3.INF:
-			ap.target = task.marker
-		return ap.sticks(f[1])
-	var ok := _fly(task, f[1], 300.0, plan)
-	check(ok, "%s: the roof survey passes%s" % [mode, "" if ok else " — " + task.hint + " " + task.summary])
-	f[2].queue_free()
-	await get_tree().process_frame
-
-
-func test_survey_wrong_answers_fail() -> void:
-	var f := _flight("MIS_CAM_SURVEY", "simple")
-	var task: FlightTask = f[0]
-	var ap := Autopilot.new()
-	ap.height = 9.0
-	var plan := func(_t: float) -> Dictionary:
-		if not task.choice.is_empty():
-			task.choose("ok")  # says every roof is fine
-		if task.marker != Vector3.INF:
-			ap.target = task.marker
-		return ap.sticks(f[1])
-	_fly(task, f[1], 300.0, plan)
-	check(task.failed and task.summary == "FAIL_SURVEY", "simple: calling damaged roofs intact does not pass")
 	f[2].queue_free()
 	await get_tree().process_frame
 

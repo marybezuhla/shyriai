@@ -10,12 +10,17 @@ extends RefCounted
 const PAR := {
 	"CAM_STICKS": 20, "CAM_TAKEOFF": 20, "CAM_HOLD": 25, "CAM_NOSE_IN": 25, "CAM_SQUARE": 50,
 	"CAM_LANDING": 80, "CAM_WIND": 40, "CAM_EXAM": 65,
-	"MIS_CAM_KITTEN": 60, "MIS_CAM_SEARCH": 90, "MIS_CAM_SURVEY": 90,
+	"MIS_CAM_KITTEN": 60, "MIS_CAM_SEARCH": 90,
 	"FPV_THROTTLE": 25, "FPV_FORWARD": 30, "FPV_EIGHT": 70, "FPV_GATES": 60, "FPV_HORIZON": 55,
 	"FPV_ACRO": 25,
 	"MIS_FPV_HOOPS": 60, "MIS_FPV_BALLOONS": 70, "MIS_FPV_RACE": 70, "MIS_FPV_TREES": 90,
 	"UGV_DRIVE": 50, "UGV_PIVOT": 35, "UGV_TERRAIN": 60, "UGV_DELIVERY": 45, "UGV_EVACUATION": 160,
 	"MIS_UGV_VET": 185, "MIS_UGV_PARCEL": 45, "MIS_UGV_CARGO": 110, "MIS_UGV_EVAC": 160,
+	"SRV_TILT": 20, "SRV_SHARP": 40, "SRV_DETAIL": 30, "SRV_ORBIT": 90, "SRV_GRID": 80,
+	"SRV_KIDS_FLOWER": 20, "SRV_KIDS_KITTEN": 15, "SRV_KIDS_VAN": 25, "MIS_SRV_ALBUM": 65,
+	"MIS_CAM_SURVEY": 245, "MIS_SRV_COUNT": 105,
+	# The test autopilot knows where the lost person is; a pilot has to search: three minutes.
+	"MIS_SRV_FIND": 180,
 }
 ## Kids get half as much time again: the third sunflower should be reachable, not a race.
 const KIDS_SLACK := 1.5

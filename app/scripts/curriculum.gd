@@ -3,7 +3,8 @@
 class_name Curriculum
 extends RefCounted
 
-const VEHICLES := ["camera", "fpv", "ugv"]
+## "survey" is a course, not a machine: aerial photography and reconnaissance with the camera drone.
+const VEHICLES := ["camera", "fpv", "ugv", "survey"]
 
 const LESSONS := {
 	"camera": [
@@ -18,27 +19,37 @@ const LESSONS := {
 		"UGV_DRIVE", "UGV_PIVOT", "UGV_TERRAIN",
 		"UGV_DELIVERY", "UGV_EVACUATION",
 	],
+	"survey": [
+		"SRV_TILT", "SRV_SHARP", "SRV_DETAIL", "SRV_ORBIT", "SRV_GRID",
+		"SRV_KIDS_FLOWER", "SRV_KIDS_KITTEN", "SRV_KIDS_VAN",
+	],
 }
 
 ## Missions per vehicle and mode family: kids get their own stories.
 const MISSIONS := {
-	"camera": {"kids": ["MIS_CAM_KITTEN"], "adult": ["MIS_CAM_SEARCH", "MIS_CAM_SURVEY"]},
+	"camera": {"kids": ["MIS_CAM_KITTEN"], "adult": ["MIS_CAM_SEARCH"]},
 	"fpv": {"kids": ["MIS_FPV_HOOPS", "MIS_FPV_BALLOONS"], "adult": ["MIS_FPV_RACE", "MIS_FPV_TREES"]},
 	"ugv": {"kids": ["MIS_UGV_VET", "MIS_UGV_PARCEL"], "adult": ["MIS_UGV_CARGO", "MIS_UGV_EVAC"]},
+	"survey": {"kids": ["MIS_SRV_ALBUM"], "adult": ["MIS_CAM_SURVEY", "MIS_SRV_FIND", "MIS_SRV_COUNT"]},
 }
 
 const THEORY := ["TH_CHECKLIST", "TH_BATTERY", "TH_SIGNAL", "TH_RULES"]
 
 ## Flying without self-levelling is for Adult mode only.
 const PRO_ONLY := ["FPV_HORIZON", "FPV_ACRO"]
+## The kids' own photography lessons; the grown-ups' survey lessons are not for kids.
+const KIDS_ONLY := ["SRV_KIDS_FLOWER", "SRV_KIDS_KITTEN", "SRV_KIDS_VAN"]
+const NOT_KIDS := ["SRV_TILT", "SRV_SHARP", "SRV_DETAIL", "SRV_ORBIT", "SRV_GRID"]
 
 
 ## The lessons of a vehicle in a mode. Without a mode: every lesson there is.
 static func lessons(vehicle: String, mode := "") -> Array:
 	var all: Array = LESSONS.get(vehicle, [])
-	if mode == "" or mode == "pro":
+	if mode == "":
 		return all
-	return all.filter(func(k): return k not in PRO_ONLY)
+	if mode == "kids":
+		return all.filter(func(k): return k not in PRO_ONLY and k not in NOT_KIDS)
+	return all.filter(func(k): return k not in KIDS_ONLY and (mode == "pro" or k not in PRO_ONLY))
 
 
 ## A name or text as the pilot sees it now: Kids mode gets its own wording where there is one.

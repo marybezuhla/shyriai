@@ -47,7 +47,7 @@ func motors(load_: float, running: bool, delta: float) -> void:
 
 
 ## A short sound: "chime" (passed), "blip" (a ball, a gate, a step done), "thud" (a bump),
-## "fail" (not this time).
+## "fail" (not this time, or a picture that will not do), "shutter" (a picture taken).
 func play(name_: String) -> void:
 	if not _on:
 		return
@@ -138,6 +138,14 @@ static func _make(name_: String) -> AudioStreamWAV:
 			out = _notes([[523.3, 0.0], [392.0, 0.14]], 0.5)
 		"beep":
 			out = _notes([[660.0, 0.0]], 0.15)
+		"shutter":
+			# Two quick mechanical clicks, like a camera's.
+			var n := int(RATE * 0.12)
+			out.resize(n)
+			for i in n:
+				var t := float(i) / RATE
+				var click := exp(-t * 300.0) + 0.7 * exp(-maxf(t - 0.06, 0.0) * 300.0) * float(t >= 0.06)
+				out[i] = rng.randf_range(-1.0, 1.0) * click * 0.8
 		"thud":
 			var n := int(RATE * 0.3)
 			out.resize(n)

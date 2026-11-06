@@ -55,7 +55,7 @@ func _build_lessons(lessons: Array, done: int) -> void:
 		var t := UI.tappable(row, Color(0, 0, 0, 0), func(): selected = idx; rebuild(), name_, 14, 2)
 		path.add_row(t, dot)
 	add_child(path)
-	if Prefs.mode != "pro" and Curriculum.lessons(vehicle).size() > lessons.size():
+	if Prefs.mode != "pro" and Curriculum.lessons(vehicle).any(func(k): return k in Curriculum.PRO_ONLY):
 		add_child(UI.label(tr("LESSON_PRO_ONLY"), 13, 600, "muted"))
 	add_child(_lesson_card(lessons, done))
 
