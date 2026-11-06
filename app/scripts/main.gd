@@ -86,6 +86,10 @@ func open_about() -> void:
 	_push(_make("res://scripts/screens/about.gd"))
 
 
+func open_pilot_cards() -> void:
+	_push(_make("res://scripts/screens/pilot_cards.gd"))
+
+
 func open_licenses() -> void:
 	_push(_make("res://scripts/screens/licenses.gd"))
 

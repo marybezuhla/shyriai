@@ -32,6 +32,7 @@ func _ready() -> void:
 	Prefs.set_language("uk")
 	await _flights()
 	await _sticks_and_sound()
+	await _sunflowers_and_free()
 	await _gate()
 	Prefs.set_language("system")
 	Prefs.set_theme("dusk")
@@ -181,6 +182,69 @@ func _flights() -> void:
 	await _shot("uk-dusk-flight-pro-crashed")
 	main.close_flight()
 	await _frames(2)
+
+
+## After the flights every lesson has sunflowers and every vehicle a licence: the lessons, the free
+## flight tab, the licences and a free flight, in each mode and both languages.
+func _sunflowers_and_free() -> void:
+	Prefs.set_theme("day")
+	Prefs.set_pilot_name("Оля Петренко")
+	for lang in ["uk", "en"]:
+		Prefs.set_language(lang)
+		for m in Prefs.MODES:
+			Prefs.set_mode(m)
+			# The flights above pass each lesson by hand: grade a few so all three looks show.
+			var lessons := Curriculum.lessons("camera", m)
+			for i in lessons.size():
+				Prefs.mark_passed("camera", i)
+				Prefs.record(lessons[i], 1 + i % 3, 999.0)
+			main.open_tab("learn")
+			await _shot("%s-day-home-%s-cards" % [lang, m])
+			main.open_lessons("camera")
+			await _shot("%s-day-lessons-camera-%s-flowers" % [lang, m])
+			var s = main.stack.back()
+			for v in Curriculum.VEHICLES:
+				s.vehicle = v
+				s.tab = "free"
+				s.rebuild()
+				await _shot("%s-day-free-%s-%s" % [lang, m, v])
+			main.back()
+			main.open_pilot_cards()
+			await _shot("%s-day-cards-%s" % [lang, m])
+			main.back()
+			await _frames(2)
+	Prefs.set_language("uk")
+	Prefs.set_text_size("larger")
+	Prefs.set_mode("pro")
+	main.open_pilot_cards()
+	await _shot("uk-larger-cards-pro")
+	main.back()
+	main.open_lessons("fpv")
+	main.stack.back().tab = "free"
+	main.stack.back().rebuild()
+	await _shot("uk-larger-free-pro-fpv")
+	main.back()
+	Prefs.set_text_size("normal")
+	for v in Curriculum.VEHICLES:
+		Prefs.set_free("time", "dusk")
+		main.start(v, "FREE_" + v.to_upper())
+		await _frames(2)
+		assert(main.flight.task.is_free)
+		await _seconds(1.0)
+		await _shot("uk-dusk-flight-free-%s" % v)
+		main.close_flight()
+		await _frames(2)
+	# A pass shows the sunflowers card.
+	main.start("camera", "CAM_TAKEOFF")
+	await _frames(2)
+	main.flight._touches = 1
+	main.flight.task.pass_with("SUM_STICKS")
+	await _frames(3)
+	await _shot("uk-day-flight-pro-passed-one-flower")
+	main.close_flight()
+	await _frames(2)
+	Prefs.set_free("time", "day")
+	Prefs.set_mode("simple")
 
 
 ## Mode 1 moves the throttle to the right stick (drones, not kids or the robot); soft sticks keep full

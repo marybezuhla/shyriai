@@ -35,6 +35,9 @@ const FILES := {
 	"MIS_UGV_PARCEL": "res://scripts/flight/tasks/ugv_route.gd",
 	"MIS_UGV_CARGO": "res://scripts/flight/tasks/ugv_route.gd",
 	"MIS_UGV_EVAC": "res://scripts/flight/tasks/ugv_route.gd",
+	"FREE_CAMERA": "res://scripts/flight/tasks/free_flight.gd",
+	"FREE_FPV": "res://scripts/flight/tasks/free_flight.gd",
+	"FREE_UGV": "res://scripts/flight/tasks/free_flight.gd",
 }
 ## The racing gates of the FPV lessons and the race, in order, centre 2.2 m up.
 const GATE_COURSE: Array[Vector3] = [
@@ -50,6 +53,8 @@ var key := ""
 var mode := "simple"
 var vehicle := "camera"
 var is_mission := false
+## Free flight: no pass, no progress bar, no sunflowers.
+var is_free := false
 var task_seed := 7
 
 var progress := 0.0
@@ -124,6 +129,7 @@ static func make(task_key: String, mode_: String, seed_ := 7) -> FlightTask:
 	t.mode = mode_
 	t.task_seed = seed_
 	t.is_mission = task_key.begins_with("MIS_")
+	t.is_free = task_key.begins_with("FREE_")
 	t.configure()
 	return t
 

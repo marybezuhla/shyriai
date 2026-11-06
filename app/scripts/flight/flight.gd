@@ -55,6 +55,8 @@ var _sound := FlightSound.new()
 ## What the task had done a physics step ago, so each new ball, gate or step gets its blip.
 var _last_progress := 0.0
 var _last_counter := 0
+## Bumps and hard landings so far: any of them costs the second and third sunflower.
+var _touches := 0
 
 
 func setup(app_: Node, vehicle_: String, task_key_: String) -> void:
@@ -62,8 +64,11 @@ func setup(app_: Node, vehicle_: String, task_key_: String) -> void:
 	vehicle = vehicle_
 	task_key = task_key_
 	mode = Prefs.mode
-	# Kids always fly on a clear day; otherwise the world follows the app's look.
+	# Kids always fly on a clear day; otherwise the world follows the app's look, or the time of day
+	# chosen for free flight.
 	look = "day" if mode == "kids" or Pal.current != "dusk" else "dusk"
+	if task_key.begins_with("FREE_") and mode != "kids":
+		look = Prefs.free["time"]
 	view = Prefs.view_for(mode, vehicle)
 	_mode1 = Prefs.stick_mode == "1" and mode != "kids" and vehicle != "ugv"
 	if _mode1:
@@ -182,6 +187,8 @@ func _sound_events() -> void:
 	_last_progress = task.progress
 	_last_counter = task.counter
 	for e in sim.events:
+		if Rating.is_touch(e):
+			_touches += 1
 		if e["type"] in ["bump", "crash", "tipped"] and float(e["speed"]) > 1.0:
 			_sound.play("thud")
 
@@ -358,7 +365,7 @@ func _build_hud() -> void:
 
 	var chip := UI.vbox(6)
 	var title := Curriculum.label(task_key)
-	if not task.is_mission:
+	if not task.is_mission and not task.is_free:
 		title = tr("LESSON_N") % (Curriculum.lessons(vehicle, mode).find(task_key) + 1) + " · " + title
 	chip.add_child(UI.label(title, 14, 700, "text", false, false))
 	var bar_row := UI.hbox(8)
@@ -373,7 +380,13 @@ func _build_hud() -> void:
 	if mode != "kids":
 		_bar_text = UI.label("0 %", 12, 700, "muted", false, false)
 		bar_row.add_child(_bar_text)
-	chip.add_child(bar_row)
+	if task.is_free:
+		# Free flight has no progress: the bar is not shown, and not kept either.
+		bar_row.free()
+		_bar_fill = null
+		_bar_text = null
+	else:
+		chip.add_child(bar_row)
 	# A second bar for how the load is doing, e.g. the casualty's comfort.
 	if task.meter >= 0.0:
 		var mrow := UI.hbox(8)
@@ -401,9 +414,7 @@ func _build_hud() -> void:
 			var row := UI.hbox(8)
 			# Sunflowers are what the kitten mission collects; other counts need no picture.
 			if task.key == "MIS_CAM_KITTEN":
-				var flower := _SunflowerIcon.new()
-				flower.custom_minimum_size = Vector2(26, 26)
-				row.add_child(flower)
+				row.add_child(Glyph.make("sunflower", 26, Pal.c("accent")))
 			_counter = UI.label("0", 18, 700, "text", true, false)
 			row.add_child(_counter)
 			top.add_child(UI.panel(row, glass, 22, 10))
@@ -573,7 +584,8 @@ func _update_hud() -> void:
 	if _nolink:
 		_nolink.visible = not task.link_ok and view == "ugv"
 	_update_choice()
-	_bar_fill.size = Vector2(120.0 * task.progress, 6)
+	if _bar_fill:
+		_bar_fill.size = Vector2(120.0 * task.progress, 6)
 	if _bar_text:
 		_bar_text.text = "%d %%" % int(round(task.progress * 100.0))
 	if task.hint != "":
@@ -712,6 +724,7 @@ func _finish() -> void:
 		Prefs.mark_passed(vehicle, Curriculum.lessons(vehicle, mode).find(task_key))
 	var col := UI.vbox(12)
 	col.add_child(UI.label(tr("PASSED_KIDS") if mode == "kids" else tr("PASSED"), 22, 600, "text", true))
+	col.add_child(_rating_block())
 	if task.summary != "":
 		var s := tr(task.summary)
 		if not task.summary_args.is_empty() and s.contains("%"):
@@ -722,10 +735,44 @@ func _finish() -> void:
 		col.add_child(UI.primary(tr("NEXT_LESSON"), func(): app.open_flight(vehicle, next), "play"))
 	else:
 		col.add_child(UI.primary(tr("DONE"), leave, "check"))
-	col.add_child(_secondary(tr("AGAIN"), restart))
-	if next != "":
-		col.add_child(_secondary(tr("EXIT"), leave))
+	# Side by side, so the card fits a phone held sideways.
+	var pair := UI.hbox(10)
+	for b in [_secondary(tr("AGAIN"), restart)] + ([_secondary(tr("EXIT"), leave)] if next != "" else []):
+		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		pair.add_child(b)
+	col.add_child(pair)
 	_show_overlay(col)
+
+
+## Sunflowers for this pass, the time against the best one, and what earns the next sunflower.
+func _rating_block() -> Control:
+	var got := Rating.sunflowers(task_key, mode, sim.time, _touches)
+	var before := Prefs.record(task_key, got, sim.time)
+	var box := UI.vbox(6)
+	var row := UI.hbox(6)
+	row.alignment = BoxContainer.ALIGNMENT_CENTER
+	for i in Rating.MAX:
+		var on := i < got
+		row.add_child(Glyph.make("sunflower" if on else "sunflower_off", 40, Pal.c("accent" if on else "line")))
+	box.add_child(row)
+	# Kids see no numbers: the sunflowers and the tip say it all.
+	if mode != "kids":
+		var t := FlightTask.clock(sim.time)
+		var line := ""
+		if before.is_empty():
+			line = tr("RESULT_FIRST") % t
+		elif sim.time < float(before["t"]):
+			line = tr("RESULT_RECORD") % t
+		else:
+			line = tr("RESULT_TIME") % [t, FlightTask.clock(float(Prefs.best_of(task_key)["t"]))]
+		box.add_child(UI.label(line, 14, 600, "text", false, false))
+	var tip := Rating.next_tip(task_key, mode, got)
+	if tip[0] != "":
+		var s := tr(tip[0])
+		if not tip[1].is_empty():
+			s = s % tip[1]
+		box.add_child(UI.label(s, 13, 500, "muted"))
+	return box
 
 
 func _crashed() -> void:
@@ -799,11 +846,20 @@ func _show_overlay(content: Control) -> void:
 	(_overlay as ColorRect).color = dim
 	_overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_overlay.mouse_filter = Control.MOUSE_FILTER_STOP
+	# Centred, and scrollable when the card is taller than the screen (large text, a low phone).
+	var scroll := ScrollContainer.new()
+	scroll.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_overlay.add_child(scroll)
+	var column := VBoxContainer.new()
+	column.alignment = BoxContainer.ALIGNMENT_CENTER
+	column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	column.custom_minimum_size = Vector2(0, get_viewport_rect().size.y)
+	scroll.add_child(column)
 	var center := CenterContainer.new()
-	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	_overlay.add_child(center)
+	column.add_child(center)
 	var card := UI.panel(content, Pal.c("surface"), 22, 20)
-	card.custom_minimum_size = Vector2(320, 0)
+	card.custom_minimum_size = Vector2(360, 0)
 	center.add_child(card)
 	add_child(_overlay)
 
@@ -814,15 +870,3 @@ func _hide_overlay() -> void:
 	if _overlay:
 		_overlay.queue_free()
 		_overlay = null
-
-
-## A tiny sunflower for the kids' counter.
-class _SunflowerIcon extends Control:
-	func _draw() -> void:
-		var c := size / 2.0
-		var r := minf(size.x, size.y) / 2.0
-		for i in 8:
-			var a := i * TAU / 8.0
-			var d := Vector2(cos(a), sin(a))
-			draw_circle(c + d * r * 0.55, r * 0.33, Color("#FFC321"), true, -1.0, true)
-		draw_circle(c, r * 0.36, Color("#6B4A2E"), true, -1.0, true)

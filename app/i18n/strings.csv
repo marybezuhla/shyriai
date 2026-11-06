@@ -450,7 +450,7 @@ SIZE_LARGE,Large,Більший
 SIZE_LARGER,Largest,Найбільший
 SET_PROGRESS,Progress,Прогрес
 RESET_PROGRESS,Start over in “%s” mode,Почати спочатку в режимі «%s»
-RESET_ASK,Clear all lessons and missions in “%s” mode? The other modes stay as they are.,Стерти всі уроки й місії в режимі «%s»? Інші режими лишаться як є.
+RESET_ASK,"Clear all lessons, missions, sunflowers and licences in “%s” mode? The other modes stay as they are.","Стерти всі уроки, місії, соняшники й посвідчення в режимі «%s»? Інші режими лишаться як є."
 RESET_YES,"Yes, start over","Так, почати спочатку"
 RESET_DONE,Progress in “%s” mode is cleared.,Прогрес у режимі «%s» стерто.
 RESET_UNDO,Undo,Повернути
@@ -520,3 +520,64 @@ FEEL_SOFT,Softer,М’якші
 FEEL_SOFTER,Softest,Найм’якші
 STICKS_FEEL,Sensitivity,Чутливість
 STICKS_FEEL_DESC,"Softer sticks move the drone gently near the centre, for small, precise moves. Full stick is still full speed.","М’якші стіки біля центру рухають дрон обережніше, для малих точних рухів. До краю стік так само дає повну швидкість."
+RESULT_FIRST,Time: %s,Час: %s
+RESULT_TIME,Time %s · best %s,Час %s · найкращий %s
+RESULT_RECORD,New best time: %s,Новий найкращий час: %s
+NEXT_SMOOTH,Next sunflower: fly it without touching anything,Наступний соняшник: пролетіти без жодного дотику
+NEXT_FAST,Third sunflower: no touches and quicker than %s,Третій соняшник: без дотиків і швидше за %s
+NEXT_SMOOTH_KIDS,"One more sunflower, if nothing gets touched","Ще один соняшник, якщо нічого не зачепити"
+NEXT_FAST_KIDS,"One more sunflower, if it's a little quicker","Ще один соняшник, якщо трохи швидше"
+A11Y_SUNFLOWERS,%d of 3 sunflowers,Соняшників: %d з 3
+TAB_FREE,Free flight,Вільний політ
+TAB_FREE_UGV,Free drive,Вільна їзда
+FREE_CAMERA,Free flight,Вільний політ
+FREE_FPV,Free flight,Вільний політ
+FREE_UGV,Free drive,Вільна їзда
+FREE_DESC,"No task and no score: fly as you like, for as long as you like.","Без завдання й без оцінок: літай як хочеш і скільки хочеш."
+FREE_DESC_UGV,"No task and no score: drive as you like, for as long as you like.","Без завдання й без оцінок: їдь куди хочеш і скільки хочеш."
+FREE_WIND,Wind,Вітер
+FREE_WIND_NONE,None,Без вітру
+FREE_WIND_LIGHT,Light,Легкий
+FREE_WIND_GUSTY,Gusty,Пориви
+FREE_TIME,Time of day,Час доби
+FREE_TIME_DAY,Day,День
+FREE_TIME_DUSK,Evening,Вечір
+FREE_FPV_MODE,Flight mode,Режим польоту
+FREE_BALLS,Gold balls in the field,Золоті кулі в полі
+FREE_BALLS_DESC,"Just for fun, with no score.","Просто для розваги, без оцінок."
+FREE_GO,Fly,Летіти
+FREE_GO_UGV,Drive,Їхати
+HINT_FREE,"No task here. To leave, tap pause","Тут без завдання. Щоб вийти, натисни паузу"
+HINT_FREE_BALLS,Gold balls left: %d,Залишилося золотих куль: %d
+HINT_FREE_BALLS_KIDS,Collect the gold balls!,Збери золоті кулі!
+HINT_FREE_ALL,All the gold balls are collected!,Усі золоті кулі зібрано!
+CARDS_TITLE,Pilot's licences,Посвідчення пілота
+CARDS_TITLE_KIDS,Certificates,Грамоти
+HOME_CARDS,Pilot's licences,Посвідчення пілота
+HOME_CARDS_KIDS,My certificates,Мої грамоти
+HOME_CARDS_DESC,One for each vehicle with every lesson passed,"Одне за кожну машину, де пройдено всі уроки"
+HOME_CARDS_DESC_KIDS,For lessons passed,За пройдені уроки
+CARD_NAME,Pilot's name,Ім’я пілота
+CARD_NAME_HINT,"Optional, for the card",За бажанням
+CARD_NAME_DESC,The name stays on this phone only. Erase all data clears it too.,Ім’я зберігається лише на цьому телефоні. «Стерти всі дані» стирає і його.
+CARD_BRAND,Shyriai · trainer,Ширяй · тренажер
+CARD,Pilot's licence,Посвідчення пілота
+CARD_KIDS,Certificate,Грамота
+CARD_KIDS_FOR,For flying through every lesson!,"За те, що пройдено всі уроки!"
+CARD_EXAM,All lessons passed,Усі уроки пройдено
+CARD_SUNFLOWERS,Sunflowers,Соняшники
+CARD_OF,%d of %d,%d з %d
+CARD_NOTE,"A licence from a trainer, not an official document.","Посвідчення тренажера, а не державний документ."
+DATE_FMT,%d %s %s,%d %s %s
+MONTH_1,January,січня
+MONTH_2,February,лютого
+MONTH_3,March,березня
+MONTH_4,April,квітня
+MONTH_5,May,травня
+MONTH_6,June,червня
+MONTH_7,July,липня
+MONTH_8,August,серпня
+MONTH_9,September,вересня
+MONTH_10,October,жовтня
+MONTH_11,November,листопада
+MONTH_12,December,грудня
