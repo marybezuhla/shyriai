@@ -1,17 +1,21 @@
-**Ширяй 0.5.3** — тренажер пілотування для Android: без інтернету, акаунтів і реклами. Українська та англійська.
+**Ширяй 0.6.0** — тренажер пілотування камерного дрона, FPV-дрона й наземного робота. Без інтернету, акаунтів і реклами. Українська та англійська.
 
-- 💙💛 **Слово від авторки** в розділі «Про застосунок»: як виникла ідея, про війну й офіційні способи підтримати Україну. У дитячому режимі посилання лише показано, браузер не відкривається.
+📲 **Встановлення:** завантажте `shyriai-0.6.0.apk` нижче й відкрийте його на телефоні. 🔄 Для оновлень — Комора або Obtainium (є в F-Droid): «Додати застосунок» → `github.com/marybezuhla/shyriai`.
 
-Потрібен Android 7 або новіший і OpenGL ES 3.0. Перевірити підпис: `apksigner verify --print-certs shyriai-0.5.3.apk` → SHA-256 `bf06a3a2…25ff2e1f`.
+**Вимоги:** Android 7 або новіший і OpenGL ES 3.0.
 
-📲 Завантажте файл .apk нижче й відкрийте його на телефоні. 🔄 Для оновлень — Obtainium (є в F-Droid): «Додати застосунок» → `github.com/marybezuhla/shyriai`.
+**Перевірити файл:** `apksigner verify --print-certs shyriai-0.6.0.apk` → SHA-256 `bf06a3a2…25ff2e1f`.
+
+Код написано за допомогою ШІ (Claude, Anthropic) під керівництвом і з тестуванням авторки.
 
 ---
 
-**Shyriai 0.5.3** — a piloting trainer for Android: no internet, no accounts, no ads. Ukrainian and English.
+**Shyriai 0.6.0** — a piloting trainer for a camera drone, an FPV drone and a ground robot. No internet, no accounts, no ads. Ukrainian and English.
 
-- 💙💛 **A word from the author** in About: how the idea came, the war, and official ways to support Ukraine. In Kids mode the links are only shown; no browser opens.
+📲 **Install:** download `shyriai-0.6.0.apk` below and open it on your phone. 🔄 For updates, use Komora or Obtainium (on F-Droid): Add App → `github.com/marybezuhla/shyriai`.
 
-Requires Android 7 or newer and OpenGL ES 3.0. To check the signature: `apksigner verify --print-certs shyriai-0.5.3.apk` → SHA-256 `bf06a3a2…25ff2e1f`.
+**Requires:** Android 7 or newer and OpenGL ES 3.0.
 
-📲 Download the .apk file below and open it on your phone. 🔄 For updates, use Obtainium (on F-Droid): Add App → `github.com/marybezuhla/shyriai`.
+**Check the file:** `apksigner verify --print-certs shyriai-0.6.0.apk` → SHA-256 `bf06a3a2…25ff2e1f`.
+
+The code was written with AI (Claude, Anthropic), directed and tested by the author.

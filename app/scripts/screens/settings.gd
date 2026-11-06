@@ -30,6 +30,26 @@ func build() -> void:
 	], Prefs.text_size, func(v): Prefs.set_text_size(v)))
 	add_child(size_box)
 
+	var sound := UI.vbox(10)
+	sound.add_child(UI.eyebrow(tr("SET_SOUND")))
+	sound.add_child(UI.switch_row(tr("SOUND_ON"), tr("SOUND_DESC"), Prefs.sound,
+		func(on): Prefs.set_sound(on)))
+	add_child(sound)
+
+	# Kids fly with the simple layout always, so the stick choices are for grown-ups only.
+	if Prefs.mode != "kids":
+		var sticks := UI.vbox(10)
+		sticks.add_child(UI.eyebrow(tr("SET_STICKS")))
+		sticks.add_child(UI.segmented([["2", "Mode 2"], ["1", "Mode 1"]], Prefs.stick_mode,
+			func(v): Prefs.set_stick_mode(v)))
+		sticks.add_child(UI.label(tr("STICKS_MODE_DESC"), 13, 500, "muted"))
+		sticks.add_child(UI.label(tr("STICKS_FEEL"), 15, 700))
+		sticks.add_child(UI.segmented([
+			["normal", tr("FEEL_NORMAL")], ["soft", tr("FEEL_SOFT")], ["softer", tr("FEEL_SOFTER")],
+		], Prefs.stick_feel, func(v): Prefs.set_stick_feel(v)))
+		sticks.add_child(UI.label(tr("STICKS_FEEL_DESC"), 13, 500, "muted"))
+		add_child(sticks)
+
 	var kids := UI.vbox(10)
 	kids.add_child(UI.eyebrow(tr("SET_KIDS")))
 	kids.add_child(UI.switch_row(tr("KIDS_LOCK"), tr("KIDS_LOCK_DESC"), Prefs.kids_lock,

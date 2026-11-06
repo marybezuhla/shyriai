@@ -31,6 +31,11 @@ var view := "pilot"
 
 var _left := Stick.new()
 var _right := Stick.new()
+## Mode 1 puts the throttle on the right stick and forward/back on the left. Drones only: the robot's
+## tracks and the kids' steering keep their own layout.
+var _mode1 := false
+var _thr := _left  # the stick whose up/down is the throttle
+var _fwd := _right  # the stick whose up/down flies forward and back
 var _hud := Control.new()
 var _marks := Control.new()
 var _hint := Label.new()
@@ -46,6 +51,10 @@ var _choice_shown := {}
 var _paused := false
 var _finished := false
 var _sticks := {"throttle": 0.0, "yaw": 0.0, "pitch": 0.0, "roll": 0.0}
+var _sound := FlightSound.new()
+## What the task had done a physics step ago, so each new ball, gate or step gets its blip.
+var _last_progress := 0.0
+var _last_counter := 0
 
 
 func setup(app_: Node, vehicle_: String, task_key_: String) -> void:
@@ -56,6 +65,10 @@ func setup(app_: Node, vehicle_: String, task_key_: String) -> void:
 	# Kids always fly on a clear day; otherwise the world follows the app's look.
 	look = "day" if mode == "kids" or Pal.current != "dusk" else "dusk"
 	view = Prefs.view_for(mode, vehicle)
+	_mode1 = Prefs.stick_mode == "1" and mode != "kids" and vehicle != "ugv"
+	if _mode1:
+		_thr = _right
+		_fwd = _left
 
 
 func _ready() -> void:
@@ -92,6 +105,10 @@ func _ready() -> void:
 	_place_camera(1.0)
 
 	_build_hud()
+	add_child(_sound)
+	_sound.setup(vehicle, mode == "kids", Prefs.sound)
+	_last_progress = task.progress
+	_last_counter = task.counter
 	DisplayServer.screen_set_keep_on(true)
 
 
@@ -109,6 +126,7 @@ func _physics_process(_delta: float) -> void:
 	_sticks = task.controls(_sticks)
 	sim.step(STEP, _sticks["throttle"], _sticks["yaw"], _sticks["pitch"], _sticks["roll"])
 	task.step(STEP, sim, _sticks)
+	_sound_events()
 	_cam_history.append([sim.pos, sim.orientation()])
 	if _cam_history.size() > 90:
 		_cam_history.pop_front()
@@ -126,11 +144,46 @@ func _physics_process(_delta: float) -> void:
 
 func _process(delta: float) -> void:
 	drone.sync(sim, delta)
+	if not _paused and not _finished:
+		_sound.motors(_motor_load(), _motors_running(), delta)
+		_sound.no_link(not task.link_ok, delta)
 	drone.body_visible(view != "fpv" and view != "drone")
 	_place_camera(delta)
 	world.show_beacon(task.marker, task.beacon)
 	_update_hud()
 	_marks.queue_redraw()
+
+
+## How hard the motors work, 0..1: the FPV throttle itself, the camera drone's climb and speed, the
+## robot's tracks.
+func _motor_load() -> float:
+	if sim is UgvSim:
+		return 0.25 + 0.75 * clampf(maxf(absf(sim.tracks.x), absf(sim.tracks.y)), 0.0, 1.0)
+	if sim is FpvSim:
+		return sim.throttle01
+	var h := Vector2(sim.vel.x, sim.vel.z).length() / 8.0
+	return clampf(0.45 + 0.3 * _sticks["throttle"] + 0.25 * h, 0.2, 1.0)
+
+
+func _motors_running() -> bool:
+	if sim.crashed:
+		return false
+	if sim is UgvSim:
+		return true
+	return not sim.on_ground or _sticks["throttle"] > 0.05 or (sim is FpvSim and sim.throttle01 > 0.05)
+
+
+## A blip for each step forward in the task (a ball taken, a gate flown: progress jumps in one step,
+## while holding or approaching only creeps), a thud for each hard bump.
+func _sound_events() -> void:
+	var jumped := task.progress - _last_progress >= 0.04 or task.counter > _last_counter
+	if jumped and not task.done:
+		_sound.play("blip")
+	_last_progress = task.progress
+	_last_counter = task.counter
+	for e in sim.events:
+		if e["type"] in ["bump", "crash", "tipped"] and float(e["speed"]) > 1.0:
+			_sound.play("thud")
 
 
 var _joy_throttle := false
@@ -140,38 +193,50 @@ func _read_sticks() -> void:
 	if autopilot.is_valid():
 		_sticks = autopilot.call(sim, task)
 		return
-	if not _left.spring_y:
+	if not _thr.spring_y:
 		# Keys move the throttle stick on screen, step by step.
 		var k := _keys(KEY_W, KEY_S)
 		if k != 0.0:
-			_left.value.y = clampf(_left.value.y + k * STEP * 0.9, -1.0, 1.0)
-			_left.queue_redraw()
-	var t := _left.value.y
+			_thr.value.y = clampf(_thr.value.y + k * STEP * 0.9, -1.0, 1.0)
+			_thr.queue_redraw()
+	var t := _thr.value.y
 	var y := _left.value.x
-	var p := _right.value.y
+	var p := _fwd.value.y
 	var r := _right.value.x
-	# A gamepad or a radio in joystick mode (Mode 2).
+	# A gamepad or a radio in joystick mode. In Mode 1 its up/down axes swap like the screen sticks.
+	var thr_axis := JOY_AXIS_RIGHT_Y if _mode1 else JOY_AXIS_LEFT_Y
+	var fwd_axis := JOY_AXIS_LEFT_Y if _mode1 else JOY_AXIS_RIGHT_Y
 	for dev in Input.get_connected_joypads():
-		if _left.spring_y:
-			t = _bigger(t, -_axis(dev, JOY_AXIS_LEFT_Y))
-		elif not _left.touched:
+		if _thr.spring_y:
+			t = _bigger(t, -_axis(dev, thr_axis))
+		elif not _thr.touched:
 			# A gamepad or radio drives the throttle until the screen stick is touched, but only once
 			# its stick has been moved: a self-centring gamepad would otherwise start at half throttle.
-			var a := Input.get_joy_axis(dev, JOY_AXIS_LEFT_Y)
+			var a := Input.get_joy_axis(dev, thr_axis)
 			if absf(a) > 0.2:
 				_joy_throttle = true
 			if _joy_throttle:
 				t = -a
 		y = _bigger(y, _axis(dev, JOY_AXIS_LEFT_X))
-		p = _bigger(p, -_axis(dev, JOY_AXIS_RIGHT_Y))
+		p = _bigger(p, -_axis(dev, fwd_axis))
 		r = _bigger(r, _axis(dev, JOY_AXIS_RIGHT_X))
 	# A keyboard: W/S up and down, A/D turn, arrows move.
-	if _left.spring_y:
+	if _thr.spring_y:
 		t = _bigger(t, _keys(KEY_W, KEY_S))
 	y = _bigger(y, _keys(KEY_D, KEY_A))
 	p = _bigger(p, _keys(KEY_UP, KEY_DOWN))
 	r = _bigger(r, _keys(KEY_RIGHT, KEY_LEFT))
+	if vehicle != "ugv":
+		var e: float = Prefs.STICK_FEELS.get(Prefs.stick_feel, 0.0)
+		y = _soft(y, e)
+		p = _soft(p, e)
+		r = _soft(r, e)
 	_sticks = {"throttle": t, "yaw": y, "pitch": p, "roll": r}
+
+
+## Expo: the same full deflection, but gentler near the centre, for fine moves. e = 0 changes nothing.
+static func _soft(x: float, e: float) -> float:
+	return (1.0 - e) * x + e * x * x * x
 
 
 func _axis(dev: int, axis: JoyAxis) -> float:
@@ -393,10 +458,13 @@ func _build_hud() -> void:
 		s.custom_minimum_size = Vector2(stick_px, stick_px)
 	# The FPV throttle stays where the thumb leaves it, like on a real radio, and starts at zero.
 	if vehicle == "fpv" and mode != "kids":
-		_left.spring_y = false
-		_left.value.y = -1.0
+		_thr.spring_y = false
+		_thr.value.y = -1.0
 	var left_label := "STICK_LEFT_FPV" if not _left.spring_y else "STICK_LEFT"
 	var right_label := "STICK_RIGHT"
+	if _mode1:
+		left_label = "STICK_LEFT_M1"
+		right_label = "STICK_RIGHT_FPV_M1" if vehicle == "fpv" else "STICK_RIGHT_M1"
 	if sim is UgvSim:
 		left_label = "STICK_TRACK_L" if sim.tank else "STICK_DRIVE"
 		right_label = "STICK_TRACK_R" if sim.tank else "STICK_TURN"
@@ -477,8 +545,15 @@ func _update_choice() -> void:
 
 func _update_hud() -> void:
 	var hints: Dictionary = task.stick_hint if _overlay == null else {}
-	_left.hint = hints.get("left", Vector2.ZERO)
-	_right.hint = hints.get("right", Vector2.ZERO)
+	var hl: Vector2 = hints.get("left", Vector2.ZERO)
+	var hr: Vector2 = hints.get("right", Vector2.ZERO)
+	if _mode1:
+		# Tasks give hints in Mode 2; in Mode 1 the up/down halves change sticks.
+		var l := Vector2(hl.x, hr.y)
+		hr = Vector2(hr.x, hl.y)
+		hl = l
+	_left.hint = hl
+	_right.hint = hr
 	if vehicle == "ugv" and task.load_kind != _shown_load:
 		_shown_load = task.load_kind
 		drone.set_load(_shown_load)
@@ -590,6 +665,7 @@ func pause() -> void:
 	if _finished:
 		return
 	_paused = true
+	_sound.hush(true)
 	_left.release()
 	_right.release()
 	var col := UI.vbox(12)
@@ -602,6 +678,7 @@ func pause() -> void:
 
 func resume() -> void:
 	_paused = false
+	_sound.hush(false)
 	_hide_overlay()
 
 
@@ -625,6 +702,8 @@ func on_back() -> void:
 
 func _finish() -> void:
 	_finished = true
+	_sound.stop_motors()
+	_sound.play("chime")
 	_left.release()
 	_right.release()
 	if task.is_mission:
@@ -650,6 +729,8 @@ func _finish() -> void:
 
 
 func _crashed() -> void:
+	_sound.stop_motors()
+	_sound.play("thud")
 	if sim is UgvSim:
 		_finished = true
 		var c := UI.vbox(12)
@@ -674,6 +755,8 @@ func _crashed() -> void:
 
 func _not_this_time() -> void:
 	_finished = true
+	_sound.stop_motors()
+	_sound.play("fail")
 	_left.release()
 	_right.release()
 	var col := UI.vbox(12)

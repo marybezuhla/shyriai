@@ -502,3 +502,21 @@ ORG_BRAVE1_URL,https://brave1.gov.ua/en/,https://brave1.gov.ua/
 ORG_REDCROSS,Ukrainian Red Cross Society,Товариство Червоного Хреста України
 ORG_REDCROSS_WHAT,The national Red Cross society: help for people hurt by the war,"Національне товариство Червоного Хреста: допомога людям, що постраждали від війни"
 ORG_REDCROSS_URL,https://redcross.org.ua/en/donate,https://redcross.org.ua/
+STICK_LEFT_M1,Forward · turn,Уперед · поворот
+STICK_RIGHT_M1,Height · sideways,Висота · убік
+STICK_RIGHT_FPV_M1,Throttle · sideways,Газ · убік
+HINT_STICKS_UP_M1,Push the right stick up: the drone takes off,Потягни правий стік угору: дрон злетить
+HINT_STICKS_FWD_M1,Left stick up and down: the drone flies forward and back,Лівий стік угору й униз: дрон летить уперед і назад
+HINT_TAKEOFF_UP_M1,Lift the drone to 2 m with the right stick,Підніми дрон на 2 м правим стіком
+FPV_THROTTLE_GOAL_M1,In FPV you hold the height. The right stick is the throttle: it does not spring back. Find the position where the drone hovers in the ball.,"У FPV висоту тримаєш ти. Правий стік керує газом і не повертається до центру. Знайди положення, на якому дрон висить у кулі."
+HINT_FPV_THR_UP_M1,Add throttle gently with the right stick: it does not spring back,Плавно додай газу правим стіком: він не повертається до центру
+SET_SOUND,Sound,Звук
+SOUND_ON,Sound in flight,Звук у польоті
+SOUND_DESC,"Motors, a chime when a task counts, a beep when the link drops.","Мотори, дзвіночок, коли завдання зараховано, і сигнал, коли зник зв’язок."
+SET_STICKS,Sticks,Стіки
+STICKS_MODE_DESC,"Mode 2: throttle on the left stick, as on most radios. Mode 1: throttle on the right. For drones, on screen and on a gamepad.","Mode 2: газ на лівому стіку, як на більшості пультів. Mode 1: газ на правому. Для дронів, на екрані й на геймпаді."
+FEEL_NORMAL,Normal,Звичайні
+FEEL_SOFT,Softer,М’якші
+FEEL_SOFTER,Softest,Найм’якші
+STICKS_FEEL,Sensitivity,Чутливість
+STICKS_FEEL_DESC,"Softer sticks move the drone gently near the centre, for small, precise moves. Full stick is still full speed.","М’якші стіки біля центру рухають дрон обережніше, для малих точних рухів. До краю стік так само дає повну швидкість."

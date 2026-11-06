@@ -15,6 +15,10 @@ const THEMES := ["dusk", "day", "system"]
 const LANGUAGES := ["system", "uk", "en"]
 const VIEWS := ["pilot", "chase", "drone", "fpv", "ugv"]
 const TEXT_SIZES := {"normal": 1.0, "large": 1.15, "larger": 1.3}
+## Mode 2: throttle on the left stick (most radios). Mode 1: throttle on the right.
+const STICK_MODES := ["2", "1"]
+## How much softer the sticks are near the centre (expo): 0 is the plain, straight response.
+const STICK_FEELS := {"normal": 0.0, "soft": 0.3, "softer": 0.55}
 
 var mode := "simple"
 ## The theme the grown-up chose. Kids mode shows "morning" instead, without changing this.
@@ -23,6 +27,9 @@ var language := "system"
 var text_size := "normal"
 ## Leaving Kids mode or opening settings needs a sum solved.
 var kids_lock := false
+var sound := true
+var stick_mode := "2"
+var stick_feel := "normal"
 ## Lessons passed, per mode and vehicle, in order: {"kids": {"camera": 3}, ...}
 var passed := {}
 ## Missions done, per mode: {"pro": ["MIS_CAM_SEARCH"], ...}
@@ -88,6 +95,30 @@ func set_kids_lock(on: bool) -> void:
 		changed.emit()
 
 
+func set_sound(on: bool) -> void:
+	if on != sound:
+		sound = on
+		_undo = {}
+		_save()
+		changed.emit()
+
+
+func set_stick_mode(value: String) -> void:
+	if value in STICK_MODES and value != stick_mode:
+		stick_mode = value
+		_undo = {}
+		_save()
+		changed.emit()
+
+
+func set_stick_feel(value: String) -> void:
+	if STICK_FEELS.has(value) and value != stick_feel:
+		stick_feel = value
+		_undo = {}
+		_save()
+		changed.emit()
+
+
 ## Each mode keeps its own progress: a child's lessons are not a grown-up's.
 func passed_count(vehicle: String, m := "") -> int:
 	var md := m if m != "" else mode
@@ -145,6 +176,9 @@ func erase_all() -> void:
 	language = "system"
 	text_size = "normal"
 	kids_lock = false
+	sound = true
+	stick_mode = "2"
+	stick_feel = "normal"
 	passed = {}
 	missions = {}
 	views = {}
@@ -279,6 +313,15 @@ func _apply(d: Dictionary) -> void:
 	var k = d.get("kids_lock")
 	if k is bool:
 		kids_lock = k
+	var snd = d.get("sound")
+	if snd is bool:
+		sound = snd
+	var sm = d.get("stick_mode")
+	if sm is String and sm in STICK_MODES:
+		stick_mode = sm
+	var sf = d.get("stick_feel")
+	if sf is String and STICK_FEELS.has(sf):
+		stick_feel = sf
 	var v = d.get("views")
 	if v is Dictionary:
 		for key in v.keys():
@@ -329,7 +372,8 @@ func _read_missions(list: Array) -> Array:
 func _data() -> Dictionary:
 	return {
 		"version": 1, "mode": mode, "theme": theme, "language": language, "text_size": text_size,
-		"kids_lock": kids_lock, "views": views.duplicate(true), "passed": passed.duplicate(true),
+		"kids_lock": kids_lock, "sound": sound, "stick_mode": stick_mode, "stick_feel": stick_feel,
+		"views": views.duplicate(true), "passed": passed.duplicate(true),
 		"missions": missions.duplicate(true),
 	}
 
