@@ -38,6 +38,11 @@ func build() -> void:
 		list.add_child(_vehicle_card(v))
 	add_child(list)
 
+	# The licences appear once a vehicle's lessons are all passed.
+	var earned := Curriculum.VEHICLES.any(func(v): return Prefs.licence_date(v) != "")
+	if earned:
+		add_child(_cards_card())
+
 
 func _pick_mode(m: String) -> void:
 	# Leaving Kids mode may need a grown-up.
@@ -100,3 +105,25 @@ func _vehicle_card(v: String) -> Control:
 	row.add_child(text)
 	row.add_child(count)
 	return UI.tappable(row, Pal.c("surface"), func(): app.open_lessons(v), Curriculum.label("VEH_" + v.to_upper()))
+
+
+
+func _cards_card() -> Control:
+	var kids := Prefs.mode == "kids"
+	var icon_bg := PanelContainer.new()
+	icon_bg.add_theme_stylebox_override("panel", UI.box(Pal.c("surface2"), 16, 0))
+	var ic := CenterContainer.new()
+	ic.custom_minimum_size = Vector2(52, 52)
+	ic.add_child(Glyph.make("sunflower", 34, Pal.c("accent")))
+	icon_bg.add_child(ic)
+	var text := UI.vbox(3)
+	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	text.alignment = BoxContainer.ALIGNMENT_CENTER
+	var title := tr("HOME_CARDS_KIDS" if kids else "HOME_CARDS")
+	text.add_child(UI.label(title, 16, 700))
+	text.add_child(UI.label(tr("HOME_CARDS_DESC_KIDS" if kids else "HOME_CARDS_DESC"), 14, 500, "muted"))
+	var row := UI.hbox(14)
+	row.add_child(icon_bg)
+	row.add_child(text)
+	row.add_child(Glyph.make("chevron", 20, Pal.c("muted")))
+	return UI.tappable(row, Pal.c("surface"), func(): app.open_pilot_cards(), title)

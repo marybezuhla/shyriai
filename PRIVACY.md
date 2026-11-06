@@ -9,9 +9,11 @@
 - обраний режим, тема, мова й розмір тексту;
 - чи ввімкнено батьківський замок;
 - які уроки й місії пройдено, окремо для кожного режиму;
-- яку камеру обрано для кожної машини.
+- яку камеру обрано для кожної машини;
+- найкращий результат кожного уроку й місії (соняшники й час) і дата посвідчення пілота;
+- імʼя для посвідчення, **лише якщо його вписано** (за бажанням).
 
-Імені, віку, контактів, місця, фото, звуку чи будь-яких ідентифікаторів немає.
+Віку, контактів, місця, фото, звуку чи будь-яких ідентифікаторів немає. Імʼя нікуди не надсилається й ніде не показується, крім посвідчення на цьому телефоні.
 
 ## Хто їх бачить
 
@@ -22,8 +24,9 @@
 
 ## Як усе стерти
 
-- **Налаштування → Прогрес → «Почати спочатку в режимі …»**: стирає уроки й місії поточного режиму.
-- **Налаштування → Прогрес → «Стерти всі дані»**: стирає прогрес усіх режимів і всі налаштування.
+- **Налаштування → Прогрес → «Почати спочатку в режимі …»**: стирає уроки, місії, результати й посвідчення поточного режиму.
+- **Налаштування → Прогрес → «Стерти всі дані»**: стирає прогрес усіх режимів, імʼя й усі налаштування.
+- Імʼя можна стерти й окремо: очистити поле на екрані посвідчень.
 - Обидві дії можна одразу «Повернути».
 - **Видалення застосунку** прибирає файл повністю. Після цього прогрес починається заново.
 
@@ -40,9 +43,11 @@ One small file on the phone (up to 64 KB), in the app's own folder. It holds:
 - the chosen mode, theme, language and text size;
 - whether the grown-ups' lock is on;
 - which lessons and missions are done, per mode;
-- which camera is chosen for each vehicle.
+- which camera is chosen for each vehicle;
+- the best result of each lesson and mission (sunflowers and time) and the date of each pilot's licence;
+- a name for the licence, **only if one is typed in** (optional).
 
-No name, age, contacts, location, photos, sound or identifiers of any kind.
+No age, contacts, location, photos, sound or identifiers of any kind. The name is never sent anywhere and shows only on the licence on this phone.
 
 ## Who can see it
 
@@ -53,7 +58,8 @@ No name, age, contacts, location, photos, sound or identifiers of any kind.
 
 ## How to erase it
 
-- **Settings → Progress → "Start over in … mode"** erases the lessons and missions of the current mode.
-- **Settings → Progress → "Erase all data"** erases progress in every mode and all settings.
+- **Settings → Progress → "Start over in … mode"** erases the lessons, missions, results and licences of the current mode.
+- **Settings → Progress → "Erase all data"** erases progress in every mode, the name and all settings.
+- The name can also be erased on its own: clear the field on the licences screen.
 - Both can be undone straight away.
 - **Uninstalling the app** removes the file completely. After that, progress starts again.

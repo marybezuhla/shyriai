@@ -61,6 +61,18 @@ func _draw() -> void:
 			draw_rect(Rect2(_p(13.5, 5), Vector2(3.5, 14) * _k), color)
 		"check":
 			_line([[5, 12.5], [10, 17], [19, 7]])
+		"sunflower":
+			# The rating mark: gold petals round a brown middle. Not a star, on purpose.
+			for i in 8:
+				var d := Vector2.from_angle(i * TAU / 8.0)
+				draw_circle(_p(12, 12) + d * 6.6 * _k, 3.9 * _k, color, true, -1.0, true)
+			draw_circle(_p(12, 12), 4.3 * _k, Pal.c("seed"), true, -1.0, true)
+		"sunflower_off":
+			# A sunflower still to earn: only its outline.
+			for i in 8:
+				var d := Vector2.from_angle(i * TAU / 8.0)
+				draw_arc(_p(12, 12) + d * 7.2 * _k, 2.6 * _k, 0, TAU, 20, color, _w * 0.8, true)
+			_ring(12, 12, 4.3)
 		"lock":
 			_line([[6, 11], [18, 11], [18, 20], [6, 20]], true)
 			draw_arc(_p(12, 11), 4 * _k, PI, TAU, 24, color, _w, true)

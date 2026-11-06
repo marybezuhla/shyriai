@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # Colours and fonts of Shyriai. Every colour on screen comes from here.
+# "seed" is the brown middle of a sunflower: the same in every look, as a real one.
 extends Node
 
 signal changed
@@ -18,6 +19,7 @@ const THEMES := {
 		"on_accent": Color("#2A1D3B"),
 		"accent_text": Color("#FFC321"),
 		"focus": Color("#FFC321"),
+		"seed": Color("#6B4A2E"),
 	},
 	# Day: light, for bright sunlight.
 	"day": {
@@ -32,6 +34,7 @@ const THEMES := {
 		"on_accent": Color("#2A1D3B"),
 		"accent_text": Color("#5B3E86"),
 		"focus": Color("#5B3E86"),
+		"seed": Color("#6B4A2E"),
 	},
 	# Morning: the Kids mode look. Sky-light, the same violet ink and gold.
 	"morning": {
@@ -46,6 +49,7 @@ const THEMES := {
 		"on_accent": Color("#2A1D3B"),
 		"accent_text": Color("#5B3E86"),
 		"focus": Color("#5B3E86"),
+		"seed": Color("#6B4A2E"),
 	},
 }
 

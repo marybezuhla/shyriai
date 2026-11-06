@@ -12,6 +12,8 @@
 - 👀 **Три камери.** «З землі»: як пілот, що стоїть із пультом, так вчаться літати по-справжньому. «За дроном»: легше для початку. «Камера»: вигляд з самого дрона, для пошуку й огляду.
 - 🎯 **Навчання й місії.** Уроки від простого до складного з чіткими умовами зарахування. Місії — ті самі навички в сюжеті: пошук у полі, траса з воротами, доставка вантажу, евакуація пораненого. Для дітей — кошеня на даху, обручі, посилка бабусі.
 - 🎮 **Керування.** Екранні стіки, геймпад і справжній пульт через USB, щоб моторна памʼять переносилася на реальний дрон. Розкладка Mode 2 або Mode 1 і мʼякші стіки для точних рухів.
+- 🌻 **Соняшники й посвідчення.** За кожен урок від одного до трьох соняшників: за проходження, за політ без дотиків і за швидкість. Найкращий час зберігається. За всі уроки машини видається посвідчення пілота, а в дитячому режимі грамота.
+- 🕊️ **Вільний політ.** Без завдання: вітер, час доби й золоті кулі для розваги.
 - 🔊 **Звук.** Мотори, що відгукуються на газ, дзвіночок за зарахований урок і сигнал втрати звʼязку. Звук створюється в коді, без аудіофайлів, і вимикається в налаштуваннях.
 - 📘 **Теорія.** Короткі картки: перед польотом, безпека батарей, втрата сигналу, правила польотів в Україні.
 
@@ -51,6 +53,8 @@ A piloting trainer for Android: camera and FPV drones, and ground robots (UGVs).
 - 👀 **Three cameras.** From the ground: as a pilot standing with the radio, the way real flying is learnt. Behind the drone: easier to start with. Camera: the view from the drone itself, for searching and surveying.
 - 🎯 **Lessons and missions.** Lessons from easy to hard, each with clear pass conditions. Missions use the same skills in a story: a search in a field, a gate course, cargo delivery, casualty evacuation. For kids: a kitten on a roof, hoops, a parcel for granny.
 - 🎮 **Controls.** On-screen sticks, a gamepad, and a real radio over USB, so muscle memory carries over to a real drone. Mode 2 or Mode 1 layout, and softer sticks for fine moves.
+- 🌻 **Sunflowers and licences.** One to three sunflowers per lesson: for passing, for flying without a touch, and for speed. Best times are kept. All of a vehicle's lessons earn a pilot's licence, or a certificate in Kids mode.
+- 🕊️ **Free flight.** No task: wind, time of day and gold balls for fun.
 - 🔊 **Sound.** Motors that answer the throttle, a chime when a lesson counts and a beep when the link drops. The sound is made in code, with no audio files, and can be turned off in settings.
 - 📘 **Theory.** Short cards: before you fly, battery safety, lost signal, flying rules in Ukraine.
 

@@ -19,6 +19,14 @@ const TEXT_SIZES := {"normal": 1.0, "large": 1.15, "larger": 1.3}
 const STICK_MODES := ["2", "1"]
 ## How much softer the sticks are near the centre (expo): 0 is the plain, straight response.
 const STICK_FEELS := {"normal": 0.0, "soft": 0.3, "softer": 0.55}
+## Free flight choices. Kids fly without wind; only Adult chooses the FPV flight mode.
+const FREE_WINDS := ["none", "light", "gusty"]
+const FREE_TIMES := ["day", "dusk"]
+const FREE_FPV := ["angle", "horizon", "acro"]
+## Long enough for any real name, short enough to fit the licence card.
+const NAME_MAX := 32
+## Longer than any flight can last: a bigger time in a saved file is not trusted.
+const MAX_SECONDS := 3600.0
 
 var mode := "simple"
 ## The theme the grown-up chose. Kids mode shows "morning" instead, without changing this.
@@ -30,6 +38,14 @@ var kids_lock := false
 var sound := true
 var stick_mode := "2"
 var stick_feel := "normal"
+## The name on the pilot's licence: optional, kept only on this phone.
+var pilot_name := ""
+var free := {"wind": "none", "time": "day", "balls": true, "fpv": "angle"}
+## Best result per mode and task: {"simple": {"CAM_TAKEOFF": {"f": 2, "t": 14.5}}}.
+## "f" = most sunflowers, "t" = shortest time of a pass, each kept on its own.
+var best := {}
+## When each vehicle's lessons were all passed, per mode: {"pro": {"camera": "2026-11-06"}}.
+var licences := {}
 ## Lessons passed, per mode and vehicle, in order: {"kids": {"camera": 3}, ...}
 var passed := {}
 ## Missions done, per mode: {"pro": ["MIS_CAM_SEARCH"], ...}
@@ -119,6 +135,76 @@ func set_stick_feel(value: String) -> void:
 		changed.emit()
 
 
+func set_pilot_name(value: String) -> void:
+	var clean := _clean_name(value)
+	if clean != pilot_name:
+		pilot_name = clean
+		_undo = {}
+		_save()
+
+
+func set_free(key: String, value) -> void:
+	var ok: bool = {
+		"wind": value in FREE_WINDS, "time": value in FREE_TIMES, "fpv": value in FREE_FPV,
+		"balls": value is bool,
+	}.get(key, false)
+	if ok and free[key] != value:
+		free[key] = value
+		_save()
+		changed.emit()
+
+
+## Keeps the best of each: the most sunflowers and the quickest pass. Returns what was there before.
+func record(key: String, flowers: int, seconds: float) -> Dictionary:
+	if not best.has(mode):
+		best[mode] = {}
+	var before: Dictionary = best[mode].get(key, {}).duplicate()
+	var now := {
+		"f": maxi(int(before.get("f", 0)), clampi(flowers, 1, Rating.MAX)),
+		"t": minf(float(before.get("t", MAX_SECONDS)), clampf(seconds, 0.0, MAX_SECONDS)),
+	}
+	best[mode][key] = now
+	_undo = {}
+	_save()
+	return before
+
+
+func best_of(key: String, m := "") -> Dictionary:
+	return best.get(m if m != "" else mode, {}).get(key, {})
+
+
+## The date of the licence for a vehicle in the mode in use, or "" if not earned yet. Progress from
+## before licences existed gets today's date the first time it is asked for.
+func licence_date(vehicle: String) -> String:
+	var lessons := Curriculum.lessons(vehicle, mode)
+	if passed_count(vehicle) < lessons.size():
+		return ""
+	if not licences.get(mode, {}).has(vehicle):
+		if not licences.has(mode):
+			licences[mode] = {}
+		licences[mode][vehicle] = Time.get_date_string_from_system()
+		_save()
+	return licences[mode][vehicle]
+
+
+## Sunflowers earned in a vehicle's lessons, out of how many there are to earn.
+func sunflowers_of(vehicle: String) -> Vector2i:
+	var lessons := Curriculum.lessons(vehicle, mode)
+	var got := 0
+	for k in lessons:
+		got += int(best_of(k).get("f", 0))
+	return Vector2i(got, lessons.size() * Rating.MAX)
+
+
+static func _clean_name(value: String) -> String:
+	var out := ""
+	for ch in value.strip_edges():
+		# No control characters or line breaks: the name is one line on a card.
+		if ch.unicode_at(0) >= 32 and ch.unicode_at(0) != 127:
+			out += ch
+	return out.substr(0, NAME_MAX).strip_edges()
+
+
 ## Each mode keeps its own progress: a child's lessons are not a grown-up's.
 func passed_count(vehicle: String, m := "") -> int:
 	var md := m if m != "" else mode
@@ -137,6 +223,7 @@ func mark_passed(vehicle: String, index: int) -> void:
 		passed[mode][vehicle] = index + 1
 		_undo = {}
 		_save()
+		licence_date(vehicle)  # dates the licence the day the last lesson is passed
 
 
 func mission_done(key: String) -> bool:
@@ -158,9 +245,14 @@ func has_progress() -> bool:
 
 ## Clears the lessons and missions of the mode in use. undo_reset() puts them back.
 func reset_progress() -> void:
-	_undo = {"mode": mode, "passed": passed.get(mode, {}).duplicate(), "missions": missions.get(mode, []).duplicate()}
+	_undo = {
+		"mode": mode, "passed": passed.get(mode, {}).duplicate(), "missions": missions.get(mode, []).duplicate(),
+		"best": best.get(mode, {}).duplicate(true), "licences": licences.get(mode, {}).duplicate(),
+	}
 	passed.erase(mode)
 	missions.erase(mode)
+	best.erase(mode)
+	licences.erase(mode)
 	_save()
 	changed.emit()
 
@@ -179,6 +271,10 @@ func erase_all() -> void:
 	sound = true
 	stick_mode = "2"
 	stick_feel = "normal"
+	pilot_name = ""
+	free = {"wind": "none", "time": "day", "balls": true, "fpv": "angle"}
+	best = {}
+	licences = {}
 	passed = {}
 	missions = {}
 	views = {}
@@ -211,6 +307,8 @@ func undo_reset() -> void:
 	else:
 		passed[_undo["mode"]] = _undo["passed"]
 		missions[_undo["mode"]] = _undo["missions"]
+		best[_undo["mode"]] = _undo["best"]
+		licences[_undo["mode"]] = _undo["licences"]
 	_undo = {}
 	_save()
 	changed.emit()
@@ -322,6 +420,31 @@ func _apply(d: Dictionary) -> void:
 	var sf = d.get("stick_feel")
 	if sf is String and STICK_FEELS.has(sf):
 		stick_feel = sf
+	var pn = d.get("pilot_name")
+	if pn is String:
+		pilot_name = _clean_name(pn)
+	var fr = d.get("free")
+	if fr is Dictionary:
+		for key in ["wind", "time", "fpv", "balls"]:
+			var val = fr.get(key)
+			if {"wind": val in FREE_WINDS, "time": val in FREE_TIMES, "fpv": val in FREE_FPV,
+					"balls": val is bool}[key]:
+				free[key] = val
+	var b = d.get("best")
+	if b is Dictionary:
+		for m_ in b.keys():
+			if m_ is String and m_ in MODES and b[m_] is Dictionary:
+				best[m_] = _read_best(b[m_])
+	var lc = d.get("licences")
+	if lc is Dictionary:
+		for m_ in lc.keys():
+			if m_ is String and m_ in MODES and lc[m_] is Dictionary:
+				var one := {}
+				for v_ in lc[m_].keys():
+					var date = lc[m_][v_]
+					if v_ is String and v_ in Curriculum.VEHICLES and date is String and _is_date(date):
+						one[v_] = date
+				licences[m_] = one
 	var v = d.get("views")
 	if v is Dictionary:
 		for key in v.keys():
@@ -345,6 +468,25 @@ func _apply(d: Dictionary) -> void:
 		for key in md.keys():
 			if key is String and key in MODES and md[key] is Array:
 				missions[key] = _read_missions(md[key])
+
+
+func _read_best(d: Dictionary) -> Dictionary:
+	var out := {}
+	for k in d.keys():
+		var r = d[k]
+		if not (k is String and FlightTask.implemented(k) and r is Dictionary):
+			continue
+		var f = r.get("f")
+		var t = r.get("t")
+		# JSON numbers arrive as floats; anything odd is dropped, not trusted.
+		if (f is int or (f is float and is_finite(f))) and (t is int or (t is float and is_finite(t))):
+			out[k] = {"f": clampi(int(f), 1, Rating.MAX), "t": clampf(float(t), 0.0, MAX_SECONDS)}
+	return out
+
+
+## A calendar date like 2026-11-06, as Time writes it.
+static func _is_date(s: String) -> bool:
+	return RegEx.create_from_string("^\\d{4}-\\d{2}-\\d{2}$").search(s) != null
 
 
 func _read_counts(d: Dictionary, m: String) -> Dictionary:
@@ -374,7 +516,8 @@ func _data() -> Dictionary:
 		"version": 1, "mode": mode, "theme": theme, "language": language, "text_size": text_size,
 		"kids_lock": kids_lock, "sound": sound, "stick_mode": stick_mode, "stick_feel": stick_feel,
 		"views": views.duplicate(true), "passed": passed.duplicate(true),
-		"missions": missions.duplicate(true),
+		"missions": missions.duplicate(true), "best": best.duplicate(true),
+		"licences": licences.duplicate(true), "pilot_name": pilot_name, "free": free.duplicate(),
 	}
 
 
