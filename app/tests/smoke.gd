@@ -245,6 +245,14 @@ func _sunflowers_and_free() -> void:
 	await _shot("uk-larger-free-pro-fpv")
 	main.back()
 	Prefs.set_text_size("normal")
+	for weather in ["fog", "winter"]:
+		Prefs.set_free("time", weather)
+		main.start("camera", "FREE_CAMERA")
+		await _frames(2)
+		await _seconds(1.0)
+		await _shot("uk-%s-flight-free-camera" % weather)
+		main.close_flight()
+		await _frames(2)
 	for v in Curriculum.VEHICLES:
 		Prefs.set_free("time", "dusk")
 		main.start(v, "FREE_" + v.to_upper())

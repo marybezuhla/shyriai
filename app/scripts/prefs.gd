@@ -21,7 +21,9 @@ const STICK_MODES := ["2", "1"]
 const STICK_FEELS := {"normal": 0.0, "soft": 0.3, "softer": 0.55}
 ## Free flight choices. Kids fly without wind; only Adult chooses the FPV flight mode.
 const FREE_WINDS := ["none", "light", "gusty"]
-const FREE_TIMES := ["day", "dusk"]
+const FREE_TIMES := ["day", "dusk", "fog", "winter"]
+## Kids fly in daylight: a clear day or a snowy one.
+const FREE_TIMES_KIDS := ["day", "winter"]
 const FREE_FPV := ["angle", "horizon", "acro"]
 ## Long enough for any real name, short enough to fit the licence card.
 const NAME_MAX := 32
@@ -317,7 +319,8 @@ func undo_reset() -> void:
 ## The FPV drone is flown through its own camera. With the camera drone, kids follow it from
 ## behind and everyone else sees it as a pilot on the ground does. Kept per mode and vehicle.
 func view_for(m: String, vehicle := "camera") -> String:
-	var fallback := "fpv" if vehicle == "fpv" else ("chase" if m == "kids" else ("ugv" if vehicle == "ugv" else "pilot"))
+	var machine := Curriculum.machine(vehicle)
+	var fallback := "fpv" if machine == "fpv" else ("chase" if m == "kids" else ("ugv" if machine == "ugv" else "pilot"))
 	if vehicle == "survey":
 		fallback = "drone"  # a survey is flown through the camera, kids too
 	return views.get(m + "/" + vehicle, fallback)

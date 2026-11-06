@@ -27,6 +27,29 @@ const PALETTES := {
 		"drone": Color("#FFF0D5"), "drone_front": Color("#FFC321"),
 		"road": Color("#6A5884"), "mud": Color("#3B2B3E"), "barrier": Color("#8E7BA8"),
 	},
+	# Fog: grey and close; far things fade out at 40-60 m.
+	"fog": {
+		"sky_top": Color("#C9D3D8"), "sky_horizon": Color("#DDE3E5"),
+		"hill_a": Color("#9DB09A"), "hill_b": Color("#A8B9A3"),
+		"field": Color("#B3C3A6"), "row": Color("#A6B798"),
+		"poplar": Color("#6F8468"), "wall": Color("#F4F4F2"), "roof": Color("#7B6F8C"),
+		"pad": Color("#FFF0D5"), "pad_ring": Color("#FFC321"), "pad_mark": Color("#463161"),
+		"sun": Color("#FFFFFF"), "sun_energy": 0.35, "ambient": Color("#E3E8EA"), "ambient_energy": 0.65,
+		"drone": Color("#463161"), "drone_front": Color("#FFC321"),
+		"road": Color("#D3D0C2"), "mud": Color("#7E7466"), "barrier": Color("#C9C6BA"),
+		"fog_density": 0.035, "fog_sky": 0.7,
+	},
+	# Winter: snow on the fields, dark firs, white light.
+	"winter": {
+		"sky_top": Color("#BFD3E6"), "sky_horizon": Color("#EEF3F7"),
+		"hill_a": Color("#E3EAF0"), "hill_b": Color("#EDF2F6"),
+		"field": Color("#F4F7FA"), "row": Color("#DCE5EC"),
+		"poplar": Color("#3F5A4C"), "wall": Color("#FFFFFF"), "roof": Color("#6E5A8A"),
+		"pad": Color("#FFF0D5"), "pad_ring": Color("#FFC321"), "pad_mark": Color("#463161"),
+		"sun": Color("#FFF6E8"), "sun_energy": 0.55, "ambient": Color("#E6EEF4"), "ambient_energy": 0.55,
+		"drone": Color("#463161"), "drone_front": Color("#FFC321"),
+		"road": Color("#CFD8DF"), "mud": Color("#8C8E96"), "barrier": Color("#B7C0C8"),
+	},
 }
 
 var pal: Dictionary
@@ -164,8 +187,8 @@ func _environment() -> void:
 	env.tonemap_mode = Environment.TONE_MAPPER_LINEAR
 	env.fog_enabled = true
 	env.fog_light_color = pal["sky_horizon"]
-	env.fog_density = 0.004
-	env.fog_sky_affect = 0.0
+	env.fog_density = float(pal.get("fog_density", 0.004))
+	env.fog_sky_affect = float(pal.get("fog_sky", 0.0))
 	var we := WorldEnvironment.new()
 	we.environment = env
 	add_child(we)

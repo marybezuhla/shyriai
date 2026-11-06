@@ -57,6 +57,10 @@ func _ready() -> void:
 		for key in Curriculum.lessons("survey", mode) + Curriculum.missions("survey", mode):
 			await test_survey_task(key, mode)
 	await test_survey_mistakes()
+	for mode in Prefs.MODES:
+		for key in Curriculum.lessons("intercept", mode) + Curriculum.missions("intercept", mode):
+			await test_intercept_task(key, mode)
+	await test_target_gets_away()
 	test_rating_rules()
 	test_results_are_kept()
 	test_saved_results_are_checked()
@@ -70,6 +74,9 @@ func _ready() -> void:
 			for key in ["MIS_CAM_SURVEY", "MIS_SRV_FIND", "MIS_SRV_COUNT"]:
 				await test_survey_task(key, mode)
 				await test_fpv_task("MIS_FPV_TREES", mode)
+		for mode in ["simple", "pro"]:
+			for key in ["MIS_INT_PATROL", "MIS_INT_FAST"]:
+				await test_intercept_task(key, mode)
 		for key in ["MIS_UGV_CARGO", "MIS_UGV_EVAC"]:
 			await test_ugv_task(key, "simple")
 	_seed = 7
@@ -270,6 +277,56 @@ func test_survey_mistakes() -> void:
 		task.answer(i, "damaged" if i == 0 else "ok")
 	check(task.done and task.wrong == [0], "simple: one misread roof still passes, and is listed")
 	f[2].queue_free()
+	await get_tree().process_frame
+
+
+# --- Interception course ---------------------------------------------------------
+
+## The test pilot flies to the lead point of the current target at its height, as a person should.
+func test_intercept_task(key: String, mode: String) -> void:
+	var f := _flight(key, mode, "intercept")
+	var task: FlightTask = f[0]
+	var sim: DroneSim = f[1]
+	var world: FlightWorld = f[2]
+	var fpv := sim is FpvSim
+	var ap = FpvAutopilot.new() if fpv else Autopilot.new()
+	if fpv:
+		# Faster than every target, but slow enough to hold height in a hard turn.
+		ap.speed = 18.0 if mode == "pro" else 7.0
+	for i in int(200.0 / DT):
+		var tg: Dictionary = task.current()
+		if not tg.is_empty() and tg.has("now"):
+			# Fly through the lead point, never brake for it: a point far beyond it, the same way.
+			var aim: Vector3 = task.lead_point(sim, tg)
+			var way := Vector3(aim.x - sim.pos.x, 0, aim.z - sim.pos.z)
+			ap.target = sim.pos + way.normalized() * maxf(way.length(), 60.0) if way.length() > 0.01 else aim
+			ap.height = maxf(1.0, aim.y - world.height(sim.pos.x, sim.pos.z))
+		var s: Dictionary = task.controls(ap.sticks(sim))
+		sim.step(DT, s["throttle"], s["yaw"], s["pitch"], s["roll"])
+		task.step(DT, sim, s)
+		if task.done or task.failed or sim.crashed:
+			break
+	check(task.done, "%s: %s catches the target (%s)" % [mode, key, task.summary if task.failed else ("crashed" if sim.crashed else "")])
+	if task.done:
+		_passed(task, sim)
+	world.queue_free()
+	await get_tree().process_frame
+
+
+## Not flying at all: a crossing target gets away, a circling one runs the clock out.
+func test_target_gets_away() -> void:
+	for key in ["INT_LEAD", "INT_TURN"]:
+		var f := _flight(key, "simple", "intercept")
+		var task: FlightTask = f[0]
+		var sim: DroneSim = f[1]
+		for i in int(80.0 / DT):
+			sim.step(DT, -1.0, 0, 0, 0)
+			task.step(DT, sim, {"throttle": -1.0, "yaw": 0.0, "pitch": 0.0, "roll": 0.0})
+			if task.failed:
+				break
+		check(task.failed and task.summary == ("FAIL_INT_GONE" if key == "INT_LEAD" else "FAIL_INT_TIME"),
+			"%s: standing still does not pass (%s)" % [key, task.summary])
+		f[2].queue_free()
 	await get_tree().process_frame
 
 

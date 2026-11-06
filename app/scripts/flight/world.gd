@@ -581,3 +581,78 @@ func add_tower(at: Vector3) -> void:
 	_mesh(tank, pal["roof"], Vector3(at.x, g + 10.0, at.z))
 	obstacles.append({"cyl": Vector2(at.x, at.z), "r": 1.4, "h": 2.2, "y": g + 8.9})
 
+
+# --- For the interception course ---------------------------------------------
+
+## A training target: an abstract striped ball, nothing like any real aircraft. At night it carries a
+## small light, as training targets do. Returns the node the task moves.
+func add_target_ball(light := false) -> Node3D:
+	var n := Node3D.new()
+	add_child(n)
+	var top := SphereMesh.new()
+	top.radius = 0.55
+	top.height = 1.1
+	top.radial_segments = 16
+	top.rings = 8
+	var half := MeshInstance3D.new()
+	half.mesh = top
+	half.material_override = _shared_mat(Color("#FFF0D5"))
+	n.add_child(half)
+	var band := CylinderMesh.new()
+	band.top_radius = 0.57
+	band.bottom_radius = 0.57
+	band.height = 0.28
+	band.radial_segments = 16
+	var b := MeshInstance3D.new()
+	b.mesh = band
+	b.material_override = _shared_mat(Color("#E5708B"))
+	n.add_child(b)
+	if light:
+		var bulb := MeshInstance3D.new()
+		var s := SphereMesh.new()
+		s.radius = 0.2
+		s.height = 0.4
+		bulb.mesh = s
+		var m := StandardMaterial3D.new()
+		m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		m.albedo_color = Color("#FFE27A")
+		bulb.material_override = m
+		bulb.position = Vector3(0, 0.62, 0)
+		n.add_child(bulb)
+		var lamp := OmniLight3D.new()
+		lamp.light_color = Color("#FFE27A")
+		lamp.omni_range = 6.0
+		lamp.light_energy = 1.5
+		n.add_child(lamp)
+	return n
+
+
+## A butterfly for the kids: two bright wings that flap. Returns the node the task moves.
+func add_butterfly(color: Color) -> Node3D:
+	var n := Node3D.new()
+	add_child(n)
+	var m := StandardMaterial3D.new()
+	m.albedo_color = color
+	m.cull_mode = BaseMaterial3D.CULL_DISABLED
+	for side in [-1.0, 1.0]:
+		# Each wing hangs on a hinge at the body, so turning the hinge flaps it.
+		var hinge := Node3D.new()
+		hinge.name = "hinge_l" if side < 0 else "hinge_r"
+		n.add_child(hinge)
+		var wing := MeshInstance3D.new()
+		var q := QuadMesh.new()
+		q.size = Vector2(0.55, 0.45)
+		wing.mesh = q
+		wing.material_override = m
+		wing.position = Vector3(side * 0.28, 0, 0)
+		wing.rotation = Vector3(-PI / 2.0, 0, 0)
+		hinge.add_child(wing)
+	return n
+
+
+## Flaps a butterfly's wings; `t` is the time in seconds.
+static func flap(butterfly: Node3D, t: float) -> void:
+	var a := sin(t * 14.0) * 0.7
+	butterfly.get_node("hinge_l").rotation.z = -a
+	butterfly.get_node("hinge_r").rotation.z = a
+

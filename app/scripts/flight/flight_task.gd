@@ -50,6 +50,17 @@ const FILES := {
 	"MIS_SRV_ALBUM": "res://scripts/flight/tasks/photo_list.gd",
 	"MIS_SRV_FIND": "res://scripts/flight/tasks/mission_find.gd",
 	"MIS_SRV_COUNT": "res://scripts/flight/tasks/mission_count.gd",
+	"INT_CHASE": "res://scripts/flight/tasks/intercept.gd",
+	"INT_TURN": "res://scripts/flight/tasks/intercept.gd",
+	"INT_LEAD": "res://scripts/flight/tasks/intercept.gd",
+	"INT_HEADON": "res://scripts/flight/tasks/intercept.gd",
+	"INT_NIGHT": "res://scripts/flight/tasks/intercept.gd",
+	"INT_KIDS_BUTTERFLY": "res://scripts/flight/tasks/intercept.gd",
+	"MIS_INT_PATROL": "res://scripts/flight/tasks/intercept.gd",
+	"MIS_INT_FAST": "res://scripts/flight/tasks/intercept.gd",
+	"MIS_INT_FOG": "res://scripts/flight/tasks/intercept.gd",
+	"MIS_INT_KIDS": "res://scripts/flight/tasks/intercept.gd",
+	"FREE_INTERCEPT": "res://scripts/flight/tasks/free_flight.gd",
 }
 ## The racing gates of the FPV lessons and the race, in order, centre 2.2 m up.
 const GATE_COURSE: Array[Vector3] = [
@@ -90,6 +101,12 @@ var summary := ""
 var summary_args: Array = []
 ## Which way the on-screen sticks should be pushed now, shown as a ghost knob: {"left": Vector2.UP}.
 var stick_hint := {}
+## A look the world must have for this task ("dusk", "fog", ...); "" = the usual one.
+var look := ""
+## For chasing a target: show its distance and how fast the gap closes.
+var target_info := false
+var target_dist := 0.0
+var closing := 0.0
 ## The camera this task starts with, if it matters (nose-in needs the pilot's view). "" = the saved one.
 var view_hint := ""
 
@@ -147,6 +164,7 @@ static func make(task_key: String, mode_: String, seed_ := 7) -> FlightTask:
 ## The physics for a vehicle in a mode, set up for this task and world. The flight screen and the
 ## tests both build it here, so the tests always fly what the app flies.
 func make_sim(vehicle_: String) -> DroneSim:
+	vehicle_ = Curriculum.machine(vehicle_)
 	var sim: DroneSim
 	if vehicle_ == "ugv":
 		var u := UgvSim.new(mode, 11)

@@ -3,8 +3,10 @@
 class_name Curriculum
 extends RefCounted
 
-## "survey" is a course, not a machine: aerial photography and reconnaissance with the camera drone.
-const VEHICLES := ["camera", "fpv", "ugv", "survey"]
+## A course of its own may be flown with one of the machines: "survey" (aerial photography and
+## reconnaissance) with the camera drone, "intercept" (catching a training target) with the FPV drone.
+const VEHICLES := ["camera", "fpv", "ugv", "survey", "intercept"]
+const MACHINE := {"survey": "camera", "intercept": "fpv"}
 
 const LESSONS := {
 	"camera": [
@@ -23,6 +25,10 @@ const LESSONS := {
 		"SRV_TILT", "SRV_SHARP", "SRV_DETAIL", "SRV_ORBIT", "SRV_GRID",
 		"SRV_KIDS_FLOWER", "SRV_KIDS_KITTEN", "SRV_KIDS_VAN",
 	],
+	"intercept": [
+		"INT_CHASE", "INT_TURN", "INT_LEAD", "INT_HEADON", "INT_NIGHT",
+		"INT_KIDS_BUTTERFLY",
+	],
 }
 
 ## Missions per vehicle and mode family: kids get their own stories.
@@ -31,6 +37,7 @@ const MISSIONS := {
 	"fpv": {"kids": ["MIS_FPV_HOOPS", "MIS_FPV_BALLOONS"], "adult": ["MIS_FPV_RACE", "MIS_FPV_TREES"]},
 	"ugv": {"kids": ["MIS_UGV_VET", "MIS_UGV_PARCEL"], "adult": ["MIS_UGV_CARGO", "MIS_UGV_EVAC"]},
 	"survey": {"kids": ["MIS_SRV_ALBUM"], "adult": ["MIS_CAM_SURVEY", "MIS_SRV_FIND", "MIS_SRV_COUNT"]},
+	"intercept": {"kids": ["MIS_INT_KIDS"], "adult": ["MIS_INT_PATROL", "MIS_INT_FAST", "MIS_INT_FOG"]},
 }
 
 const THEORY := ["TH_CHECKLIST", "TH_BATTERY", "TH_SIGNAL", "TH_RULES"]
@@ -38,8 +45,11 @@ const THEORY := ["TH_CHECKLIST", "TH_BATTERY", "TH_SIGNAL", "TH_RULES"]
 ## Flying without self-levelling is for Adult mode only.
 const PRO_ONLY := ["FPV_HORIZON", "FPV_ACRO"]
 ## The kids' own photography lessons; the grown-ups' survey lessons are not for kids.
-const KIDS_ONLY := ["SRV_KIDS_FLOWER", "SRV_KIDS_KITTEN", "SRV_KIDS_VAN"]
-const NOT_KIDS := ["SRV_TILT", "SRV_SHARP", "SRV_DETAIL", "SRV_ORBIT", "SRV_GRID"]
+const KIDS_ONLY := ["SRV_KIDS_FLOWER", "SRV_KIDS_KITTEN", "SRV_KIDS_VAN", "INT_KIDS_BUTTERFLY"]
+const NOT_KIDS := [
+	"SRV_TILT", "SRV_SHARP", "SRV_DETAIL", "SRV_ORBIT", "SRV_GRID",
+	"INT_CHASE", "INT_TURN", "INT_LEAD", "INT_HEADON", "INT_NIGHT",
+]
 
 
 ## The lessons of a vehicle in a mode. Without a mode: every lesson there is.
@@ -50,6 +60,12 @@ static func lessons(vehicle: String, mode := "") -> Array:
 	if mode == "kids":
 		return all.filter(func(k): return k not in PRO_ONLY and k not in NOT_KIDS)
 	return all.filter(func(k): return k not in KIDS_ONLY and (mode == "pro" or k not in PRO_ONLY))
+
+
+## The machine a course or vehicle is flown with: physics, cameras and sticks follow it; progress
+## and licences follow the course.
+static func machine(vehicle: String) -> String:
+	return MACHINE.get(vehicle, vehicle)
 
 
 ## A name or text as the pilot sees it now: Kids mode gets its own wording where there is one.

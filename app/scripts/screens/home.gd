@@ -2,7 +2,7 @@
 # First screen: who is flying, what to continue, which vehicle.
 extends Screen
 
-const VEHICLE_ICONS := {"camera": "camera", "fpv": "fpv", "ugv": "ugv", "survey": "photo"}
+const VEHICLE_ICONS := {"camera": "camera", "fpv": "fpv", "ugv": "ugv", "survey": "photo", "intercept": "intercept"}
 
 
 func build() -> void:

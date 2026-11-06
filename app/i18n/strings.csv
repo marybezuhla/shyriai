@@ -534,7 +534,7 @@ FREE_WIND,Wind,Вітер
 FREE_WIND_NONE,None,Без вітру
 FREE_WIND_LIGHT,Light,Легкий
 FREE_WIND_GUSTY,Gusty,Пориви
-FREE_TIME,Time of day,Час доби
+FREE_TIME,Weather,Погода
 FREE_TIME_DAY,Day,День
 FREE_TIME_DUSK,Evening,Вечір
 FREE_FPV_MODE,Flight mode,Режим польоту
@@ -678,3 +678,70 @@ MIS_SRV_COUNT_DESC,A camp has sprung up after a flood. Picture it all at once an
 HINT_COUNT_UP,Take off and fly to the camp,Злітай і лети до табору
 HINT_COUNT_GO,"Climb until every tent fits in the frame, then shoot","Піднімайся, доки всі намети не вмістяться в кадр, тоді знімай"
 FREE_SURVEY,Free flight,Вільний політ
+FREE_TIME_FOG,Fog,Туман
+FREE_TIME_WINTER,Winter,Зима
+VEH_INTERCEPT,Interception,Перехоплення
+VEH_INTERCEPT_DESC,Catch a moving training target with the FPV drone,Наздогнати рухому навчальну мішень на FPV-дроні
+VEH_INTERCEPT_KIDS,Butterflies,Метелики
+VEH_INTERCEPT_DESC_KIDS,Catch the butterflies with the drone,Лови метеликів дроном
+STAT_TARGET,Target,До мішені
+STAT_CLOSING,Closing,Зближення
+HINT_INT_UP,Take off: the target is in the air,Злітай: мішень у повітрі
+HINT_INT_CAUGHT,Caught!,Перехоплено!
+HINT_INT_CAUGHT_KIDS,Caught it!,Впіймано!
+HINT_INT_LEAD,Aim at the yellow mark: that is where the target will be,Цілься в жовту позначку: там мішень буде за мить
+HINT_INT_BEHIND,"The gap is growing: more speed, cut the corner","Відстань росте: швидше, зріж кут"
+FAIL_INT_GONE,"The target got away. Aim ahead of it, not at it.","Мішень пішла. Цілься перед нею, а не в неї."
+FAIL_INT_TIME,Out of time. Close in faster: aim where the target will be.,"Час вийшов. Зближуйся швидше: цілься туди, де мішень буде."
+INT_CHASE,Catch up,Наздогнати
+INT_CHASE_NOTE,The target flies straight,Мішень летить прямо
+INT_CHASE_GOAL,A training target flies away from you in a straight line. Catch up and touch it.,Навчальна мішень летить від тебе по прямій. Наздожени й торкнися її.
+INT_CHASE_PASS,Touch the target | 45 s,Торкнутися мішені | 45 с
+HINT_INT_CHASE,"Full speed behind it, then ease in","Повна швидкість за нею, потім обережно ближче"
+SUM_INT_CHASE,"Caught. Behind a straight flier, speed is all it takes.","Перехоплено. За тим, хто летить прямо, вистачає швидкості."
+INT_TURN,A turning target,Ціль повертає
+INT_TURN_NOTE,Cut the corner,Зрізай кут
+INT_TURN_GOAL,The target flies in a wide circle. Chasing its tail is slow: cut across the circle to meet it.,Мішень летить широким колом. Ганятися за хвостом довго: зріж коло й зустрінь її.
+INT_TURN_PASS,Touch the target | 45 s,Торкнутися мішені | 45 с
+HINT_INT_TURN,"Cut across the circle, do not follow its tail","Зрізай коло, не йди за хвостом"
+SUM_INT_TURN,Caught. Cutting inside the turn is shorter than following.,"Перехоплено. Усередині повороту шлях коротший, ніж слідом."
+INT_LEAD,Leading,Упередження
+INT_LEAD_NOTE,Aim where it will be,"Цілься туди, де вона буде"
+INT_LEAD_GOAL,"The target crosses in front of you. Flying at it, you always arrive late: aim at the yellow mark, where it will be.","Мішень перетинає поле перед тобою. Якщо летіти просто на неї, завжди спізнишся: цілься в жовту позначку, туди, де вона буде."
+INT_LEAD_PASS,Touch the target | Before it leaves,Торкнутися мішені | Поки не пішла
+SUM_INT_LEAD,Caught by leading it. This is the heart of every interception.,Перехоплено з упередженням. Це основа кожного перехоплення.
+INT_HEADON,Head on,Зустрічні курси
+INT_HEADON_NOTE,"Meet it, do not chase","Зустрінь, а не наздоганяй"
+INT_HEADON_GOAL,"The target flies towards the pad. Go out to meet it: match its height early, the closing is fast.","Мішень летить до майданчика. Вилітай назустріч: висоту зрівняй заздалегідь, зближення швидке."
+INT_HEADON_PASS,Touch the target | Before it reaches the pad,Торкнутися мішені | До майданчика
+HINT_INT_HEADON,"Match its height now, then hold steady towards it","Зрівняй висоту зараз, далі рівно назустріч"
+SUM_INT_HEADON,Caught head on. Meeting is quicker than chasing.,"Перехоплено на зустрічних. Зустріти швидше, ніж наздогнати."
+INT_NIGHT,In the evening,Увечері
+INT_NIGHT_NOTE,Only its light,Лише її вогник
+INT_NIGHT_GOAL,In the evening the target is hard to see: follow its small light. It flies in a circle.,Увечері мішень погано видно: стеж за її вогником. Вона летить колом.
+INT_NIGHT_PASS,Touch the target | 45 s,Торкнутися мішені | 45 с
+HINT_INT_NIGHT,"Follow the light, cut across the circle","Стеж за вогником, зрізай коло"
+SUM_INT_NIGHT,Caught in the dark. The light was enough.,Перехоплено в сутінках. Вогника вистачило.
+INT_KIDS_BUTTERFLY,Butterfly,Метелик
+INT_KIDS_BUTTERFLY_NOTE,It flies in circles,Літає колами
+INT_KIDS_BUTTERFLY_GOAL,A butterfly flies in circles. Fly up to it and touch it gently.,Метелик літає колами. Підлети й обережно торкнися його.
+INT_KIDS_BUTTERFLY_PASS,A butterfly | A touch,Метелик | Торкнутися
+HINT_INT_KIDS_BUTTERFLY,Fly to the butterfly,Лети до метелика
+SUM_INT_KIDS_BUTTERFLY,You caught the butterfly!,Метелика впіймано!
+MIS_INT_KIDS,Butterfly meadow,Метеликова галявина
+MIS_INT_KIDS_DESC,Catch all the butterflies in the meadow.,Впіймай усіх метеликів на галявині.
+HINT_MIS_INT_KIDS,Catch every butterfly,Лови кожного метелика
+SUM_MIS_INT_KIDS,Every butterfly caught!,Усіх метеликів впіймано!
+MIS_INT_PATROL,On watch,Чергування
+MIS_INT_PATROL_DESC,"Three targets come in one after another, from different sides. Catch each.",Три мішені залітають одна за одною з різних боків. Перехопи кожну.
+HINT_MIS_INT_PATROL,Next target: aim ahead of it,Наступна мішень: цілься перед нею
+SUM_MIS_INT_PATROL,All three caught.,Усі три перехоплено.
+MIS_INT_FAST,A fast target,Швидка мішень
+MIS_INT_FAST_DESC,"A target nearly as fast as you, weaving. Only a good lead will do.","Мішень майже така швидка, як ти, ще й петляє. Допоможе лише точне упередження."
+HINT_MIS_INT_FAST,Lead it: do not follow the weave,Упереджуй: не повторюй її петлі
+SUM_MIS_INT_FAST,"Caught a fast, weaving target.","Перехоплено швидку мішень, що петляла."
+MIS_INT_FOG,In the fog,У тумані
+MIS_INT_FOG_DESC,Three targets in fog: they show only up close. Use the readouts.,Три мішені в тумані: їх видно лише зблизька. Стеж за показниками.
+HINT_MIS_INT_FOG,Watch the distance and the closing speed,Стеж за відстанню й зближенням
+SUM_MIS_INT_FOG,All three caught in the fog.,Усі три перехоплено в тумані.
+FREE_INTERCEPT,Free flight,Вільний політ
