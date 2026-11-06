@@ -18,7 +18,7 @@ func build() -> void:
 
 	add_child(UI.segmented([
 		["learn", tr("TAB_LEARN")], ["missions", tr("TAB_MISSIONS")],
-		["free", tr("TAB_FREE_UGV" if vehicle == "ugv" else "TAB_FREE")],
+		["free", tr("TAB_FREE_UGV" if Curriculum.machine(vehicle) == "ugv" else "TAB_FREE")],
 	], tab, func(t): tab = t; rebuild()))
 
 	if tab == "learn":
@@ -137,9 +137,10 @@ func _flowers(key: String, px: int) -> Control:
 ## Free flight: no task, the pilot picks the conditions. Kids just fly, with no wind.
 func _build_free() -> void:
 	var col := UI.vbox(14)
-	col.add_child(UI.label(tr("FREE_DESC_UGV" if vehicle == "ugv" else "FREE_DESC"), 14, 500, "muted"))
+	var machine := Curriculum.machine(vehicle)
+	col.add_child(UI.label(tr("FREE_DESC_UGV" if machine == "ugv" else "FREE_DESC"), 14, 500, "muted"))
 	if Prefs.mode != "kids":
-		if vehicle != "ugv":
+		if machine != "ugv":
 			col.add_child(UI.eyebrow(tr("FREE_WIND")))
 			col.add_child(UI.segmented([
 				["none", tr("FREE_WIND_NONE")], ["light", tr("FREE_WIND_LIGHT")], ["gusty", tr("FREE_WIND_GUSTY")],
@@ -147,13 +148,19 @@ func _build_free() -> void:
 		col.add_child(UI.eyebrow(tr("FREE_TIME")))
 		col.add_child(UI.segmented([["day", tr("FREE_TIME_DAY")], ["dusk", tr("FREE_TIME_DUSK")]],
 			Prefs.free["time"], func(v): Prefs.set_free("time", v)))
-		if vehicle == "fpv" and Prefs.mode == "pro":
+		col.add_child(UI.segmented([["fog", tr("FREE_TIME_FOG")], ["winter", tr("FREE_TIME_WINTER")]],
+			Prefs.free["time"], func(v): Prefs.set_free("time", v)))
+		if machine == "fpv" and Prefs.mode == "pro":
 			col.add_child(UI.eyebrow(tr("FREE_FPV_MODE")))
 			col.add_child(UI.segmented([["angle", "Angle"], ["horizon", "Horizon"], ["acro", "Acro"]],
 				Prefs.free["fpv"], func(v): Prefs.set_free("fpv", v)))
+	else:
+		col.add_child(UI.segmented([["day", tr("FREE_TIME_DAY")], ["winter", tr("FREE_TIME_WINTER")]],
+			Prefs.free["time"] if Prefs.free["time"] in Prefs.FREE_TIMES_KIDS else "day",
+			func(v): Prefs.set_free("time", v)))
 	col.add_child(UI.switch_row(tr("FREE_BALLS"), tr("FREE_BALLS_DESC"), Prefs.free["balls"],
 		func(on): Prefs.set_free("balls", on)))
 	var key := "FREE_" + vehicle.to_upper()
-	col.add_child(UI.primary(tr("FREE_GO_UGV" if vehicle == "ugv" else "FREE_GO"), func(): app.start(vehicle, key), "play"))
+	col.add_child(UI.primary(tr("FREE_GO_UGV" if machine == "ugv" else "FREE_GO"), func(): app.start(vehicle, key), "play"))
 	add_child(col)
 

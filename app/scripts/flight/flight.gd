@@ -9,6 +9,8 @@ const DEADZONE := 0.08
 
 var app: Node  # main.gd
 var vehicle := "camera"
+## What is flown: the course's machine ("camera", "fpv" or "ugv").
+var machine := "camera"
 var task_key := "CAM_STICKS"
 var mode := "simple"
 var look := "dusk"
@@ -62,15 +64,18 @@ var _touches := 0
 func setup(app_: Node, vehicle_: String, task_key_: String) -> void:
 	app = app_
 	vehicle = vehicle_
+	machine = Curriculum.machine(vehicle)
 	task_key = task_key_
 	mode = Prefs.mode
 	# Kids always fly on a clear day; otherwise the world follows the app's look, or the time of day
 	# chosen for free flight.
 	look = "day" if mode == "kids" or Pal.current != "dusk" else "dusk"
-	if task_key.begins_with("FREE_") and mode != "kids":
-		look = Prefs.free["time"]
+	if task_key.begins_with("FREE_"):
+		var t: String = Prefs.free["time"]
+		if mode != "kids" or t in Prefs.FREE_TIMES_KIDS:
+			look = t
 	view = Prefs.view_for(mode, vehicle)
-	_mode1 = Prefs.stick_mode == "1" and mode != "kids" and vehicle != "ugv"
+	_mode1 = Prefs.stick_mode == "1" and mode != "kids" and machine != "ugv"
 	if _mode1:
 		_thr = _right
 		_fwd = _left
@@ -81,6 +86,8 @@ func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 	task = FlightTask.make(task_key, mode, flight_seed)
+	if task.look != "":
+		look = task.look
 	world = FlightWorld.new()
 	add_child(world)
 	world.build(look, 7)
@@ -89,12 +96,12 @@ func _ready() -> void:
 	if task.view_hint != "":
 		view = task.view_hint
 
-	sim = task.make_sim(vehicle)
+	sim = task.make_sim(machine)
 	if task is PhotoTask:
 		var vp := get_viewport_rect().size
 		task.aspect = vp.x / maxf(vp.y, 1.0)
 
-	if vehicle == "ugv":
+	if machine == "ugv":
 		drone = UgvView.new()
 		world.add_child(drone)
 		drone.build(world.pal["drone"], world.pal["drone_front"], task.load_kind)
@@ -114,7 +121,7 @@ func _ready() -> void:
 
 	_build_hud()
 	add_child(_sound)
-	_sound.setup(vehicle, mode == "kids", Prefs.sound)
+	_sound.setup(machine, mode == "kids", Prefs.sound)
 	_last_progress = task.progress
 	_last_counter = task.counter
 	DisplayServer.screen_set_keep_on(true)
@@ -238,7 +245,7 @@ func _read_sticks() -> void:
 	y = _bigger(y, _keys(KEY_D, KEY_A))
 	p = _bigger(p, _keys(KEY_UP, KEY_DOWN))
 	r = _bigger(r, _keys(KEY_RIGHT, KEY_LEFT))
-	if vehicle != "ugv":
+	if machine != "ugv":
 		var e: float = Prefs.STICK_FEELS.get(Prefs.stick_feel, 0.0)
 		y = _soft(y, e)
 		p = _soft(p, e)
@@ -429,10 +436,12 @@ func _build_hud() -> void:
 		var names := ["ALT", "TIME"]
 		if mode == "pro":
 			names = ["ALT", "SPEED", "BATTERY", "TIME"]
-		if vehicle == "ugv":
+		if machine == "ugv":
 			names = ["SPEED", "BATTERY", "TIME"] if mode == "pro" else ["SPEED", "TIME"]
-		elif vehicle == "fpv" and mode != "pro":
+		elif machine == "fpv" and mode != "pro":
 			names = ["ALT", "SPEED", "TIME"]
+		if task.target_info:
+			names = ["TARGET", "CLOSING", "SPEED", "TIME"] if mode == "pro" else ["TARGET", "CLOSING", "TIME"]
 		for n in names:
 			var s := UI.vbox(1)
 			var head := UI.eyebrow(tr("STAT_" + n))
@@ -476,14 +485,14 @@ func _build_hud() -> void:
 		s.kids = mode == "kids"
 		s.custom_minimum_size = Vector2(stick_px, stick_px)
 	# The FPV throttle stays where the thumb leaves it, like on a real radio, and starts at zero.
-	if vehicle == "fpv" and mode != "kids":
+	if machine == "fpv" and mode != "kids":
 		_thr.spring_y = false
 		_thr.value.y = -1.0
 	var left_label := "STICK_LEFT_FPV" if not _left.spring_y else "STICK_LEFT"
 	var right_label := "STICK_RIGHT"
 	if _mode1:
 		left_label = "STICK_LEFT_M1"
-		right_label = "STICK_RIGHT_FPV_M1" if vehicle == "fpv" else "STICK_RIGHT_M1"
+		right_label = "STICK_RIGHT_FPV_M1" if machine == "fpv" else "STICK_RIGHT_M1"
 	if sim is UgvSim:
 		left_label = "STICK_TRACK_L" if sim.tank else "STICK_DRIVE"
 		right_label = "STICK_TRACK_R" if sim.tank else "STICK_TURN"
@@ -523,8 +532,8 @@ func _build_view_toggle() -> void:
 	fill.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	fill.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_view_box.add_child(fill)
-	var views := [["ugv", Curriculum.label("VIEW_DRONE")], ["chase", Curriculum.label("VIEW_BEHIND")], ["pilot", Curriculum.label("VIEW_PILOT")]] if vehicle == "ugv" \
-		else [["fpv", Curriculum.label("VIEW_FPV")], ["chase", Curriculum.label("VIEW_CHASE")], ["pilot", Curriculum.label("VIEW_PILOT")]] if vehicle == "fpv" \
+	var views := [["ugv", Curriculum.label("VIEW_DRONE")], ["chase", Curriculum.label("VIEW_BEHIND")], ["pilot", Curriculum.label("VIEW_PILOT")]] if machine == "ugv" \
+		else [["fpv", Curriculum.label("VIEW_FPV")], ["chase", Curriculum.label("VIEW_CHASE")], ["pilot", Curriculum.label("VIEW_PILOT")]] if machine == "fpv" \
 		else [["pilot", Curriculum.label("VIEW_PILOT")], ["chase", Curriculum.label("VIEW_CHASE")], ["drone", Curriculum.label("VIEW_DRONE")]]
 	var seg := UI.segmented(views, view, set_view)
 	seg.custom_minimum_size = Vector2(360, 0)
@@ -545,7 +554,7 @@ func _update_hud() -> void:
 		hl = l
 	_left.hint = hl
 	_right.hint = hr
-	if vehicle == "ugv" and task.load_kind != _shown_load:
+	if machine == "ugv" and task.load_kind != _shown_load:
 		_shown_load = task.load_kind
 		drone.set_load(_shown_load)
 	if _meter_fill:
@@ -586,6 +595,9 @@ func _update_hud() -> void:
 		_stats["SPEED"].text = tr("UNIT_MS") % FlightTask.num(Vector2(sim.vel.x, sim.vel.z).length())
 	if _stats.has("BATTERY"):
 		_stats["BATTERY"].text = "%d %%" % int(ceil(sim.battery * 100.0))
+	if _stats.has("TARGET"):
+		_stats["TARGET"].text = tr("UNIT_M") % FlightTask.num(task.target_dist, 0)
+		_stats["CLOSING"].text = ("+" if task.closing >= 0.0 else "") + tr("UNIT_MS") % FlightTask.num(task.closing)
 	if _stats.has("TIME"):
 		var t := int(sim.time)
 		_stats["TIME"].text = FlightTask.clock(t)

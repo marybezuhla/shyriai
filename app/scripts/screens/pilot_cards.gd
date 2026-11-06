@@ -3,7 +3,7 @@
 # certificate instead, with no numbers. The name is optional and stays on this phone.
 extends Screen
 
-const ICONS := {"camera": "camera", "fpv": "fpv", "ugv": "ugv", "survey": "photo"}
+const ICONS := {"camera": "camera", "fpv": "fpv", "ugv": "ugv", "survey": "photo", "intercept": "intercept"}
 
 
 func build() -> void:

@@ -21,6 +21,11 @@ const PAR := {
 	"MIS_CAM_SURVEY": 245, "MIS_SRV_COUNT": 105,
 	# The test autopilot knows where the lost person is; a pilot has to search: three minutes.
 	"MIS_SRV_FIND": 180,
+	# The test pilot always knows the perfect lead; a person must find the target first, so the
+	# interception course gets at least 30 s a target.
+	"INT_CHASE": 30, "INT_TURN": 30, "INT_LEAD": 30, "INT_HEADON": 30, "INT_NIGHT": 30,
+	"INT_KIDS_BUTTERFLY": 30, "MIS_INT_KIDS": 50,
+	"MIS_INT_PATROL": 90, "MIS_INT_FAST": 30, "MIS_INT_FOG": 90,
 }
 ## Kids get half as much time again: the third sunflower should be reachable, not a race.
 const KIDS_SLACK := 1.5
