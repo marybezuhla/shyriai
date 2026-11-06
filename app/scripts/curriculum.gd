@@ -46,12 +46,17 @@ static func label(key: String) -> String:
 	return String(TranslationServer.translate(text_key(key, Prefs.mode)))
 
 
-## Kids mode has its own wording for many texts: KEY_KIDS, when it exists.
+## Kids mode has its own wording for many texts: KEY_KIDS, when it exists. With the throttle on the
+## right stick (Mode 1), texts that name a stick have their own wording too: KEY_M1.
 static func text_key(key: String, mode: String) -> String:
 	if mode == "kids":
 		var kids := key + "_KIDS"
 		if String(TranslationServer.translate(kids)) != kids:
 			return kids
+	elif Prefs.stick_mode == "1":
+		var m1 := key + "_M1"
+		if String(TranslationServer.translate(m1)) != m1:
+			return m1
 	return key
 
 

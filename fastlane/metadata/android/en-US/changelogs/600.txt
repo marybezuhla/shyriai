@@ -1,0 +1,1 @@
+Shyriai 0.6.0. Requires Android 7 or newer.
