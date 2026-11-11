@@ -61,6 +61,9 @@ func _draw() -> void:
 			draw_rect(Rect2(_p(13.5, 5), Vector2(3.5, 14) * _k), color)
 		"check":
 			_line([[5, 12.5], [10, 17], [19, 7]])
+		"cross":
+			_line([[6, 6], [18, 18]])
+			_line([[18, 6], [6, 18]])
 		"intercept":
 			# A ball on the move, with speed lines: the course of catching a moving target.
 			_ring(15, 12, 5)

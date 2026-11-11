@@ -61,6 +61,8 @@ const FILES := {
 	"MIS_INT_FOG": "res://scripts/flight/tasks/intercept.gd",
 	"MIS_INT_KIDS": "res://scripts/flight/tasks/intercept.gd",
 	"FREE_INTERCEPT": "res://scripts/flight/tasks/free_flight.gd",
+	"MIS_CAM_MEDS": "res://scripts/flight/tasks/mission_meds.gd",
+	"MIS_CAM_DOG": "res://scripts/flight/tasks/mission_dog.gd",
 }
 ## The racing gates of the FPV lessons and the race, in order, centre 2.2 m up.
 const GATE_COURSE: Array[Vector3] = [
@@ -101,6 +103,8 @@ var summary := ""
 var summary_args: Array = []
 ## Which way the on-screen sticks should be pushed now, shown as a ghost knob: {"left": Vector2.UP}.
 var stick_hint := {}
+## A task's own button beside the right stick (a translation key), e.g. "Drop"; "" = none.
+var action := ""
 ## A look the world must have for this task ("dusk", "fog", ...); "" = the usual one.
 var look := ""
 ## For chasing a target: show its distance and how fast the gap closes.
@@ -217,6 +221,11 @@ func start_heading() -> float:
 
 ## Override: called every physics step.
 func update(_dt: float, _sim: DroneSim, _sticks: Dictionary) -> void:
+	pass
+
+
+## Override: the pilot pressed the task's own button.
+func act(_sim: DroneSim) -> void:
 	pass
 
 

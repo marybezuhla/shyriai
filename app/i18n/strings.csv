@@ -745,3 +745,130 @@ MIS_INT_FOG_DESC,Three targets in fog: they show only up close. Use the readouts
 HINT_MIS_INT_FOG,Watch the distance and the closing speed,Стеж за відстанню й зближенням
 SUM_MIS_INT_FOG,All three caught in the fog.,Усі три перехоплено в тумані.
 FREE_INTERCEPT,Free flight,Вільний політ
+ACT_DROP,Drop,Скинути
+MIS_CAM_MEDS,Medicine across the river,Ліки через річку
+MIS_CAM_MEDS_DESC,The bridge is out. Drop a first-aid kit into the circle at the aid point on the far bank.,Міст зруйновано. Скинь аптечку в коло пункту допомоги на тому березі.
+HINT_MEDS_UP,Take off: the kits hang under the drone,Злітай: аптечки під дроном
+HINT_MEDS_GO,Fly across the river to the circle,Лети через річку до кола
+HINT_MEDS_DROP,"Over the circle: stop, hold 3 to 15 m up, then drop",Над колом: зупинись на висоті 3–15 м і скидай
+HINT_MEDS_LOW,Too low: people below could be hit. Climb above 3 m,Занизько: можна зачепити людей. Піднімися вище 3 м
+HINT_MEDS_HIGH,Too high: the wind would carry it off. Come below 15 m,Зависоко: вітер віднесе. Знизься до 15 м
+HINT_MEDS_WATER,It fell in the river and is lost,Аптечка впала в річку й загубилася
+HINT_MEDS_MISS,Missed by %s m. Allow for the wind and drop again,Мимо на %s м. Візьми поправку на вітер і скидай ще
+SUM_MEDS_CENTRE,Right in the middle of the circle. The aid point has its medicine.,Точно в центр кола. Пункт допомоги отримав ліки.
+SUM_MEDS_RING,In the circle. The aid point has its medicine.,У колі. Пункт допомоги отримав ліки.
+FAIL_MEDS_MISSED,"Both kits missed. Stop over the circle first, and drop a little upwind.",Обидві аптечки мимо. Спершу зупинись над колом і скидай трохи проти вітру.
+MIS_CAM_DOG,The lost dog,Загублений пес
+MIS_CAM_DOG_DESC,A puppy ran off into the field. Find it and lead it home.,Цуценя втекло в поле. Знайди його й приведи додому.
+HINT_DOG_UP,Take off and look for the puppy,Злітай і шукай цуценя
+HINT_DOG_WARMER,Warmer!,Тепліше!
+HINT_DOG_COLDER,Colder…,Холодніше…
+HINT_DOG_NEAR,It's very near!,Зовсім поруч!
+HINT_DOG_LOWER,"Fly lower, so the puppy sees you","Опустися нижче, щоб цуценя тебе побачило"
+HINT_DOG_FOUND,Found! The puppy runs after the drone,Знайшлося! Цуценя біжить за дроном
+HINT_DOG_HOME,"Lead the puppy home to the pad, slowly","Веди цуценя додому до майданчика, повільно"
+SUM_DOG,The puppy is home!,Цуценя вдома!
+QUIZ,Check yourself,Перевір себе
+QUIZ_RIGHT,Right!,Правильно!
+QUIZ_WRONG,Not quite:,Не зовсім:
+QUIZ_ALL,All right!,Усе правильно!
+Q_TH_CHECKLIST_1,When may you take off?,Коли можна злітати?
+Q_TH_CHECKLIST_1_A,Once the drone has its satellites and has saved the home point,Коли дрон знайшов супутники й записав точку старту
+Q_TH_CHECKLIST_1_B,Right after switching it on,Одразу після ввімкнення
+Q_TH_CHECKLIST_1_C,When the battery is at least half full,Коли батарея заряджена хоча б наполовину
+Q_TH_CHECKLIST_1_WHY,"Without a home point, the drone does not know where to come back to.","Без точки старту дрон не знатиме, куди повертатися."
+Q_TH_CHECKLIST_2,How high should the return-to-home height be?,Якою має бути висота автоповернення?
+Q_TH_CHECKLIST_2_A,Higher than the tallest obstacles around,Вищою за найвищі перешкоди довкола
+Q_TH_CHECKLIST_2_B,"As low as possible, to land sooner","Якомога нижчою, щоб швидше сісти"
+Q_TH_CHECKLIST_2_C,It does not matter,Байдуже якою
+Q_TH_CHECKLIST_2_WHY,"Coming back on its own, the drone flies straight: trees and buildings must be below it.","Повертаючись сам, дрон летить напряму: дерева й будівлі мають бути нижче."
+Q_TH_CHECKLIST_3,The wind is stronger than the maker allows. What then?,"Вітер сильніший, ніж дозволяє виробник. Що робити?"
+Q_TH_CHECKLIST_3_A,Do not fly,Не літати
+Q_TH_CHECKLIST_3_B,Fly lower,Літати нижче
+Q_TH_CHECKLIST_3_C,Fly faster,Літати швидше
+Q_TH_CHECKLIST_3_WHY,Before a flight the wind must be weaker than the maker allows.,"Перед польотом вітер має бути слабшим, ніж дозволяє виробник."
+Q_TH_BATTERY_1,A battery has puffed up. What do you do with it?,Батарея здулася. Що з нею робити?
+Q_TH_BATTERY_1_A,Neither charge nor use it; take it to a battery collection point,"Не заряджати, не використовувати й здати в пункт приймання"
+Q_TH_BATTERY_1_B,Charge it more slowly,Заряджати повільніше
+Q_TH_BATTERY_1_C,"Use it once more, carefully",Обережно використати ще раз
+Q_TH_BATTERY_1_WHY,"A puffed, dented or pierced battery must not be charged or used.","Здуту, пом’яту чи пробиту батарею не можна заряджати й використовувати."
+Q_TH_BATTERY_2,When should you land?,Коли треба сідати?
+Q_TH_BATTERY_2_A,When 20–30 % is left,Коли лишається 20–30 %
+Q_TH_BATTERY_2_B,When the battery is completely flat,Коли батарея повністю розрядиться
+Q_TH_BATTERY_2_C,After exactly five minutes,Рівно через п’ять хвилин
+Q_TH_BATTERY_2_WHY,Do not run a battery down to zero.,Батарею не розряджають до нуля.
+Q_TH_BATTERY_3,A battery will not be needed for a few days. How is it kept?,Батарея не знадобиться кілька днів. Як її зберігати?
+Q_TH_BATTERY_3_A,"In storage mode, about 3.7–3.8 V a cell","У режимі зберігання, близько 3,7–3,8 В на банку"
+Q_TH_BATTERY_3_B,Fully charged,Повністю зарядженою
+Q_TH_BATTERY_3_C,Fully flat,Повністю розрядженою
+Q_TH_BATTERY_3_WHY,Storage mode keeps the battery healthy.,Режим зберігання береже батарею.
+Q_TH_SIGNAL_1,The link to a camera drone is lost. What does it usually do?,Зник зв’язок з камерним дроном. Що він зазвичай робить?
+Q_TH_SIGNAL_1_A,"Hovers, then flies back to its home point by itself","Зависає, а потім сам повертається до точки старту"
+Q_TH_SIGNAL_1_B,Falls straight down,Одразу падає
+Q_TH_SIGNAL_1_C,Flies on by itself,Летить далі сам
+Q_TH_SIGNAL_1_WHY,That is why the home point and the return height matter.,Тому важливі точка старту й висота автоповернення.
+Q_TH_SIGNAL_2,And what do you do?,А що робиш ти?
+Q_TH_SIGNAL_2_A,"Let go of the sticks, come closer or raise the radio with its aerials towards the drone","Відпускаєш стіки, підходиш ближче чи піднімаєш пульт антенами до дрона"
+Q_TH_SIGNAL_2_B,Move the sticks hard,Різко рухаєш стіками
+Q_TH_SIGNAL_2_C,Switch the radio off,Вимикаєш пульт
+Q_TH_SIGNAL_2_WHY,Calm hands give the drone time to come back.,Спокійні руки дають дрону час повернутися.
+Q_TH_SIGNAL_3,"Without GPS, a camera drone…",Без GPS камерний дрон…
+Q_TH_SIGNAL_3_A,"does not hold its place, and the wind carries it off","не тримає точку, і вітер його зносить"
+Q_TH_SIGNAL_3_B,flies just the same,літає так само
+Q_TH_SIGNAL_3_C,lands at once,одразу сідає
+Q_TH_SIGNAL_3_WHY,As in the lesson Hold a point.,Як в уроці «Утримати точку».
+Q_TH_RULES_1,"Under martial law, may a drone be launched over your own yard without permission?",Під час воєнного стану чи можна без дозволу запустити дрон над власним подвір’ям?
+Q_TH_RULES_1_A,No,Ні
+Q_TH_RULES_1_B,"Yes, if it stays low","Так, якщо невисоко"
+Q_TH_RULES_1_C,"Yes, in daytime","Так, якщо вдень"
+Q_TH_RULES_1_WHY,Over a yard the drone is already in the airspace.,Над подвір’ям дрон уже в повітряному просторі.
+Q_TH_RULES_2,Where may you fly without permission?,Де можна літати без дозволу?
+Q_TH_RULES_2_A,Only indoors,Лише в закритому приміщенні
+Q_TH_RULES_2_B,In a field outside town,У полі за містом
+Q_TH_RULES_2_C,Over a river,Над річкою
+Q_TH_RULES_2_WHY,"Outdoors, permission is needed.",Надворі потрібен дозвіл.
+Q_TH_RULES_3,What must not be filmed or posted?,Що не можна знімати й публікувати?
+Q_TH_RULES_3_A,"Soldiers, equipment, fortifications and the aftermath of strikes","Військових, техніку, укріплення й наслідки ударів"
+Q_TH_RULES_3_B,A sunflower field,Соняшникове поле
+Q_TH_RULES_3_C,Your own house,Свій дім
+Q_TH_RULES_3_WHY,This carries criminal liability.,За це є кримінальна відповідальність.
+Q_TH_CHECKLIST_KIDS_1,Who checks the drone before a flight?,Хто перевіряє дрон перед польотом?
+Q_TH_CHECKLIST_KIDS_1_A,"A grown-up, together with you",Дорослий разом з тобою
+Q_TH_CHECKLIST_KIDS_1_B,Nobody,Ніхто
+Q_TH_CHECKLIST_KIDS_1_C,The neighbour's cat,Сусідський кіт
+Q_TH_CHECKLIST_KIDS_1_WHY,A grown-up checks it with you.,Дорослий перевіряє дрон разом з тобою.
+Q_TH_CHECKLIST_KIDS_2,Where do you look while the drone flies?,"Куди дивитися, поки дрон летить?"
+Q_TH_CHECKLIST_KIDS_2_A,At the drone,На дрон
+Q_TH_CHECKLIST_KIDS_2_B,At a phone,У телефон
+Q_TH_CHECKLIST_KIDS_2_C,Anywhere,Куди завгодно
+Q_TH_CHECKLIST_KIDS_2_WHY,Watch the drone all the time it flies.,"Дивись на дрон увесь час, поки він летить."
+Q_TH_BATTERY_KIDS_1,Who charges the battery?,Хто заряджає батарею?
+Q_TH_BATTERY_KIDS_1_A,Only a grown-up,Тільки дорослий
+Q_TH_BATTERY_KIDS_1_B,Anyone at all,Будь-хто
+Q_TH_BATTERY_KIDS_1_C,A friend from school,Друг зі школи
+Q_TH_BATTERY_KIDS_1_WHY,Charging is a grown-up's job.,Заряджає тільки дорослий.
+Q_TH_BATTERY_KIDS_2,The battery has puffed up like a pillow. What then?,"Батарея надулася, як подушка. Що робити?"
+Q_TH_BATTERY_KIDS_2_A,Leave it alone and tell a grown-up,Не чіпати й сказати дорослому
+Q_TH_BATTERY_KIDS_2_B,Squeeze it flat,"Натиснути, щоб зменшилась"
+Q_TH_BATTERY_KIDS_2_C,Put it in a backpack,Покласти в рюкзак
+Q_TH_BATTERY_KIDS_2_WHY,A puffed battery is not touched.,Надуту батарею не чіпають.
+Q_TH_SIGNAL_KIDS_1,The drone has lost the radio. What does a smart drone do?,Дрон «загубив» пульт. Що робить розумний дрон?
+Q_TH_SIGNAL_KIDS_1_A,Hovers and flies home,Зависає й летить додому
+Q_TH_SIGNAL_KIDS_1_B,Runs away,Тікає
+Q_TH_SIGNAL_KIDS_1_C,Falls asleep in the sky,Засинає в небі
+Q_TH_SIGNAL_KIDS_1_WHY,A smart drone comes home by itself.,Розумний дрон сам летить додому.
+Q_TH_SIGNAL_KIDS_2,And what do you do?,А що робиш ти?
+Q_TH_SIGNAL_KIDS_2_A,Stay calm and let go of the sticks,Не хвилюватися й відпустити стіки
+Q_TH_SIGNAL_KIDS_2_B,Shake the radio hard,Сильно трясти пульт
+Q_TH_SIGNAL_KIDS_2_C,Shout at the drone,Кричати на дрон
+Q_TH_SIGNAL_KIDS_2_WHY,Calm hands help the drone come back.,Спокійні руки допомагають дрону повернутися.
+Q_TH_RULES_KIDS_1,Where may a small drone be flown?,Де можна запускати маленький дрон?
+Q_TH_RULES_KIDS_1_A,"In a room, with grown-ups",У кімнаті разом з дорослими
+Q_TH_RULES_KIDS_1_B,Over a road,Над дорогою
+Q_TH_RULES_KIDS_1_C,Anywhere outside,Будь-де надворі
+Q_TH_RULES_KIDS_1_WHY,Real drones fly outside only with permission.,Справжні дрони надворі літають лише з дозволом.
+Q_TH_RULES_KIDS_2,Where can you fly as much as you like?,Де можна літати скільки завгодно?
+Q_TH_RULES_KIDS_2_A,In Shyriai,У Ширяї
+Q_TH_RULES_KIDS_2_B,Over the school,Над школою
+Q_TH_RULES_KIDS_2_C,Over a river,Над річкою
+Q_TH_RULES_KIDS_2_WHY,Here you can practise all you want.,Тут можна тренуватися скільки хочеш.

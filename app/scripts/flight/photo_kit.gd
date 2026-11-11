@@ -51,6 +51,47 @@ func _process(_delta: float) -> void:
 		_tilt_label.text = tr("TILT_" + task.tilt.to_upper())
 
 
+## The shutter: the task decides whether the picture will do; a good one is then taken from the
+## drone's own camera, whatever view is on screen. `f` is the flight screen.
+static func shoot(f) -> void:
+	if f._paused or f._finished or f.task is not PhotoTask or not f.task.kit:
+		return
+	var task: PhotoTask = f.task
+	var r: Dictionary = task.shoot(f.sim)
+	if not r["ok"]:
+		f._sound.play("fail")
+		return
+	f._sound.play("shutter")
+	flash(f._hud)
+	var i: int = task.photos.size() - 1
+	var img: Image = await picture(f)
+	if img != null and i < task.photos.size():
+		task.photos[i]["image"] = img
+
+
+## Renders the drone camera's view once, small: kept only for this flight's report.
+static func picture(f) -> Image:
+	# Without a screen (the tests in CI) nothing is drawn, and a frame never finishes drawing.
+	if DisplayServer.get_name() == "headless":
+		return null
+	var sv := SubViewport.new()
+	sv.size = Vector2i(Report.THUMB * 2.0)
+	sv.world_3d = f.get_viewport().world_3d
+	sv.render_target_update_mode = SubViewport.UPDATE_ONCE
+	var c := Camera3D.new()
+	c.fov = Photo.FOV
+	c.far = f.cam.far
+	sv.add_child(c)
+	f.add_child(sv)
+	c.position = Photo.camera_position(f.sim.pos, f.sim.yaw)
+	c.global_basis = Photo.camera_basis(f.sim.yaw, f.task.tilt)
+	c.current = true
+	await RenderingServer.frame_post_draw
+	var img := sv.get_texture().get_image()
+	sv.queue_free()
+	return img if img != null and not img.is_empty() else null
+
+
 ## A white flash over the whole view, gone in a blink.
 static func flash(parent: Control) -> void:
 	var f := ColorRect.new()

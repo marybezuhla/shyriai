@@ -61,6 +61,11 @@ func _ready() -> void:
 		for key in Curriculum.lessons("intercept", mode) + Curriculum.missions("intercept", mode):
 			await test_intercept_task(key, mode)
 	await test_target_gets_away()
+	for mode in ["simple", "pro"]:
+		await test_meds(mode)
+	await test_meds_rules()
+	await test_dog()
+	test_quiz_texts()
 	test_rating_rules()
 	test_results_are_kept()
 	test_saved_results_are_checked()
@@ -328,6 +333,105 @@ func test_target_gets_away() -> void:
 			"%s: standing still does not pass (%s)" % [key, task.summary])
 		f[2].queue_free()
 	await get_tree().process_frame
+
+
+# --- Aid drop, lost dog, theory questions -------------------------------------
+
+## Hover over the circle and drop; if the first kit misses, hover off by the miss the other way.
+func test_meds(mode: String) -> void:
+	var f := _flight("MIS_CAM_MEDS", mode, "camera")
+	var task: FlightTask = f[0]
+	var sim: DroneSim = f[1]
+	var ap := Autopilot.new()
+	var aim: Vector3 = task.spot()
+	for attempt in 2:
+		ap.target = aim
+		ap.height = 5.0
+		var still := 0.0
+		var dropped := false
+		for i in int(60.0 / DT):
+			var s: Dictionary = ap.sticks(sim)
+			sim.step(DT, s["throttle"], s["yaw"], s["pitch"], s["roll"])
+			task.step(DT, sim, s)
+			if task.done or task.failed or sim.crashed:
+				break
+			var here := FlightTask.flat_distance(sim.pos, aim) < 0.3 and sim.vel.length() < 0.15
+			still = still + DT if here else 0.0
+			if not dropped and still > 1.0:
+				task.act(sim)
+				dropped = true
+			if dropped and task._falling.is_empty() and task.last_landing != Vector3.INF:
+				break
+		if task.done or task.failed:
+			break
+		aim += task.spot() - task.last_landing
+		aim.y = 0.0
+	check(task.done, "%s: the aid kit lands in the circle (%s)" % [mode, task.summary])
+	if task.done:
+		_passed(task, sim)
+	f[2].queue_free()
+	await get_tree().process_frame
+
+
+func test_meds_rules() -> void:
+	var f := _flight("MIS_CAM_MEDS", "pro", "camera")
+	var task: FlightTask = f[0]
+	var sim: DroneSim = f[1]
+	sim.pos = task.spot() + Vector3(0, 1.5, 0)
+	sim.on_ground = false
+	task.act(sim)
+	check(task._falling.is_empty() and task.hint_base == "HINT_MEDS_LOW", "no dropping from 1.5 m: people could be hit")
+	sim.pos = Vector3(0, 6, -23)
+	sim.vel = Vector3.ZERO
+	task.act(sim)
+	for i in int(3.0 / DT):
+		task.step(DT, sim, {"throttle": 0.0, "yaw": 0.0, "pitch": 0.0, "roll": 0.0})
+	check(task.hint_base == "HINT_MEDS_WATER" and not task.done, "a kit that falls in the river is lost")
+	f[2].queue_free()
+	await get_tree().process_frame
+
+
+## Find the puppy by flying low near it, then lead it home slowly.
+func test_dog() -> void:
+	var f := _flight("MIS_CAM_DOG", "kids", "camera")
+	var task: FlightTask = f[0]
+	var sim: DroneSim = f[1]
+	var world: FlightWorld = f[2]
+	var ap := Autopilot.new()
+	ap.target = task.dog()
+	ap.height = 3.0
+	for i in int(120.0 / DT):
+		if task._follows:
+			# Home, a little at a time, so the puppy keeps up.
+			var to := world.pad - sim.pos
+			to.y = 0.0
+			ap.target = sim.pos + to.limit_length(2.5)
+		var s: Dictionary = ap.sticks(sim)
+		sim.step(DT, s["throttle"], s["yaw"], s["pitch"], s["roll"])
+		task.step(DT, sim, s)
+		if task.done:
+			break
+	check(task.done, "kids: the puppy is found and led home")
+	if task.done:
+		_passed(task, sim)
+	world.queue_free()
+	await get_tree().process_frame
+
+
+## Every theory card has its questions, in both families, with three different answers and a why.
+func test_quiz_texts() -> void:
+	for card in Curriculum.THEORY:
+		for fam in ["adult", "kids"]:
+			for i in range(1, int(Curriculum.QUIZ[fam]) + 1):
+				var q := "Q_%s%s_%d" % [card, "_KIDS" if fam == "kids" else "", i]
+				var texts := []
+				for part in ["", "_A", "_B", "_C", "_WHY"]:
+					texts.append(tr(q + part))
+				var ok: bool = texts.all(func(t): return not t.begins_with("Q_")) and texts[1] != texts[2] \
+					and texts[1] != texts[3] and texts[2] != texts[3]
+				if fam == "kids":
+					ok = ok and not RegEx.create_from_string("[0-9]").search("".join(texts))
+				check(ok, "%s: question, three answers and why%s" % [q, ", no numbers" if fam == "kids" else ""])
 
 
 # --- Sunflowers, results, licences, free flight ------------------------------

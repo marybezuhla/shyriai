@@ -2,7 +2,7 @@
 
 Тренажер пілотування для Android: камерні й FPV-дрони та наземні роботизовані комплекси (НРК). Для дітей і дорослих. Українська та англійська. Безкоштовно, без реклами й акаунтів, без інтернету. Потрібен Android 7 або новіший і OpenGL ES 3.0.
 
-> **Тестова версія.** Є всі три машини: камерний дрон (8 уроків, 2 місії), FPV-дрон (6 уроків, 4 місії) і НРК (5 уроків, 4 місії), курс аерозйомки й розвідки (5 уроків, 3 місії; для дітей 3 уроки й фотоальбом), курс перехоплення (5 уроків, 3 місії; для дітей метелики), а також картки теорії. До версії 1.0 лишилися нові місії й питання до теорії, а потім незалежний аудит.
+> **Тестова версія.** Є всі три машини: камерний дрон (8 уроків, 4 місії), FPV-дрон (6 уроків, 4 місії) і НРК (5 уроків, 4 місії), курс аерозйомки й розвідки (5 уроків, 3 місії; для дітей 3 уроки й фотоальбом), курс перехоплення (5 уроків, 3 місії; для дітей метелики), а також картки теорії з питаннями «Перевір себе». Наступний крок: незалежний аудит перед версією 1.0.
 
 ## Задум
 
@@ -46,7 +46,7 @@
 
 A piloting trainer for Android: camera and FPV drones, and ground robots (UGVs). For kids and adults. Ukrainian and English. Free, no ads, no accounts, no internet. Requires Android 7 or newer and OpenGL ES 3.0.
 
-> **Test version.** All three vehicles are here: the camera drone (8 lessons, 2 missions), the FPV drone (6 lessons, 4 missions) and the UGV (5 lessons, 4 missions), the aerial survey course (5 lessons, 3 missions; 3 lessons and a photo album for kids), the interception course (5 lessons, 3 missions; butterflies for kids), plus the theory cards. Before version 1.0 come new missions and theory questions, then an independent audit.
+> **Test version.** All three vehicles are here: the camera drone (8 lessons, 4 missions), the FPV drone (6 lessons, 4 missions) and the UGV (5 lessons, 4 missions), the aerial survey course (5 lessons, 3 missions; 3 lessons and a photo album for kids), the interception course (5 lessons, 3 missions; butterflies for kids), plus the theory cards with "Check yourself" questions. Next: an independent audit before version 1.0.
 
 ## The idea
 

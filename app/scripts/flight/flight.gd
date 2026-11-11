@@ -478,8 +478,8 @@ func _build_hud() -> void:
 	bottom.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	# Sticks as big as fit beside the camera switch (narrow phones in landscape get a little less).
 	var room := get_viewport_rect().size.x - 32.0 - float(ins["left"]) - float(ins["right"]) - 344.0
-	if task is PhotoTask and task.kit:
-		room -= 80.0  # the camera buttons beside the right stick
+	if (task is PhotoTask and task.kit) or task.action != "":
+		room -= 80.0  # the camera or action buttons beside the right stick
 	var stick_px := int(clampf(room / 2.0, 104.0, 150.0 if mode == "kids" else 128.0))
 	for s in [_left, _right]:
 		s.kids = mode == "kids"
@@ -504,6 +504,10 @@ func _build_hud() -> void:
 		_kit = PhotoKit.new()
 		_kit.build(task, mode == "kids", shutter)
 		bottom.add_child(_kit)
+	if task.action != "":
+		var act := ActionButton.new()
+		act.build(task, sim)
+		bottom.add_child(act)
 	bottom.add_child(_stick_with_label(_right, tr(right_label)))
 	col.add_child(bottom)
 	_build_view_toggle()
@@ -664,44 +668,13 @@ func _ground_ring(center: Vector3, radius: float) -> void:
 
 # --- Survey camera ----------------------------------------------------------
 
-## The shutter: the task decides whether the picture will do; a good one is then taken from the
-## drone's own camera, whatever view is on screen.
+## The shutter and the picture it takes live in PhotoKit; the tests call these too.
 func shutter() -> void:
-	if _paused or _finished or task is not PhotoTask or not task.kit:
-		return
-	var r: Dictionary = task.shoot(sim)
-	if not r["ok"]:
-		_sound.play("fail")
-		return
-	_sound.play("shutter")
-	PhotoKit.flash(_hud)
-	var i: int = task.photos.size() - 1
-	var img := await _picture()
-	if img != null and i < task.photos.size():
-		task.photos[i]["image"] = img
+	PhotoKit.shoot(self)
 
 
-## Renders the drone camera's view once, small: kept only for this flight's report.
 func _picture() -> Image:
-	# Without a screen (the tests in CI) nothing is drawn, and a frame never finishes drawing.
-	if DisplayServer.get_name() == "headless":
-		return null
-	var sv := SubViewport.new()
-	sv.size = Vector2i(Report.THUMB * 2.0)
-	sv.world_3d = get_viewport().world_3d
-	sv.render_target_update_mode = SubViewport.UPDATE_ONCE
-	var c := Camera3D.new()
-	c.fov = Photo.FOV
-	c.far = cam.far
-	sv.add_child(c)
-	add_child(sv)
-	c.position = Photo.camera_position(sim.pos, sim.yaw)
-	c.global_basis = Photo.camera_basis(sim.yaw, task.tilt)
-	c.current = true
-	await RenderingServer.frame_post_draw
-	var img := sv.get_texture().get_image()
-	sv.queue_free()
-	return img if img != null and not img.is_empty() else null
+	return await PhotoKit.picture(self)
 
 
 func report_answer(i: int, option: String) -> void:
