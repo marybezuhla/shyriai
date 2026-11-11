@@ -30,7 +30,11 @@ func header(title: String, subtitle := "") -> Control:
 	var col := UI.vbox(2)
 	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	col.alignment = BoxContainer.ALIGNMENT_CENTER
-	col.add_child(UI.label(title, 20, 600, "text", true))
+	var t := UI.label(title, 20, 600, "text", true)
+	# The narrowest layout: 390 wide, two gutters, the back button, gaps, and a little
+	# slack for the scroll bar.
+	UI.fit_words(t, 390 - 2 * UI.GUTTER - 52 - 8 - 20)
+	col.add_child(t)
 	if subtitle != "":
 		col.add_child(UI.label(subtitle, 13, 500, "muted"))
 	row.add_child(col)

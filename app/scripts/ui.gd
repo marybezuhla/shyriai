@@ -20,6 +20,18 @@ static func label(text: String, px: int, weight := 500, token := "text", display
 	return l
 
 
+## Shrinks a label's text until its longest word fits in `max_w`, so large text sizes wrap
+## between words and never break one ("Налаштуванн / я").
+static func fit_words(l: Label, max_w: float) -> void:
+	var font := l.get_theme_font("font")
+	var px := l.get_theme_font_size("font_size")
+	var widest := 0.0
+	for w in l.text.split(" ", false):
+		widest = maxf(widest, font.get_string_size(w, HORIZONTAL_ALIGNMENT_LEFT, -1, px).x)
+	if widest > max_w:
+		l.add_theme_font_size_override("font_size", floori(px * max_w / widest))
+
+
 ## A small uppercase label above a group, like "WHAT WE PILOT".
 static func eyebrow(text: String, token := "muted") -> Label:
 	var l := label(text.to_upper(), 12, 800, token)

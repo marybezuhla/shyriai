@@ -36,6 +36,7 @@ func _ready() -> void:
 	await _gate()
 	await _fixes_0_11()
 	await _kids_0_11()
+	await _check_title_fits()
 	Prefs.set_language("system")
 	Prefs.set_theme("dusk")
 	Prefs.set_mode("simple")
@@ -597,3 +598,15 @@ func _texts(n: Node) -> Array:
 	for l in n.find_children("*", "Label", true, false):
 		out.append((l as Label).text)
 	return out
+
+
+## The longest one-word title still fits at the largest text size.
+func _check_title_fits() -> void:
+	Prefs.set_language("uk")
+	Prefs.set_text_size("larger")
+	main.open_settings()
+	await _frames(2)
+	var title: Label = main.stack.back().find_children("*", "Label", true, false)[0]
+	assert(title.get_line_count() == 1, "the settings title stays one word on one line")
+	main.back()
+	Prefs.set_text_size("normal")
