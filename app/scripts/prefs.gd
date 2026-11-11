@@ -14,7 +14,7 @@ const MODES := ["kids", "simple", "pro"]
 const THEMES := ["dusk", "day", "system"]
 const LANGUAGES := ["system", "uk", "en"]
 const VIEWS := ["pilot", "chase", "drone", "fpv", "ugv"]
-const TEXT_SIZES := {"normal": 1.0, "large": 1.15, "larger": 1.3}
+const TEXT_SIZES := {"normal": 1.0, "large": 1.2, "larger": 1.5}
 ## Mode 2: throttle on the left stick (most radios). Mode 1: throttle on the right.
 const STICK_MODES := ["2", "1"]
 ## How much softer the sticks are near the centre (expo): 0 is the plain, straight response.

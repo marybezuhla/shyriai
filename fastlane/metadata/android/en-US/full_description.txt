@@ -6,7 +6,7 @@ Shyriai is a piloting trainer for Android: a camera drone, an FPV drone and a gr
 • Adult: full physics with inertia, wind and battery, FPV all the way to Acro mode.
 
 <b>Lessons and missions</b>
-Lessons from easy to hard, each with clear pass conditions. Missions use the same skills in a story: a search in a field, a gate course, cargo delivery, casualty evacuation. For kids: a kitten on a roof, hoops, a parcel for granny. No combat scenarios.
+Lessons from easy to hard, each with clear pass conditions. Missions use the same skills in a story: a search in a field, a gate course, cargo delivery, casualty evacuation. For kids: a kitten on a roof, hoops, a parcel for granny. Scenarios are rescue and training only, with no combat details.
 
 <b>Controls</b>
 On-screen sticks, a gamepad, or a real radio over USB. Three cameras: from the ground, behind, and from the vehicle itself.

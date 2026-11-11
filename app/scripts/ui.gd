@@ -20,6 +20,18 @@ static func label(text: String, px: int, weight := 500, token := "text", display
 	return l
 
 
+## Shrinks a label's text until its longest word fits in `max_w`, so large text sizes wrap
+## between words and never break one ("Налаштуванн / я").
+static func fit_words(l: Label, max_w: float) -> void:
+	var font := l.get_theme_font("font")
+	var px := l.get_theme_font_size("font_size")
+	var widest := 0.0
+	for w in l.text.split(" ", false):
+		widest = maxf(widest, font.get_string_size(w, HORIZONTAL_ALIGNMENT_LEFT, -1, px).x)
+	if widest > max_w:
+		l.add_theme_font_size_override("font_size", floori(px * max_w / widest))
+
+
 ## A small uppercase label above a group, like "WHAT WE PILOT".
 static func eyebrow(text: String, token := "muted") -> Label:
 	var l := label(text.to_upper(), 12, 800, token)
@@ -109,7 +121,8 @@ static func tappable(content: Control, bg: Color, on_press: Callable, a11y_name 
 ## A round icon-only button, 44×44 so it is easy to hit.
 static func icon_button(icon: String, on_press: Callable, a11y_name: String, bg: Color) -> PanelContainer:
 	var c := CenterContainer.new()
-	c.custom_minimum_size = Vector2(48, 48)
+	# 52 design units stay at least 48 dp on a 360 dp phone (the layout is 390 wide).
+	c.custom_minimum_size = Vector2(52, 52)
 	c.add_child(Glyph.make(icon, 22, Pal.c("text")))
 	return tappable(c, bg, on_press, a11y_name, 22, 0)
 
@@ -121,7 +134,7 @@ static func segmented(options: Array, selected: String, on_pick: Callable) -> Pa
 	for opt in options:
 		var on: bool = opt[0] == selected
 		var c := CenterContainer.new()
-		c.custom_minimum_size = Vector2(0, 48)
+		c.custom_minimum_size = Vector2(0, 52)
 		var l := label(opt[1], 15, 700 if on else 600, "on_accent" if on else "text", false, false)
 		# Three options share one row on a narrow phone: larger text would no longer fit, so it stays fixed.
 		l.add_theme_font_size_override("font_size", 14)

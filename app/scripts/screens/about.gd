@@ -21,7 +21,10 @@ func build() -> void:
 	add_child(UI.label(tr("ABOUT_WHAT"), 15, 500))
 	add_child(UI.label(tr("ABOUT_COPYRIGHT"), 13, 600, "muted"))
 
-	add_child(_letter())
+	# The letter speaks of the war, and the defence fundraisers are for grown-ups:
+	# Kids mode shows only the humanitarian help.
+	if Prefs.mode != "kids":
+		add_child(_letter())
 	add_child(_support())
 
 	add_child(_section(tr("ABOUT_LICENSE_T"), tr("ABOUT_LICENSE")))
@@ -61,9 +64,8 @@ func _section(title: String, body: String) -> Control:
 func _letter() -> Control:
 	var v := UI.vbox(12)
 	for i in range(1, 8):
-		var p := UI.label(tr("LETTER_%d" % i), 15, 500)
-		p.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		v.add_child(p)
+		# Left-aligned: long centred lines are hard to follow with low vision.
+		v.add_child(UI.label(tr("LETTER_%d" % i), 15, 500))
 	var sig := UI.label(tr("LETTER_SIGN"), 15, 600, "accent_text")
 	sig.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(sig)
@@ -99,11 +101,15 @@ func _support() -> Control:
 	v.add_child(UI.eyebrow(tr("SUPPORT_TITLE")))
 	v.add_child(UI.label(tr("SUPPORT_KIDS") if Prefs.mode == "kids" else tr("SUPPORT_NOTE"), 13, 500, "muted"))
 	# Learning first (Brave1), then the state's own fundraising
-	for group in [["SUPPORT_DEFENCE", ["BRAVE1", "UNITED24_DEFENCE", "NBU"]], ["SUPPORT_HUMANITARIAN", ["UNITED24_HUMANITARIAN", "REDCROSS"]]]:
+	var groups := [["SUPPORT_DEFENCE", ["BRAVE1", "UNITED24_DEFENCE", "NBU"]], ["SUPPORT_HUMANITARIAN", ["UNITED24_HUMANITARIAN", "REDCROSS"]]]
+	if Prefs.mode == "kids":
+		groups = groups.slice(1)
+	for group in groups:
 		v.add_child(UI.label(tr(group[0]), 15, 700, "accent_text"))
 		for org in group[1]:
 			v.add_child(_cause(org))
-	v.add_child(UI.label(tr("SUPPORT_ANY"), 13, 500, "muted"))
+	if Prefs.mode != "kids":
+		v.add_child(UI.label(tr("SUPPORT_ANY"), 13, 500, "muted"))
 	return v
 
 
