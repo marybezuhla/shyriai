@@ -445,16 +445,20 @@ func _store_shots() -> void:
 	for lang in [["uk", "uk"], ["en", "en-US"]]:
 		Prefs.erase_all()
 		Prefs.set_language(lang[0])
-		for i in 4:
+		# A pilot a few days in: sunflowers on the first lessons, a name on the licence.
+		var lessons := Curriculum.lessons("camera", "simple")
+		for i in 5:
 			Prefs.mark_passed("camera", i)
+			Prefs.record(lessons[i], [3, 3, 2, 3, 1][i], Rating.par(lessons[i], "simple") * 0.8)
 		Prefs.mark_passed("fpv", 0)
+		Prefs.record(Curriculum.lessons("fpv", "simple")[0], 2, 30.0)
 		var dir: String = store.path_join(lang[1])
 		DirAccess.make_dir_recursive_absolute(dir)
 		Prefs.set_theme("day")
 		Prefs.set_mode("simple")
 		main.open_tab("learn")
 		await _store(dir, "01_home")
-		await _store_flight(dir, "02_camera", "camera", "CAM_SQUARE", "chase", Vector3(1.5, 3.0, -4.0))
+		await _store_flight(dir, "02_camera", "camera", "CAM_SQUARE", "chase", Vector3(-3.0, 4.0, -9.0))
 		Prefs.set_mode("kids")
 		main.open_tab("learn")
 		await _store(dir, "03_kids")
@@ -462,7 +466,7 @@ func _store_shots() -> void:
 		main.open_lessons("camera")
 		await _store(dir, "04_lessons")
 		main.back()
-		await _store_flight(dir, "05_fpv", "fpv", "FPV_GATES", "fpv", Vector3(0.0, 2.5, -2.0))
+		await _store_flight(dir, "05_fpv", "fpv", "FPV_GATES", "fpv", Vector3(0.0, 2.5, -6.0))
 		Prefs.set_theme("dusk")
 		main.open_tab("learn")
 		await _store(dir, "06_home_dusk")
@@ -477,8 +481,12 @@ func _store_shots() -> void:
 
 func _store(dir: String, name_: String) -> void:
 	await _frames(6)
+	# Menus draw only on change (low-processor mode): make sure this frame is drawn.
+	var low := OS.low_processor_usage_mode
+	OS.low_processor_usage_mode = false
 	await RenderingServer.frame_post_draw
 	get_viewport().get_texture().get_image().save_png(dir.path_join(name_ + ".png"))
+	OS.low_processor_usage_mode = low
 
 
 func _store_flight(dir: String, name_: String, vehicle: String, key: String, view: String, at: Vector3) -> void:
@@ -487,7 +495,8 @@ func _store_flight(dir: String, name_: String, vehicle: String, key: String, vie
 	await _frames(3)
 	var f = main.flight
 	f.sim.place(at, 0.0)
-	await _frames(30)
+	# An FPV drone does not hold height by itself: shoot it before it sinks.
+	await _frames(30 if vehicle == "camera" else 4)
 	await _store(dir, name_)
 	main.back()
 	main.back()
