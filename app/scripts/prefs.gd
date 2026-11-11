@@ -152,6 +152,7 @@ func set_free(key: String, value) -> void:
 	}.get(key, false)
 	if ok and free[key] != value:
 		free[key] = value
+		_undo = {}
 		_save()
 		changed.emit()
 
@@ -185,6 +186,7 @@ func licence_date(vehicle: String) -> String:
 		if not licences.has(mode):
 			licences[mode] = {}
 		licences[mode][vehicle] = Time.get_date_string_from_system()
+		_undo = {}
 		_save()
 	return licences[mode][vehicle]
 
@@ -201,8 +203,11 @@ func sunflowers_of(vehicle: String) -> Vector2i:
 static func _clean_name(value: String) -> String:
 	var out := ""
 	for ch in value.strip_edges():
-		# No control characters or line breaks: the name is one line on a card.
-		if ch.unicode_at(0) >= 32 and ch.unicode_at(0) != 127:
+		# No control characters or line breaks: the name is one line on a card. Nor the
+		# invisible ones that reorder or hide text (bidi overrides, zero-width marks).
+		var c := ch.unicode_at(0)
+		if c >= 32 and not (c >= 0x7F and c <= 0x9F) and not (c >= 0x200B and c <= 0x200F) \
+				and not (c >= 0x202A and c <= 0x202E) and not (c >= 0x2066 and c <= 0x2069) and c != 0xFEFF:
 			out += ch
 	return out.substr(0, NAME_MAX).strip_edges()
 
@@ -281,6 +286,7 @@ func erase_all() -> void:
 	missions = {}
 	views = {}
 	_save()
+	_drop_backup()
 	_apply_language()
 	_apply_theme()
 	changed.emit()
@@ -329,6 +335,7 @@ func view_for(m: String, vehicle := "camera") -> String:
 func set_view(m: String, vehicle: String, v: String) -> void:
 	if v in VIEWS and m in MODES and vehicle in Curriculum.VEHICLES:
 		views[m + "/" + vehicle] = v
+		_undo = {}
 		_save()
 
 
@@ -350,6 +357,10 @@ func _load() -> void:
 	if data == null:
 		# The swap may not have reached the disk: the last written copy is the next best.
 		data = _read_json(path() + ".tmp")
+	if data == null:
+		# A damaged file (a full phone, a cut write) must not wipe progress: the copy
+		# from the save before is one step behind but whole.
+		data = _read_json(path() + ".bak")
 	if data == null and path() == PATH:
 		data = _read_old_config()
 		if data != null:
@@ -370,8 +381,11 @@ func _read_json(p: String):
 	var f := FileAccess.open(p, FileAccess.READ)
 	if f == null or f.get_length() > MAX_BYTES:
 		return null
-	var parsed = JSON.parse_string(f.get_as_text())
-	return parsed if parsed is Dictionary else null
+	# JSON.parse (not parse_string): a damaged file is expected here, not an engine error.
+	var json := JSON.new()
+	if json.parse(f.get_as_text()) != OK:
+		return null
+	return json.data if json.data is Dictionary else null
 
 
 ## The old ConfigFile format can describe engine objects; such a file is refused, not parsed.
@@ -491,7 +505,12 @@ func _read_best(d: Dictionary) -> Dictionary:
 
 ## A calendar date like 2026-11-06, as Time writes it.
 static func _is_date(s: String) -> bool:
-	return RegEx.create_from_string("^\\d{4}-\\d{2}-\\d{2}$").search(s) != null
+	var m := RegEx.create_from_string("^(\\d{4})-(\\d{2})-(\\d{2})$").search(s)
+	if m == null:
+		return false
+	var month := int(m.get_string(2))
+	var day := int(m.get_string(3))
+	return month >= 1 and month <= 12 and day >= 1 and day <= 31
 
 
 func _read_counts(d: Dictionary, m: String) -> Dictionary:
@@ -527,13 +546,27 @@ func _data() -> Dictionary:
 
 
 ## Writes a whole new file and then swaps it in, so the app closing mid-write leaves the old
-## file whole. (A sudden power loss can still lose the newest file: _load then tries the copy.)
-## Returns false if it could not be written.
+## file whole. The file before is kept as .bak, and _load falls back to .tmp, then .bak.
+## Returns false if it could not be written; the old file is then left as it was.
 func _save() -> bool:
 	var tmp := path() + ".tmp"
 	var f := FileAccess.open(tmp, FileAccess.WRITE)
 	if f == null:
 		return false
 	f.store_string(JSON.stringify(_data(), "\t"))
+	f.flush()
+	var ok := f.get_error() == OK
 	f.close()
+	if not ok:
+		# A full phone: never swap a half-written file in.
+		DirAccess.remove_absolute(tmp)
+		return false
+	if FileAccess.file_exists(path()):
+		DirAccess.remove_absolute(path() + ".bak")
+		DirAccess.rename_absolute(path(), path() + ".bak")
 	return DirAccess.rename_absolute(tmp, path()) == OK
+
+
+## Removes the previous copy, so erased data does not linger on the phone.
+func _drop_backup() -> void:
+	DirAccess.remove_absolute(path() + ".bak")

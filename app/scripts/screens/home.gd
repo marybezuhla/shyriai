@@ -52,12 +52,22 @@ func _pick_mode(m: String) -> void:
 		Prefs.set_mode(m)
 
 
-func _continue_card() -> Control:
-	# Continue where the pilot stopped; the camera drone is where everyone starts.
+## Continue where the pilot stopped: the course with most progress that is not finished
+## yet. The camera drone is where everyone starts (and where a pilot with every course done
+## lands).
+static func continue_vehicle() -> String:
 	var vehicle := "camera"
+	var best := -1
 	for v in Curriculum.VEHICLES:
-		if Prefs.passed_count(v) > Prefs.passed_count(vehicle):
+		var n := Prefs.passed_count(v)
+		if n < Curriculum.lessons(v, Prefs.mode).size() and n > best:
 			vehicle = v
+			best = n
+	return vehicle
+
+
+func _continue_card() -> Control:
+	var vehicle := continue_vehicle()
 	var lessons := Curriculum.lessons(vehicle, Prefs.mode)
 	var done := Prefs.passed_count(vehicle)
 	var idx := mini(done, lessons.size() - 1)

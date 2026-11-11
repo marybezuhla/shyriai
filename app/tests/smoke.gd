@@ -34,6 +34,7 @@ func _ready() -> void:
 	await _sticks_and_sound()
 	await _sunflowers_and_free()
 	await _gate()
+	await _fixes_0_11()
 	Prefs.set_language("system")
 	Prefs.set_theme("dusk")
 	Prefs.set_mode("simple")
@@ -500,3 +501,49 @@ func _big_text_and_tablet() -> void:
 		await _shot("uk-tablet-lessons")
 		main.back()
 		get_window().size = phone
+
+
+## Bugs found before 1.0, each with the check that would have caught it.
+func _fixes_0_11() -> void:
+	Prefs.erase_all()
+	Prefs.set_mode("simple")
+	# Back while the name field has focus leaves the licence screen at once, no errors.
+	main.open_pilot_cards()
+	await _frames(2)
+	var depth: int = main.stack.size()
+	var fields: Array = main.stack.back().find_children("*", "LineEdit", true, false)
+	assert(fields.size() == 1)
+	(fields[0] as LineEdit).grab_focus()
+	await _frames(1)
+	main.back()
+	await _frames(3)
+	assert(main.stack.size() == depth - 1, "one Back leaves the licence screen")
+	# After a pass the lesson card moves on to the next lesson.
+	main.open_lessons("camera")
+	await _frames(1)
+	var s = main.stack.back()
+	assert(s.selected == 0)
+	Prefs.mark_passed("camera", 0)
+	s.rebuild()
+	assert(s.selected == 1, "the card follows the pilot to the next lesson")
+	main.back()
+	# A finished course is not offered to continue.
+	for i in Curriculum.lessons("camera", "simple").size():
+		Prefs.mark_passed("camera", i)
+	assert(load("res://scripts/screens/home.gd").continue_vehicle() != "camera", "continue offers an unfinished course")
+	# The photo report stops the clock and the battery.
+	Prefs.set_mode("pro")
+	main.start("survey", "SRV_DETAIL")
+	await _frames(2)
+	var f = main.flight
+	f.task.photos.append({"id": "number", "image": null})
+	f.task.on_photo("number", f.sim)
+	assert(f.task.report_open)
+	await _frames(2)
+	var t0: float = f.sim.time
+	var b0: float = f.sim.battery
+	await _seconds(1.0)
+	assert(f.sim.time == t0 and f.sim.battery == b0, "time stands still while the report is open")
+	main.close_flight()
+	await _frames(2)
+	Prefs.erase_all()

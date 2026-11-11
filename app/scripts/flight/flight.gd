@@ -136,6 +136,10 @@ func _exit_tree() -> void:
 func _physics_process(_delta: float) -> void:
 	if _paused or _finished:
 		return
+	# The photo report is a pause too: reading and answering must not cost
+	# time or battery (the PAR times were measured without it).
+	if task is PhotoTask and task.report_open:
+		return
 	_read_sticks()
 	# No radio link: the robot gets no commands and stops by itself.
 	_sticks = task.controls(_sticks)

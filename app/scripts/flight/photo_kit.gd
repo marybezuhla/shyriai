@@ -87,6 +87,9 @@ static func picture(f) -> Image:
 	c.global_basis = Photo.camera_basis(f.sim.yaw, f.task.tilt)
 	c.current = true
 	await RenderingServer.frame_post_draw
+	# The flight may have closed during that frame (Start over, Exit).
+	if not is_instance_valid(sv):
+		return null
 	var img := sv.get_texture().get_image()
 	sv.queue_free()
 	return img if img != null and not img.is_empty() else null

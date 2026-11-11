@@ -5,13 +5,18 @@ extends Screen
 var vehicle := "camera"
 var tab := "learn"
 var selected := -1
+## Lessons passed when this screen last drew; a new pass moves the card on.
+var _seen_done := -1
 
 
 func build() -> void:
 	var lessons := Curriculum.lessons(vehicle, Prefs.mode)
 	var done := Prefs.passed_count(vehicle)
-	if selected < 0:
+	# Follow the pilot: after a pass the card shows the next lesson, unless an
+	# older one was picked on purpose.
+	if selected < 0 or (done != _seen_done and selected == mini(_seen_done, lessons.size() - 1)):
 		selected = mini(done, lessons.size() - 1)
+	_seen_done = done
 
 	add_child(header(Curriculum.label("VEH_" + vehicle.to_upper()),
 		"%s · %s" % [tr("MODE_" + Prefs.mode.to_upper()), tr("LESSONS_OF") % [done, lessons.size()]]))
