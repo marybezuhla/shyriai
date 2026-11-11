@@ -69,6 +69,7 @@ func _ready() -> void:
 	test_rating_rules()
 	test_results_are_kept()
 	test_saved_results_are_checked()
+	test_damaged_save_falls_back()
 	await test_free_flight()
 	# Missions change with every attempt: fly them with other layouts too.
 	for seed_ in [1234, 9001]:
@@ -1144,3 +1145,23 @@ func test_shortcuts_closed() -> void:
 	check(not k[0].failed, "kids: a bump on the delivery is not a failure")
 	k[2].queue_free()
 	await get_tree().process_frame
+
+
+## A damaged save (full phone, cut write) falls back to the copy before; erase leaves no copy.
+func test_damaged_save_falls_back() -> void:
+	Prefs.erase_all()
+	Prefs.set_mode("simple")
+	Prefs.record("CAM_HOLD", 2, 30.0)
+	Prefs.set_pilot_name("Оля")  # one more save: the copy now holds CAM_HOLD too
+	var f := FileAccess.open(Prefs.path(), FileAccess.WRITE)
+	f.store_string('{"mode":"simple","pass')
+	f.close()
+	Prefs.best = {}
+	Prefs._load()
+	check(int(Prefs.best_of("CAM_HOLD").get("f", 0)) == 2, "a damaged file falls back to the copy before")
+	Prefs.erase_all()
+	check(not FileAccess.file_exists(Prefs.path() + ".bak"), "erase all leaves no copy behind")
+	check(not Prefs._is_date("1234-56-78") and Prefs._is_date("2026-11-06"), "impossible dates are refused")
+	Prefs.set_pilot_name("Оля\u202eПетренко\u200b")
+	check(Prefs.pilot_name == "ОляПетренко", "invisible characters are dropped from the name")
+	Prefs.erase_all()

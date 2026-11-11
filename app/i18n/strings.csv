@@ -419,6 +419,7 @@ HINT_JOLT_STRETCHER,Too sharp! It hurts the casualty,Різко! Поранен�
 HINT_JOLT_KITTEN,"Careful, the kitten got scared","Обережно, кошеня злякалося"
 HINT_JOLT_CARGO,Shaking! The cargo could break,Трясе! Вантаж може розбитися
 FAIL_JOLT_STRETCHER,"The casualty was shaken too much. Start and brake gently, turn slowly, and take potholes slowly.","Пораненого надто трясло. Рушай і гальмуй плавно, повертай повільно, а ями проїжджай поволі."
+FAIL_JOLT_KITTEN,The kitten got too shaken. Drive gently.,Кошеня надто трясло. Їдь плавно.
 FAIL_JOLT_CARGO,The cargo broke from the jolts. Slow down before potholes.,Вантаж розбився від поштовхів. Перед ямами пригальмовуй.
 FAIL_CARGO_BUMP,The robot touched an obstacle and the cargo is damaged. Give obstacles room.,"Робот зачепив перешкоду, і вантаж пошкоджено. Об’їжджай із запасом."
 HINT_ROUTE_LOADING,"Holding still, loading…","Стоїмо, вантажимо…"

@@ -38,9 +38,19 @@ func _name_field() -> LineEdit:
 	e.set("accessibility_name", tr("CARD_NAME"))
 	# Saved as typed; the cards below pick it up when the field is left.
 	e.text_changed.connect(func(t): Prefs.set_pilot_name(t))
-	e.focus_exited.connect(rebuild)
+	# Deferred: focus is also lost while this screen is being rebuilt or closed
+	# (Back), and rebuilding right inside that swallowed the tap.
+	e.focus_exited.connect(_rebuild_later)
 	e.text_submitted.connect(func(_t): e.release_focus())
 	return e
+
+
+func _rebuild_later() -> void:
+	if is_inside_tree() and not is_queued_for_deletion():
+		(func():
+			if is_inside_tree() and not is_queued_for_deletion():
+				rebuild()
+		).call_deferred()
 
 
 func _card(vehicle: String, date: String, kids: bool) -> Control:
