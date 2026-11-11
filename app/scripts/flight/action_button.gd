@@ -7,6 +7,7 @@ extends VBoxContainer
 var task: FlightTask
 var sim: DroneSim
 var _label: Label
+var _tap: Control
 var _shown := ""
 
 
@@ -20,7 +21,8 @@ func build(task_: FlightTask, sim_: DroneSim) -> void:
 	_label = UI.label("", 13, 800, "on_accent", false, false)
 	_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	c.add_child(_label)
-	add_child(UI.tappable(c, Pal.c("accent"), func(): task.act(sim), "", 38, 0))
+	_tap = UI.tappable(c, Pal.c("accent"), func(): task.act(sim), "", 38, 0)
+	add_child(_tap)
 	_refresh()
 
 
@@ -34,3 +36,5 @@ func _refresh() -> void:
 	_shown = task.action
 	visible = _shown != ""
 	_label.text = tr(_shown) if _shown != "" else ""
+	# TalkBack and switch access read the same words the button shows.
+	_tap.get_child(1).set("accessibility_name", _label.text)

@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-# What the ground robot looks like: a low body on two tracks, a camera mast, a gold front edge,
+# What the ground robot looks like: a low body on two tracks, a round camera on a mast, a gold front edge,
 # and a load on top when it carries one.
 class_name UgvView
 extends Node3D
@@ -27,9 +27,27 @@ func build(body: Color, front: Color, load_kind := "") -> void:
 			wheel.radial_segments = 10
 			var w := _part(wheel, m_body, Vector3(sx * 1.02, 0.2, z))
 			w.rotation.z = PI / 2.0
-	# Camera mast at the front.
-	_part(_box(Vector3(0.08, 0.5, 0.08)), m_body, Vector3(0, 0.85, -0.5))
-	_part(_box(Vector3(0.22, 0.14, 0.18)), _mat(Color("#39254F")), Vector3(0, 1.12, -0.52))
+	# Camera mast at the front: a light round head with one big lens, so it reads as
+	# a friendly camera, not a turret.
+	_part(_box(Vector3(0.06, 0.42, 0.06)), m_body, Vector3(0, 0.8, -0.5))
+	var head := SphereMesh.new()
+	head.radius = 0.16
+	head.height = 0.32
+	head.radial_segments = 16
+	head.rings = 8
+	_part(head, _mat(Color("#FFF0D5")), Vector3(0, 1.12, -0.5))
+	var ring := CylinderMesh.new()
+	ring.top_radius = 0.1
+	ring.bottom_radius = 0.1
+	ring.height = 0.05
+	ring.radial_segments = 16
+	_part(ring, m_front, Vector3(0, 1.12, -0.65)).rotation.x = PI / 2.0
+	var lens := CylinderMesh.new()
+	lens.top_radius = 0.065
+	lens.bottom_radius = 0.065
+	lens.height = 0.06
+	lens.radial_segments = 16
+	_part(lens, _mat(Color("#2A1D3B")), Vector3(0, 1.12, -0.67)).rotation.x = PI / 2.0
 	_body.add_child(_load)
 	set_load(load_kind)
 

@@ -343,7 +343,7 @@ func _build_hud() -> void:
 	var nl_text := Label.new()
 	nl_text.text = tr("NO_SIGNAL")
 	nl_text.add_theme_font_override("font", Pal.font(600, true))
-	nl_text.add_theme_font_size_override("font_size", 26)
+	nl_text.add_theme_font_size_override("font_size", roundi(26 * Pal.text_scale()))
 	nl_text.add_theme_color_override("font_color", Color("#FFF0D5"))
 	nl_center.add_child(nl_text)
 	nl.add_child(nl_center)
@@ -382,7 +382,7 @@ func _build_hud() -> void:
 
 	var chip := UI.vbox(6)
 	var title := Curriculum.label(task_key)
-	if not task.is_mission and not task.is_free:
+	if not task.is_mission and not task.is_free and mode != "kids":
 		title = tr("LESSON_N") % (Curriculum.lessons(vehicle, mode).find(task_key) + 1) + " · " + title
 	chip.add_child(UI.label(title, 14, 700, "text", false, false))
 	var bar_row := UI.hbox(8)
@@ -416,7 +416,7 @@ func _build_hud() -> void:
 		_meter_fill.size = Vector2(120, 6)
 		mbar.add_child(_meter_fill)
 		mrow.add_child(mbar)
-		var meter_text := UI.label(tr(task.meter_label), 12, 700, "muted", false, false)
+		var meter_text := UI.label(tr(Curriculum.text_key(task.meter_label, mode)), 12, 700, "muted", false, false)
 		mrow.add_child(meter_text)
 		chip.add_child(mrow)
 	top.add_child(UI.panel(chip, glass, 16, 10))
@@ -462,7 +462,8 @@ func _build_hud() -> void:
 	var hint_row := CenterContainer.new()
 	hint_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_hint.add_theme_font_override("font", Pal.font(700))
-	_hint.add_theme_font_size_override("font_size", 19 if mode == "kids" else 16)
+	# The reader's text size reaches the flight too: the hint is what they must read.
+	_hint.add_theme_font_size_override("font_size", roundi((19 if mode == "kids" else 16) * Pal.text_scale()))
 	_hint.add_theme_color_override("font_color", Pal.c("bg"))
 	_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_hint_panel.add_theme_stylebox_override("panel", UI.box(Pal.c("text"), 12, 9))

@@ -22,6 +22,8 @@ var _gate: Control = null
 
 
 func _ready() -> void:
+	# Menus redraw only when something changes: saves battery on cheap phones.
+	OS.low_processor_usage_mode = true
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -135,6 +137,7 @@ func open_flight(vehicle: String, key: String, seed_ := -1) -> void:
 		flight.queue_free()
 		remove_child(flight)
 	_set_landscape(true)
+	OS.low_processor_usage_mode = false  # the flight draws every frame
 	_bg.visible = false
 	_frame.visible = false
 	flight = load("res://scripts/flight/flight.gd").new()
@@ -153,6 +156,7 @@ func close_flight() -> void:
 		remove_child(flight)
 		flight = null
 	_set_landscape(false)
+	OS.low_processor_usage_mode = true
 	_bg.visible = true
 	_frame.visible = true
 	_restyle()

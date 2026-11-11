@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-# Grown-ups' lock: solve a small multiplication to leave Kids mode or open settings.
-# Stops small children without a PIN that can be forgotten.
+# Grown-ups' lock: solve a multiplication to leave Kids mode or open settings.
+# Stops children without a PIN that can be forgotten. A two-digit number keeps out a child
+# who knows the times table; after three misses it waits a little, so guessing is slow.
 class_name Gate
 extends ColorRect
 
@@ -11,6 +12,10 @@ var _typed := ""
 var _answer: Label
 var _note: Label
 var _rng := RandomNumberGenerator.new()
+const MISSES_BEFORE_WAIT := 3
+const WAIT_MS := 10000
+var _misses := 0
+var _wait_until := 0
 
 
 func _ready() -> void:
@@ -71,12 +76,24 @@ func close() -> void:
 
 
 func _new_sum() -> void:
-	_a = _rng.randi_range(6, 9)
-	_b = _rng.randi_range(4, 9)
+	_a = _rng.randi_range(12, 29)
+	_b = _rng.randi_range(3, 9)
 	_typed = ""
 
 
+func _process(_delta: float) -> void:
+	if _wait_until > 0:
+		var left := _wait_until - Time.get_ticks_msec()
+		if left <= 0:
+			_wait_until = 0
+			_note.text = ""
+		else:
+			_note.text = tr("GATE_WAIT") % ceili(left / 1000.0)
+
+
 func _press(k: String) -> void:
+	if _wait_until > 0:
+		return
 	if k == "⌫":
 		_typed = _typed.left(-1)
 	elif k == "OK":
@@ -88,6 +105,9 @@ func _press(k: String) -> void:
 			return
 		_note.text = tr("GATE_WRONG")
 		_new_sum()
+		_misses += 1
+		if _misses % MISSES_BEFORE_WAIT == 0:
+			_wait_until = Time.get_ticks_msec() + WAIT_MS
 	elif _typed.length() < 3:
 		_typed += k
 	_refresh()

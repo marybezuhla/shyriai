@@ -35,6 +35,7 @@ func _ready() -> void:
 	await _sunflowers_and_free()
 	await _gate()
 	await _fixes_0_11()
+	await _kids_0_11()
 	Prefs.set_language("system")
 	Prefs.set_theme("dusk")
 	Prefs.set_mode("simple")
@@ -415,8 +416,12 @@ func _shot(name: String) -> void:
 	await _frames(4)
 	if shots == "" or DisplayServer.get_name() == "headless":
 		return
+	# Menus draw only on change (low-processor mode): make sure this frame is drawn.
+	var low := OS.low_processor_usage_mode
+	OS.low_processor_usage_mode = false
 	await RenderingServer.frame_post_draw
 	get_viewport().get_texture().get_image().save_png(shots.path_join(name + ".png"))
+	OS.low_processor_usage_mode = low
 
 
 ## The 8 screenshots for the app pages (F-Droid, Komora), most important first,
@@ -547,3 +552,48 @@ func _fixes_0_11() -> void:
 	main.close_flight()
 	await _frames(2)
 	Prefs.erase_all()
+
+
+## Kids mode before 1.0: no war letter or defence fundraisers, no lesson numbers; the lock waits.
+func _kids_0_11() -> void:
+	Prefs.erase_all()
+	Prefs.set_language("uk")
+	Prefs.set_mode("kids")
+	main.open_about()
+	await _shot("uk-morning-about-kids")
+	var texts := _texts(main.stack.back())
+	assert(not texts.has(tr("LETTER_4")) and not texts.has(tr("ORG_NBU")), "kids see no war letter or army account")
+	assert(texts.has(tr("ORG_REDCROSS")), "kids still see humanitarian help")
+	main.back()
+	main.open_lessons("ugv")
+	await _shot("uk-morning-lessons-ugv-kids")
+	texts = _texts(main.stack.back())
+	for t in texts:
+		assert(not RegEx.create_from_string("\\d").search(t), "no numbers on the kids lessons screen: " + t)
+	main.back()
+	# Three wrong answers and the lock waits before the next try.
+	Prefs.set_kids_lock(true)
+	var opened := [false]
+	main.guard(func(): opened[0] = true)
+	await _frames(2)
+	var g = main._gate
+	for i in 3:
+		g._press("1")
+		g._press("OK")
+	assert(g._wait_until > 0, "three misses and the lock waits")
+	for ch in str(g._a * g._b):
+		g._press(ch)
+	g._press("OK")
+	await _frames(1)
+	assert(not opened[0], "no answer counts while it waits")
+	await _shot("uk-morning-gate-wait")
+	g.close()
+	Prefs.set_kids_lock(false)
+	Prefs.erase_all()
+
+
+func _texts(n: Node) -> Array:
+	var out := []
+	for l in n.find_children("*", "Label", true, false):
+		out.append((l as Label).text)
+	return out

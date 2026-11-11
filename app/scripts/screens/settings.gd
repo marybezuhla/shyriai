@@ -91,13 +91,13 @@ func _progress_section() -> void:
 		var r := UI.hbox(10)
 		var yes_text := tr("ERASE_YES") if all else tr("RESET_YES")
 		var yes := CenterContainer.new()
-		yes.custom_minimum_size = Vector2(0, 48)
+		yes.custom_minimum_size = Vector2(0, 52)
 		yes.add_child(UI.label(yes_text, 15, 800, "on_accent", false, false))
 		var y := UI.tappable(yes, Pal.c("accent"), confirm_erase, yes_text, 16, 0)
 		y.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		r.add_child(y)
 		var no := CenterContainer.new()
-		no.custom_minimum_size = Vector2(0, 48)
+		no.custom_minimum_size = Vector2(0, 52)
 		no.add_child(UI.label(tr("CANCEL"), 15, 700, "text", false, false))
 		var n := UI.tappable(no, Pal.c("surface2"), func(): _confirm = ""; rebuild(), tr("CANCEL"), 16, 0)
 		n.size_flags_horizontal = Control.SIZE_EXPAND_FILL

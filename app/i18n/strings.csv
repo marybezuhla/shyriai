@@ -13,6 +13,7 @@ HOME_CONTINUE,Continue,Продовжити
 HOME_START,Start,Почати
 LESSON_N,Lesson %d,Урок %d
 LESSONS_OF,%d of %d lessons,%d з %d уроків
+LESSON,Lesson,Урок
 HOME_WHAT,What we pilot,Що пілотуємо
 VEH_CAMERA,Camera drone,Камерний дрон
 VEH_CAMERA_DESC,Hovers by itself when you let go of the sticks,"Сам зависає, коли відпускаєш стіки"
@@ -59,11 +60,11 @@ CAM_WIND_GOAL,"There is no GPS, and the wind is strong and gusty. Fly to four po
 CAM_WIND_PASS,"4 points | Strong, gusty wind",4 точки | Сильний вітер з поривами
 CAM_EXAM,Exam,Іспит
 CAM_EXAM_NOTE,Everything together,Усе разом
-CAM_EXAM_GOAL,"Take-off, a route nose first, a sideways pass nose in, and a precise landing, in one flight.","Зліт, маршрут носом уперед, проліт боком носом до себе й точна посадка — за один політ."
+CAM_EXAM_GOAL,"Take-off, a route nose first, a sideways pass nose in, and a precise landing, in one flight.","Зліт, маршрут носом уперед, проліт боком носом до себе й точна посадка, усе за один політ."
 CAM_EXAM_PASS,No collisions | Under 3 min,Без зіткнень | До 3 хв
 FPV_THROTTLE,Throttle and hover,Газ і висіння
 FPV_THROTTLE_NOTE,You hold the height,Висоту тримаєш ти
-FPV_THROTTLE_GOAL,In FPV you hold the height. The left stick is the throttle: it does not spring back. Find the position where the drone hovers in the ball.,"У FPV висоту тримаєш ти. Лівий стік — газ: він не повертається до центру. Знайди положення, на якому дрон висить у кулі."
+FPV_THROTTLE_GOAL,In FPV you hold the height. The left stick is the throttle: it does not spring back. Find the position where the drone hovers in the ball.,"У FPV висоту тримаєш ти. Лівий стік керує газом і не повертається до центру. Знайди положення, на якому дрон висить у кулі."
 FPV_THROTTLE_PASS,Hover 10 s | ±1 m,Висіти 10 с | ±1 м
 FPV_FORWARD,Forward and turns,Уперед і повороти
 FPV_FORWARD_NOTE,Tilt gives speed,Нахил дає швидкість
@@ -71,15 +72,15 @@ FPV_FORWARD_GOAL,Tilting gives speed but costs height: add throttle as you tilt.
 FPV_FORWARD_PASS,3 balls | Without touching the ground,3 кулі | Без дотику до землі
 FPV_EIGHT,Figure eight,Вісімка
 FPV_EIGHT_NOTE,Smooth arcs,Плавні дуги
-FPV_EIGHT_GOAL,"Fly a figure eight round two poles, twice. Tilt, turn and throttle together.","Облети два стовпи вісімкою, двічі. Нахил, поворот і газ — разом."
+FPV_EIGHT_GOAL,"Fly a figure eight round two poles, twice. Tilt, turn and throttle together.","Облети два стовпи вісімкою, двічі. Нахил, поворот і газ разом."
 FPV_EIGHT_PASS,2 figure eights | Under 90 s,2 вісімки | До 90 с
 FPV_GATES,Gates,Ворота
 FPV_GATES_NOTE,Precision at speed,Точність на швидкості
-FPV_GATES_GOAL,Fly through six gates in order. The next one is gold. Touch a frame and you start again.,Пролети шість воріт по черзі. Наступні — золоті. Зачепиш раму — почнеш знову.
+FPV_GATES_GOAL,Fly through six gates in order. The next one is gold. Touch a frame and you start again.,"Пролети шість воріт по черзі. Наступні золоті. Зачепиш раму, і почнеш знову."
 FPV_GATES_PASS,6 gates | No collisions,6 воріт | Без зіткнень
 FPV_HORIZON,Horizon mode,Режим Horizon
 FPV_HORIZON_NOTE,Less help,Менше допомоги
-FPV_HORIZON_GOAL,"The same gates in Horizon mode: at small tilts the drone still levels itself, at big ones it does not.","Ті самі ворота, але в режимі Horizon: при малих нахилах дрон ще вирівнюється, а при сильних — ні."
+FPV_HORIZON_GOAL,"The same gates in Horizon mode: at small tilts the drone still levels itself, at big ones it does not.","Ті самі ворота, але в режимі Horizon: при малих нахилах дрон ще вирівнюється, а при сильних уже ні."
 FPV_HORIZON_PASS,6 gates | Horizon,6 воріт | Horizon
 FPV_ACRO,Acro mode,Режим Acro
 FPV_ACRO_NOTE,For Adult mode,Для дорослого режиму
@@ -87,7 +88,7 @@ FPV_ACRO_GOAL,In Acro mode the drone never levels itself: the stick sets how fas
 FPV_ACRO_PASS,4 balls | Acro,4 кулі | Acro
 UGV_DRIVE,Driving and turns,Їзда й повороти
 UGV_DRIVE_NOTE,Each stick drives one side,Кожен стік веде свій бік
-UGV_DRIVE_GOAL,"Drive a winding dirt road. The left stick drives the left track, the right stick the right one: both forward and the robot goes straight.","Проїдь ґрунтовою дорогою з поворотами. Лівий стік веде ліву гусеницю, правий — праву: обидва вперед — робот їде прямо."
+UGV_DRIVE_GOAL,"Drive a winding dirt road. The left stick drives the left track, the right stick the right one: both forward and the robot goes straight.","Проїдь ґрунтовою дорогою з поворотами. Лівий стік веде ліву гусеницю, правий праву: обидва вперед, і робот їде прямо."
 UGV_DRIVE_PASS,The road | Stay on it,Дорога | Не з’їжджати
 UGV_PIVOT,Turning on the spot,Розворот на місці
 UGV_PIVOT_NOTE,Tracks in opposite directions,Гусениці в різні боки
@@ -99,7 +100,7 @@ UGV_TERRAIN_GOAL,"Get over a hill and through mud. Uphill and in mud the robot i
 UGV_TERRAIN_PASS,20° hill | Mud | No rollover,Пагорб 20° | Бруд | Без перекидання
 UGV_DELIVERY,Delivery,Доставка
 UGV_DELIVERY_NOTE,Cargo to a point,Вантаж у точку
-UGV_DELIVERY_GOAL,Carry the cargo along the road past the barrels and stop on the mark. Touch anything and the cargo is damaged.,Довези вантаж дорогою повз бочки й зупинись на мітці. Зачепиш щось — вантаж пошкоджено.
+UGV_DELIVERY_GOAL,Carry the cargo along the road past the barrels and stop on the mark. Touch anything and the cargo is damaged.,"Довези вантаж дорогою повз бочки й зупинись на мітці. Зачепиш щось, і вантаж пошкоджено."
 UGV_DELIVERY_PASS,No collisions | Within 1 m of the mark,Без зіткнень | До 1 м від мітки
 UGV_EVACUATION,Evacuation,Евакуація
 UGV_EVACUATION_NOTE,"Gently, with video delay","Плавно, з затримкою відео"
@@ -114,9 +115,9 @@ MIS_CAM_SURVEY_DESC,"Picture every roof from above, land, and mark the damaged o
 MIS_FPV_HOOPS,Hoops,Обручі
 MIS_FPV_HOOPS_DESC,Fly through every colourful hoop.,Пролети крізь усі кольорові обручі.
 MIS_FPV_BALLOONS,Balloons and landing,Кульки й посадка
-MIS_FPV_BALLOONS_DESC,"Pop the balloons, then land right in the middle of the target.","Лопни кульки, а тоді сядь у самісінький центр мішені."
+MIS_FPV_BALLOONS_DESC,"Pop the balloons, then land right in the middle of the circle.","Лопни кульки, а тоді сядь у самісінький центр кола."
 MIS_FPV_RACE,Timed course,Траса на час
-MIS_FPV_RACE_DESC,"Gate after gate, and every second counts.","Ворота одні за одними, і кожна секунда рахується."
+MIS_FPV_RACE_DESC,"Gate after gate, and every second counts.","Ворота за воротами, і важить кожна секунда."
 MIS_FPV_TREES,Between the trees,Між деревами
 MIS_FPV_TREES_DESC,Fly through a tree line without touching the branches.,"Пролети лісосмугою, не зачепивши гілок."
 MIS_UGV_VET,Kitten to the vet,Кошеня до ветеринарки
@@ -143,7 +144,7 @@ SET_LANGUAGE,Language,Мова
 LANG_SYSTEM,System,Як у системі
 ABOUT,About,Про застосунок
 ABOUT_VERSION,Version %s,Версія %s
-ABOUT_WHAT,"Shyriai is a piloting trainer for drones and ground robots, for kids and adults. It works offline, with no accounts and no ads. Progress is stored only on this phone.","Ширяй — тренажер пілотування дронів і наземних роботів для дітей і дорослих. Працює без інтернету, без акаунтів і реклами. Прогрес зберігається лише на цьому телефоні."
+ABOUT_WHAT,"Shyriai is a piloting trainer for drones and ground robots, for kids and adults. It works offline, with no accounts and no ads. Progress is stored only on this phone.","Ширяй є тренажером пілотування дронів і наземних роботів для дітей і дорослих. Працює без інтернету, без акаунтів і реклами. Прогрес зберігається лише на цьому телефоні."
 ABOUT_LICENSE_T,Licence,Ліцензія
 ABOUT_LICENSE,"Free software under the GNU GPL 3.0 or later: you may use, study, change and share it. It comes with no warranty of any kind.","Вільна програма за ліцензією GNU GPL 3.0 або новішою: її можна використовувати, вивчати, змінювати й поширювати. Вона надається без жодних гарантій."
 ABOUT_SOURCE_T,Source code,Сирцевий код
@@ -184,7 +185,7 @@ HINT_TAKEOFF_HOLD,Hold this height for %d more s,Тримай висоту ще 
 HINT_TAKEOFF_BACK,Get back to 1.5–2.5 m,"Повернись на висоту 1,5–2,5 м"
 HINT_TAKEOFF_LAND,Now land softly on the pad,Тепер м’яко посади дрон на майданчик
 HINT_TAKEOFF_MISSED,You missed the pad. Take off and land inside the circle,Повз майданчик. Злети й сідай у коло
-HINT_TAKEOFF_HARD,Too hard: %s m/s. Take off and come down slower,Зажорстко: %s м/с. Злети й сідай повільніше
+HINT_TAKEOFF_HARD,Too hard: %s m/s. Take off and come down slower,Надто жорстко: %s м/с. Злети й сідай повільніше
 SUM_TAKEOFF,Touchdown at %s m/s: soft.,Посадка на швидкості %s м/с: м’яко.
 HINT_HOLD_GO,Take off and fly to the mark,Злети й лети до мітки
 HINT_HOLD_KEEP,Keep the drone over the mark: %d more s,Тримай дрон над міткою: ще %d с
@@ -192,8 +193,9 @@ HINT_HOLD_OUT,The wind pushed it out. Back into the circle,Вітер зніс �
 SUM_HOLD,10 seconds over the mark despite the wind.,10 секунд над міткою попри вітер.
 HINT_KITTEN_FIND,Fly to the kitten!,Лети до кошеняти!
 HINT_KITTEN_BACK,Kitten found! Fly back to the rescuers,Кошеня знайдено! Лети назад до рятувальників
+SUM_KITTEN_KIDS,The kitten is saved!,Кошеня врятовано!
 SUM_KITTEN,The kitten is saved. Sunflowers: %d of %d.,Кошеня врятовано. Соняшників: %d з %d.
-THEME_KIDS_NOTE,Kids mode uses the light Morning look. Your choice comes back when you leave Kids mode.,"У дитячому режимі — світла тема «Ранок». Твій вибір повернеться, коли вийдеш з дитячого режиму."
+THEME_KIDS_NOTE,Kids mode uses the light Morning look. Your choice comes back when you leave Kids mode.,"У дитячому режимі світла тема «Ранок». Твій вибір повернеться, коли вийдеш з дитячого режиму."
 SET_KIDS,Kids mode,Дитячий режим
 KIDS_LOCK,Grown-ups’ lock,Батьківський замок
 KIDS_LOCK_DESC,"To leave Kids mode or open settings, a sum must be solved.","Щоб вийти з дитячого режиму чи відкрити налаштування, треба розв’язати приклад."
@@ -202,6 +204,7 @@ GATE_TEXT,Solve the sum to continue.,"Розв’яжи приклад, щоб �
 GATE_OK,OK,OK
 GATE_ERASE,Erase,Стерти
 GATE_WRONG,Not quite. Here is another one.,Не те. Ось інший приклад.
+GATE_WAIT,Wait %d s and try again.,Зачекай %d с і спробуй ще.
 CANCEL,Cancel,Скасувати
 VIEW_DRONE,Camera,Камера
 NOT_THIS_TIME,Not this time,Цього разу не вийшло
@@ -212,26 +215,26 @@ CAM_WIND_PASS_KIDS,Four spots,Чотири точки
 CAM_EXAM_PASS_KIDS,Everything together | No rush,Усе разом | Без поспіху
 HINT_NOSE_UP,Take off: the drone is already facing you,Злітай: дрон уже дивиться на тебе
 HINT_NOSE_FACE,Turn the drone to face you with the left stick,Поверни дрон носом до себе лівим стіком
-HINT_NOSE_GO,"Fly from sphere to sphere, nose towards you: %d to go","Лети від кулі до кулі, носом до себе: ще %d"
+HINT_NOSE_GO,"Fly from ball to ball, nose towards you: %d to go","Лети від кулі до кулі, носом до себе: ще %d"
 HINT_NOSE_SLOW,A minute has passed. Let’s start the lap again,Хвилина минула. Почнімо коло спочатку
 SUM_NOSE_IN,A nose-in lap in %d s.,Коло носом до себе за %d с.
-HINT_SQUARE_UP,Take off and fly to the first sphere,Злітай і лети до першої кулі
+HINT_SQUARE_UP,Take off and fly to the first ball,Злітай і лети до першої кулі
 HINT_SQUARE_NOSE,Fly nose first: turn the drone with the left stick,Лети носом уперед: поверни дрон лівим стіком
-HINT_SQUARE_GO,"Square, spheres left: %d","Квадрат, куль лишилось: %d"
-HINT_CIRCLE_GO,"Now the circle, spheres left: %d","Тепер коло, куль лишилось: %d"
+HINT_SQUARE_GO,"Square, balls left: %d","Квадрат, куль лишилось: %d"
+HINT_CIRCLE_GO,"Now the circle, balls left: %d","Тепер коло, куль лишилось: %d"
 SUM_SQUARE,Square and circle flown nose first.,Квадрат і коло пройдено носом уперед.
-HINT_LAND_UP,Take off and fly to the sphere,Злітай і лети до кулі
-HINT_LAND_TAKEOFF,Take off and fly to the next sphere,Злітай і лети до наступної кулі
-HINT_LAND_GO,Landing %d of 3: fly to the sphere,Посадка %d з 3: лети до кулі
+HINT_LAND_UP,Take off and fly to the ball,Злітай і лети до кулі
+HINT_LAND_TAKEOFF,Take off and fly to the next ball,Злітай і лети до наступної кулі
+HINT_LAND_GO,Landing %d of 3: fly to the ball,Посадка %d з 3: лети до кулі
 HINT_LAND_DOWN,Now land in the centre of the pad,Тепер сідай у центр майданчика
 HINT_LAND_MISS,Off by %d cm. Take off and try again,Мимо: %d см від центру. Злети й спробуй ще
-HINT_LAND_HARD,Too hard: %s m/s. Take off and come down slower,Зажорстко: %s м/с. Злети й сідай повільніше
+HINT_LAND_HARD,Too hard: %s m/s. Take off and come down slower,Надто жорстко: %s м/с. Злети й сідай повільніше
 HINT_LAND_GOOD,Landing %d: %d cm from the centre!,Посадка %d: %d см від центру!
-SUM_LANDING,Three precise landings from different sides. The last was %d cm from the centre.,Три точні посадки з різних боків. Остання — %d см від центру.
+SUM_LANDING,Three precise landings from different sides. The last was %d cm from the centre.,Три точні посадки з різних боків. Остання за %d см від центру.
 HINT_WIND_UP,Take off: the wind is already blowing,Злітай: вітер уже дме
-HINT_WIND_GO,Fly to the sphere: %d to go,Лети до кулі: ще %d
-HINT_WIND_HOLD,Keep the drone in the sphere: %d more s,Тримай дрон у кулі: ще %d с
-HINT_WIND_OUT,A gust pushed it out. Back into the sphere,Порив виніс дрон. Повертайся в кулю
+HINT_WIND_GO,Fly to the ball: %d to go,Лети до кулі: ще %d
+HINT_WIND_HOLD,Keep the drone in the ball: %d more s,Тримай дрон у кулі: ще %d с
+HINT_WIND_OUT,A gust pushed it out. Back into the ball,Порив виніс дрон. Повертайся в кулю
 SUM_WIND,Route flown. The wind at the end: %s m/s.,Маршрут пройдено. Вітер наприкінці: %s м/с.
 HINT_EXAM_UP,Exam: take off to 2 m,Іспит: злітай на 2 м
 HINT_EXAM_ROUTE,"Route, nose first: %d to go",Маршрут носом уперед: ще %d
@@ -263,7 +266,7 @@ TH_RULES_KIDS,"Right now, real drones may fly only with permission.|A small dron
 TH_RULES_SOURCES,"Air Code of Ukraine, article 30. Regulation on the use of the airspace of Ukraine, Cabinet of Ministers resolution No. 954 of 2017. Free legal aid system of Ukraine, quoted in Fakty, How to get permission to fly a drone, 5 Nov 2024. Sud.ua, Where drones may not be launched, 2026. CEDEM, Using drones in wartime, 2023. As of November 2026.","Повітряний кодекс України, стаття 30. Положення про використання повітряного простору України, постанова Кабінету Міністрів № 954, 2017. Система безоплатної правничої допомоги, цитата у «Фактах», «Як отримати дозвіл на політ дрона», 05.11.2024. Судово-юридична газета (sud.ua), «Де не можна запускати дрони», 2026. ЦЕДЕМ, «Використання дронів під час воєнного часу», 2023. Станом на листопад 2026 року."
 TH_BATTERY_SOURCES,LiPo safety rules of the University of Maryland drone lab and of battery makers.,Правила безпеки LiPo-батарей лабораторії дронів Університету Меріленду та виробників батарей.
 CAM_STICKS_NOTE_KIDS,Try every stick,Спробуй усі стіки
-CAM_STICKS_GOAL_KIDS,Wiggle each stick and see what the drone does. Nothing can break here!,"Поворушь кожен стік і подивись, що робить дрон. Тут нічого не зламаєш!"
+CAM_STICKS_GOAL_KIDS,Wiggle each stick and see what the drone does. Nothing can break here!,"Поворуши кожен стік і подивись, що робить дрон. Тут нічого не зламаєш!"
 CAM_STICKS_PASS_KIDS,Every move,Усі рухи
 CAM_TAKEOFF_NOTE_KIDS,Up to the ball and back,До кульки й назад
 CAM_TAKEOFF_GOAL_KIDS,"Fly up to the gold ball over the pad, stay in it a little, then land again.","Злети до золотої кульки над майданчиком, побудь у ній трішки й сядь назад."
@@ -360,7 +363,7 @@ HINT_BALLOONS_UP,Take off and pop the balloons,Злітай і лопай кул
 HINT_BALLOONS_GO,Touch a balloon to pop it: %d to go,"Торкнись кульки, щоб лопнути: ще %d"
 HINT_TARGET_GO,Now land in the middle of the target on the ground!,Тепер сядь у центр мішені на землі!
 SUM_TARGET_CENTRE,Right in the middle! Every balloon popped.,У самісінький центр! Усі кульки лопнули.
-SUM_TARGET_MIDDLE,"Landed on the target! Next time, closer to the middle.",Посадка на мішень! Наступного разу — ближче до центру.
+SUM_TARGET_MIDDLE,"Landed on the target! Next time, closer to the middle.",Посадка на мішень! Наступного разу ближче до центру.
 SUM_TARGET_EDGE,Landed on the edge. Try for the middle!,Посадка на краю мішені. Спробуй у центр!
 SUM_RACE,Course done in %d:%02d.,Траса пройдена за %d:%02d.
 HINT_TREES_THERE,"Fly between the trees to the ball beyond the tree line, below the tops","Лети між деревами до кулі за лісосмугою, нижче за верхівки"
@@ -368,7 +371,7 @@ HINT_TREES_BACK,Now the same way back,А тепер так само назад
 HINT_TREES_LOW,Between the trees: below 5 m,Між деревами: нижче 5 м
 SUM_TREES,Through the tree line and back without a single touch.,Лісосмугу пройдено двічі без жодного дотику.
 FAIL_TREES,The drone touched a tree. Between trees fly slower and give more room.,Дрон зачепив дерево. Між деревами лети повільніше й тримай більший запас.
-FAIL_TREES_OVER,Flying over the tree line does not count: the task is to fly between the trees.,Над лісосмугою літати не можна: завдання — пролетіти між деревами.
+FAIL_TREES_OVER,Flying over the tree line does not count: the task is to fly between the trees.,"Над лісосмугою літати не можна: завдання в тому, щоб пролетіти між деревами."
 STICK_TRACK_L,Left track,Ліва гусениця
 STICK_TRACK_R,Right track,Права гусениця
 STICK_DRIVE,Drive,Хід
@@ -378,7 +381,7 @@ CRASHED_UGV,The robot is damaged,Робота пошкоджено
 CRASHED_UGV_TIP,"The robot tipped over: a %s° lean. On a slope drive straight up or down, not across, and keep off the edge.","Робот перекинувся: нахил %s°. На схилі їдь прямо вгору чи вниз, а не впоперек, і не з’їжджай з краю."
 CRASHED_UGV_HIT,It hit at %s m/s. Slow down near obstacles.,Удар на швидкості %s м/с. Перед перешкодами пригальмовуй.
 UGV_DRIVE_NOTE_KIDS,Follow the road,Їдь дорогою
-UGV_DRIVE_GOAL_KIDS,Drive along the road to the balls. Left stick: forward and back; right stick: turning.,"Їдь дорогою до кульок. Лівий стік — уперед і назад, правий — повороти."
+UGV_DRIVE_GOAL_KIDS,Drive along the road to the balls. Left stick: forward and back; right stick: turning.,"Їдь дорогою до кульок. Лівий стік: уперед і назад, правий: повороти."
 UGV_DRIVE_PASS_KIDS,The road,Дорога
 UGV_PIVOT_NOTE_KIDS,Turn in an alley,Розворот у провулку
 UGV_PIVOT_GOAL_KIDS,"Drive into the alley, turn round and drive back out.","Заїдь у провулок, розвернися й виїдь назад."
@@ -390,7 +393,7 @@ UGV_DELIVERY_NOTE_KIDS,Deliver a box,Довези коробку
 UGV_DELIVERY_GOAL_KIDS,Deliver the box and stop in the gold circle.,Довези коробку й зупинись у золотому колі.
 UGV_DELIVERY_PASS_KIDS,Box | Circle,Коробка | Коло
 UGV_EVACUATION_NOTE_KIDS,"Gently, gently",Плавно-плавно
-UGV_EVACUATION_GOAL_KIDS,Bring the casualty to the rescuers’ van. Drive gently so nothing shakes.,"Привези пораненого до машини рятувальників. Їдь плавно-плавно, щоб не трусило."
+UGV_EVACUATION_GOAL_KIDS,Bring a hiker with a twisted ankle to the rescuers’ van. Drive gently so nothing shakes.,"Привези туриста з підвернутою ногою до машини рятувальників. Їдь плавно-плавно, щоб не трусило."
 UGV_EVACUATION_PASS_KIDS,Gently,Плавно
 HINT_UGV_START_TANK,Both sticks forward: the robot goes straight,Обидва стіки вперед: робот їде прямо
 HINT_UGV_START_CAR,Left stick forward: off we go!,Лівий стік уперед: поїхали!
@@ -432,10 +435,16 @@ HINT_ROUTE_GO_STRETCHER,"Take the casualty to the van, gently","Вези пор�
 HINT_ROUTE_GO_KITTEN,Take the kitten to the vet,Вези кошеня до ветеринарки
 HINT_ROUTE_GO_PARCEL,Take the parcel to granny and stop by the house,Вези посилку бабусі й зупинись біля хати
 SUM_UGV_DELIVERY,The cargo arrived intact.,Вантаж доставлено цілим.
+METER_PATIENT_KIDS,Hiker’s comfort,Спокій туриста
+HINT_JOLT_STRETCHER_KIDS,Too sharp! The hiker is uncomfortable,Різко! Туристові незручно
+HINT_ROUTE_PICKUP_STRETCHER_KIDS,Drive to the hiker and stop beside them,Їдь до туриста й зупинись поруч
+HINT_ROUTE_LOADED_STRETCHER_KIDS,"The hiker is on the stretcher. Take them to the van, gently","Турист на ношах. Вези до машини, плавно"
+HINT_ROUTE_GO_STRETCHER_KIDS,"Take the hiker to the van, gently","Вези туриста до машини, плавно"
 SUM_UGV_DELIVERY_KIDS,The box is delivered!,Коробку доставлено!
 SUM_UGV_EVACUATION,The casualty is safe. Comfort on the way: %d %%.,Пораненого довезено. Комфорт у дорозі: %d %%.
-SUM_UGV_EVACUATION_KIDS,The casualty is with the rescuers!,Пораненого довезено до рятувальників!
+SUM_UGV_EVACUATION_KIDS,The hiker is with the rescuers!,Турист уже в рятувальників!
 SUM_UGV_VET,The kitten is at the vet. Calm on the way: %d %%.,Кошеня у ветеринарки. Спокій у дорозі: %d %%.
+SUM_UGV_PARCEL_KIDS,The parcel is delivered!,Посилку доставлено!
 SUM_UGV_VET_KIDS,The kitten is at the vet! Calm and happy.,Кошеня у ветеринарки! Спокійне й задоволене.
 SUM_UGV_PARCEL,The parcel is delivered! Sunflowers: %d of %d.,Посилку доставлено! Соняшників: %d з %d.
 SUM_UGV_CARGO,Water and medicine delivered. Cargo condition: %d %%.,Воду й ліки доставлено. Цілість вантажу: %d %%.
@@ -454,7 +463,7 @@ A11Y_DONE,done,пройдено
 A11Y_LOCKED,locked,ще закрито
 ABOUT_COPYRIGHT,© 2026 marybezuhla,© 2026 marybezuhla
 FAIL_BATTERY,The battery ran out and the drone landed by itself.,"Батарея сіла, і дрон приземлився сам."
-FAIL_TREES_AROUND,That went round the trees. The task is to fly between them.,Це в обхід дерев. Завдання — пролетіти між ними.
+FAIL_TREES_AROUND,That went round the trees. The task is to fly between them.,"Це в обхід дерев. Завдання в тому, щоб пролетіти між ними."
 HINT_PIVOT_FORWARD,"Turn round on the spot first, then drive forward into the alley","Спершу розвернися на місці, а тоді їдь уперед у прохід"
 HINT_NOSE_RESET,Nose turned away: back to the start of this side,Ніс відвернувся: назад на початок цієї сторони
 HINT_TARGET_MISS,Missed the target. Take off and land in the middle!,Повз мішень. Злітай і сідай у центр!
@@ -462,7 +471,7 @@ VIEW_BEHIND,Behind,Ззаду
 VEH_UGV_KIDS,Robot,Робот
 VEH_UGV_DESC_KIDS,A robot on tracks that brings things and helps,"Робот на гусеницях, що привозить речі й допомагає"
 VIEW_FPV_KIDS,Drone’s eyes,Очима дрона
-UGV_EVACUATION_KIDS,Helping a casualty,Допомога пораненому
+UGV_EVACUATION_KIDS,Helping a hiker,Допомога туристові
 HINT_TERRAIN_MUD_KIDS,"Now through the mud. Slowly, it is slippery!","Тепер через бруд. Повільно, тут слизько!"
 HINT_TREES_LOW_KIDS,"Fly low, below the treetops","Лети низенько, нижче за верхівки"
 ERASE_ALL,Erase all data,Стерти всі дані
@@ -480,7 +489,7 @@ LETTER_7,"Learn, stay alert and be ready. Ukraine’s future is yours. And if yo
 LETTER_SIGN,The author of Shyriai 💙💛,Авторка Ширяя 💙💛
 AUTHOR_NAME,Mariana Bezuhla,Марʼяна Безугла
 SUPPORT_NOTE,"The links open in your browser, on the organisations’ own sites. The app knows nothing about it and receives nothing.","Посилання відкриваються в браузері, на сайтах самих організацій. Застосунок нічого про це не знає й не отримує."
-SUPPORT_KIDS,In Kids mode the links only show where to go: ask a grown-up to open them.,"У дитячому режимі посилання лише показують, куди йти: попросіть дорослого їх відкрити."
+SUPPORT_KIDS,In Kids mode the links only show where to go: ask a grown-up to open them.,"У дитячому режимі посилання лише показують, куди йти: попроси дорослого їх відкрити."
 SUPPORT_TITLE,Support Ukraine 💙💛,Підтримати Україну 💙💛
 SUPPORT_DEFENCE,Defence,Оборона
 SUPPORT_HUMANITARIAN,Humanitarian aid,Гуманітарна допомога
@@ -493,7 +502,7 @@ ORG_NBU,National Bank of Ukraine special account,Спецрахунок Наці
 ORG_NBU_WHAT,"An account for the needs of the army, opened on 24 February 2022; the National Bank reports on it every month","Рахунок для збору коштів на потреби армії, відкритий 24 лютого 2022 року; НБУ щомісяця звітує"
 ORG_NBU_URL,https://bank.gov.ua/en/news/all/natsionalniy-bank-vidkriv-spetsrahunok-dlya-zboru-koshtiv-na-potrebi-armiyi,https://bank.gov.ua/ua/news/all/natsionalniy-bank-vidkriv-spetsrahunok-dlya-zboru-koshtiv-na-potrebi-armiyi
 ORG_BRAVE1,Brave1,Brave1
-ORG_BRAVE1_WHAT,Ukraine’s state defence technology cluster: learn how Ukraine builds them,"Державний кластер оборонних технологій: дізнатися, як Україна їх створює"
+ORG_BRAVE1_WHAT,Ukraine’s state defence technology cluster,Державний кластер оборонних технологій
 ORG_BRAVE1_URL,https://brave1.gov.ua/en/,https://brave1.gov.ua/
 ORG_REDCROSS,Ukrainian Red Cross Society,Товариство Червоного Хреста України
 ORG_REDCROSS_WHAT,The national Red Cross society: help for people hurt by the war,"Національне товариство Червоного Хреста: допомога людям, що постраждали від війни"
@@ -529,8 +538,8 @@ TAB_FREE_UGV,Free drive,Вільна їзда
 FREE_CAMERA,Free flight,Вільний політ
 FREE_FPV,Free flight,Вільний політ
 FREE_UGV,Free drive,Вільна їзда
-FREE_DESC,"No task and no score: fly as you like, for as long as you like.","Без завдання й без оцінок: літай як хочеш і скільки хочеш."
-FREE_DESC_UGV,"No task and no score: drive as you like, for as long as you like.","Без завдання й без оцінок: їдь куди хочеш і скільки хочеш."
+FREE_DESC,"No task and no score: fly as you like, for as long as you like.",Без завдання й без оцінок: літай як хочеш і скільки хочеш.
+FREE_DESC_UGV,"No task and no score: drive as you like, for as long as you like.",Без завдання й без оцінок: їдь куди хочеш і скільки хочеш.
 FREE_WIND,Wind,Вітер
 FREE_WIND_NONE,None,Без вітру
 FREE_WIND_LIGHT,Light,Легкий
@@ -577,7 +586,7 @@ MONTH_9,September,вересня
 MONTH_10,October,жовтня
 MONTH_11,November,листопада
 MONTH_12,December,грудня
-VEH_SURVEY,Aerial survey,Аерозйомка й розвідка
+VEH_SURVEY,Aerial survey,Аерозйомка й пошук
 VEH_SURVEY_DESC,"Camera down, sharp pictures, search and reports","Камера донизу, чіткі знімки, пошук і звіт"
 VEH_SURVEY_KIDS,Photographer,Фотограф
 VEH_SURVEY_DESC_KIDS,Take pictures from the sky,Фотографуй з неба
@@ -631,7 +640,7 @@ SRV_DETAIL_GOAL,"A number is written on a roof. From high up it cannot be read: 
 SRV_DETAIL_PASS,Camera down | The right number,Камера донизу | Правильне число
 HINT_SRV_DETAIL,"Come down over the roof until the number can be read, then shoot","Знижуйся над дахом, доки число не стане видно, тоді знімай"
 SUM_SRV_DETAIL,"Read right. Higher up shows more ground, lower shows more detail.","Прочитано правильно. Вище видно більше землі, нижче більше деталей."
-SRV_ORBIT,Around it,Облет навколо
+SRV_ORBIT,Around it,Обліт навколо
 SRV_ORBIT_NOTE,Turn and slide together,Поворот і рух убік разом
 SRV_ORBIT_GOAL,"Fly a full circle round the water tower, 8 to 18 m from it, keeping its tank in the middle of the camera all the way.","Облети водонапірну вежу по колу на відстані 8–18 м, весь час тримаючи її бак посередині кадру."
 SRV_ORBIT_PASS,Full circle | Tank in the middle,Повне коло | Бак посередині
@@ -670,7 +679,7 @@ MIS_SRV_ALBUM_DESC,"Picture the sunflowers, the kitten and the van in one flight
 HINT_MIS_SRV_ALBUM,"Sunflowers, kitten, van: picture them all","Соняшники, кошеня, фургон: сфотографуй усіх"
 SUM_MIS_SRV_ALBUM,The album is full!,Альбом готовий!
 MIS_SRV_FIND,Search the field,Пошук у полі
-MIS_SRV_FIND_DESC,"Someone in a red jacket is lost. Find them, picture them, and report where they are.","Людина в червоній куртці загубилася. Знайди її, сфотографуй і доповідай, де вона."
+MIS_SRV_FIND_DESC,"Someone in a red jacket is lost. Find them, picture them, and report where they are.","Людина в червоній куртці загубилася. Знайди її, сфотографуй і повідом, де вона."
 HINT_FIND_UP,Take off: search from the air,Злітай: шукай з повітря
 HINT_FIND_HIGHER,Climb above 8 m to see more of the field,"Піднімись вище 8 м, щоб бачити більше поля"
 HINT_FIND_PATTERN,"Search in a widening square: ahead, left, back, right, each side longer","Шукай розширеним квадратом: уперед, ліворуч, назад, праворуч, щоразу далі"
@@ -692,7 +701,7 @@ HINT_INT_CAUGHT,Caught!,Перехоплено!
 HINT_INT_CAUGHT_KIDS,Caught it!,Впіймано!
 HINT_INT_LEAD,Aim at the yellow mark: that is where the target will be,Цілься в жовту позначку: там мішень буде за мить
 HINT_INT_BEHIND,"The gap is growing: more speed, cut the corner","Відстань росте: швидше, зріж кут"
-FAIL_INT_GONE,"The target got away. Aim ahead of it, not at it.","Мішень пішла. Цілься перед нею, а не в неї."
+FAIL_INT_GONE,"The target got away. Aim ahead of it, not at it.","Мішень утекла. Цілься перед нею, а не в неї."
 FAIL_INT_TIME,Out of time. Close in faster: aim where the target will be.,"Час вийшов. Зближуйся швидше: цілься туди, де мішень буде."
 INT_CHASE,Catch up,Наздогнати
 INT_CHASE_NOTE,The target flies straight,Мішень летить прямо
@@ -700,7 +709,7 @@ INT_CHASE_GOAL,A training target flies away from you in a straight line. Catch u
 INT_CHASE_PASS,Touch the target | 45 s,Торкнутися мішені | 45 с
 HINT_INT_CHASE,"Full speed behind it, then ease in","Повна швидкість за нею, потім обережно ближче"
 SUM_INT_CHASE,"Caught. Behind a straight flier, speed is all it takes.","Перехоплено. За тим, хто летить прямо, вистачає швидкості."
-INT_TURN,A turning target,Ціль повертає
+INT_TURN,A turning target,Мішень повертає
 INT_TURN_NOTE,Cut the corner,Зрізай кут
 INT_TURN_GOAL,The target flies in a wide circle. Chasing its tail is slow: cut across the circle to meet it.,Мішень летить широким колом. Ганятися за хвостом довго: зріж коло й зустрінь її.
 INT_TURN_PASS,Touch the target | 45 s,Торкнутися мішені | 45 с
@@ -709,7 +718,7 @@ SUM_INT_TURN,Caught. Cutting inside the turn is shorter than following.,"Пер�
 INT_LEAD,Leading,Упередження
 INT_LEAD_NOTE,Aim where it will be,"Цілься туди, де вона буде"
 INT_LEAD_GOAL,"The target crosses in front of you. Flying at it, you always arrive late: aim at the yellow mark, where it will be.","Мішень перетинає поле перед тобою. Якщо летіти просто на неї, завжди спізнишся: цілься в жовту позначку, туди, де вона буде."
-INT_LEAD_PASS,Touch the target | Before it leaves,Торкнутися мішені | Поки не пішла
+INT_LEAD_PASS,Touch the target | Before it leaves,Торкнутися мішені | Поки не втекла
 SUM_INT_LEAD,Caught by leading it. This is the heart of every interception.,Перехоплено з упередженням. Це основа кожного перехоплення.
 INT_HEADON,Head on,Зустрічні курси
 INT_HEADON_NOTE,"Meet it, do not chase","Зустрінь, а не наздоганяй"
@@ -733,7 +742,7 @@ MIS_INT_KIDS,Butterfly meadow,Метеликова галявина
 MIS_INT_KIDS_DESC,Catch all the butterflies in the meadow.,Впіймай усіх метеликів на галявині.
 HINT_MIS_INT_KIDS,Catch every butterfly,Лови кожного метелика
 SUM_MIS_INT_KIDS,Every butterfly caught!,Усіх метеликів впіймано!
-MIS_INT_PATROL,On watch,Чергування
+MIS_INT_PATROL,Three in a row,Три поспіль
 MIS_INT_PATROL_DESC,"Three targets come in one after another, from different sides. Catch each.",Три мішені залітають одна за одною з різних боків. Перехопи кожну.
 HINT_MIS_INT_PATROL,Next target: aim ahead of it,Наступна мішень: цілься перед нею
 SUM_MIS_INT_PATROL,All three caught.,Усі три перехоплено.
@@ -748,17 +757,17 @@ SUM_MIS_INT_FOG,All three caught in the fog.,Усі три перехоплен�
 FREE_INTERCEPT,Free flight,Вільний політ
 ACT_DROP,Drop,Скинути
 MIS_CAM_MEDS,Medicine across the river,Ліки через річку
-MIS_CAM_MEDS_DESC,The bridge is out. Drop a first-aid kit into the circle at the aid point on the far bank.,Міст зруйновано. Скинь аптечку в коло пункту допомоги на тому березі.
+MIS_CAM_MEDS_DESC,The bridge is out. Lower a first-aid kit into the circle at the aid point on the far bank.,Міст зруйновано. Опусти аптечку в коло пункту допомоги на тому березі.
 HINT_MEDS_UP,Take off: the kits hang under the drone,Злітай: аптечки під дроном
 HINT_MEDS_GO,Fly across the river to the circle,Лети через річку до кола
-HINT_MEDS_DROP,"Over the circle: stop, hold 3 to 15 m up, then drop",Над колом: зупинись на висоті 3–15 м і скидай
+HINT_MEDS_DROP,"Over the circle: stop, hold 3 to 15 m up, then release the kit",Над колом: зупинись на висоті 3–15 м і відпускай аптечку
 HINT_MEDS_LOW,Too low: people below could be hit. Climb above 3 m,Занизько: можна зачепити людей. Піднімися вище 3 м
 HINT_MEDS_HIGH,Too high: the wind would carry it off. Come below 15 m,Зависоко: вітер віднесе. Знизься до 15 м
 HINT_MEDS_WATER,It fell in the river and is lost,Аптечка впала в річку й загубилася
-HINT_MEDS_MISS,Missed by %s m. Allow for the wind and drop again,Мимо на %s м. Візьми поправку на вітер і скидай ще
+HINT_MEDS_MISS,Missed by %s m. Allow for the wind and release again,Мимо на %s м. Візьми поправку на вітер і відпускай ще
 SUM_MEDS_CENTRE,Right in the middle of the circle. The aid point has its medicine.,Точно в центр кола. Пункт допомоги отримав ліки.
 SUM_MEDS_RING,In the circle. The aid point has its medicine.,У колі. Пункт допомоги отримав ліки.
-FAIL_MEDS_MISSED,"Both kits missed. Stop over the circle first, and drop a little upwind.",Обидві аптечки мимо. Спершу зупинись над колом і скидай трохи проти вітру.
+FAIL_MEDS_MISSED,"Both kits missed. Stop over the circle first, and release a little upwind.",Обидві аптечки мимо. Спершу зупинись над колом і відпускай трохи проти вітру.
 MIS_CAM_DOG,The lost dog,Загублений пес
 MIS_CAM_DOG_DESC,A puppy ran off into the field. Find it and lead it home.,Цуценя втекло в поле. Знайди його й приведи додому.
 HINT_DOG_UP,Take off and look for the puppy,Злітай і шукай цуценя

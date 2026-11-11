@@ -75,8 +75,13 @@ func _continue_card() -> Control:
 	var text := UI.vbox(4)
 	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	text.add_child(UI.eyebrow(tr("HOME_CONTINUE") if done > 0 else tr("HOME_START"), "on_accent"))
-	text.add_child(UI.label(tr("LESSON_N") % (idx + 1) + ". " + Curriculum.label(lessons[idx]), 16, 600, "on_accent", true))
-	text.add_child(UI.label("%s · %s" % [Curriculum.label("VEH_" + vehicle.to_upper()), tr("LESSONS_OF") % [done, lessons.size()]], 13, 600, "on_accent"))
+	var kids := Prefs.mode == "kids"
+	var lesson := Curriculum.label(lessons[idx]) if kids else tr("LESSON_N") % (idx + 1) + ". " + Curriculum.label(lessons[idx])
+	text.add_child(UI.label(lesson, 16, 600, "on_accent", true))
+	var where := Curriculum.label("VEH_" + vehicle.to_upper())
+	if not kids:
+		where += " · " + tr("LESSONS_OF") % [done, lessons.size()]
+	text.add_child(UI.label(where, 13, 600, "on_accent"))
 
 	var play := PanelContainer.new()
 	play.add_theme_stylebox_override("panel", UI.box(Pal.c("on_accent"), 24, 0))
@@ -89,7 +94,7 @@ func _continue_card() -> Control:
 	var row := UI.hbox(14)
 	row.add_child(text)
 	row.add_child(play)
-	var name_ := "%s: %s. %s" % [tr("HOME_CONTINUE"), tr("LESSON_N") % (idx + 1), Curriculum.label(lessons[idx])]
+	var name_ := "%s: %s" % [tr("HOME_CONTINUE"), lesson]
 	return UI.tappable(row, Pal.c("accent"), func(): app.open_lessons(vehicle), name_, 20, 16)
 
 
@@ -108,12 +113,11 @@ func _vehicle_card(v: String) -> Control:
 	text.add_child(UI.label(Curriculum.label("VEH_%s_DESC" % v.to_upper()), 14, 500, "muted"))
 
 	var done := Prefs.passed_count(v)
-	var count := UI.label("%d/%d" % [done, Curriculum.lessons(v, Prefs.mode).size()], 13, 700, "accent_text" if done > 0 else "muted", false, false)
-
 	var row := UI.hbox(14)
 	row.add_child(icon_bg)
 	row.add_child(text)
-	row.add_child(count)
+	if Prefs.mode != "kids":
+		row.add_child(UI.label("%d/%d" % [done, Curriculum.lessons(v, Prefs.mode).size()], 13, 700, "accent_text" if done > 0 else "muted", false, false))
 	return UI.tappable(row, Pal.c("surface"), func(): app.open_lessons(v), Curriculum.label("VEH_" + v.to_upper()))
 
 

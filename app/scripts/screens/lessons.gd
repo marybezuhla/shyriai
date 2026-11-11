@@ -18,8 +18,10 @@ func build() -> void:
 		selected = mini(done, lessons.size() - 1)
 	_seen_done = done
 
-	add_child(header(Curriculum.label("VEH_" + vehicle.to_upper()),
-		"%s · %s" % [tr("MODE_" + Prefs.mode.to_upper()), tr("LESSONS_OF") % [done, lessons.size()]]))
+	# Kids see no numbers: sunflowers and ticks tell them how far they are.
+	var sub := tr("MODE_KIDS") if Prefs.mode == "kids" else \
+		"%s · %s" % [tr("MODE_" + Prefs.mode.to_upper()), tr("LESSONS_OF") % [done, lessons.size()]]
+	add_child(header(Curriculum.label("VEH_" + vehicle.to_upper()), sub))
 
 	add_child(UI.segmented([
 		["learn", tr("TAB_LEARN")], ["missions", tr("TAB_MISSIONS")],
@@ -74,6 +76,8 @@ func _dot(i: int, state: String) -> Control:
 	c.custom_minimum_size = Vector2(44, 44)
 	if state == "done":
 		c.add_child(Glyph.make("check", 20, Pal.c("on_accent")))
+	elif Prefs.mode == "kids":
+		c.add_child(Glyph.make("play" if state == "next" else "lock", 18, Pal.c("accent_text") if state == "next" else Pal.c("faint")))
 	else:
 		var n := UI.label(str(i + 1), 15, 800, "accent_text" if state == "next" else "faint", false, false)
 		c.add_child(n)
@@ -86,7 +90,7 @@ func _lesson_card(lessons: Array, done: int) -> Control:
 	var key: String = lessons[selected]
 	var card := UI.vbox(12)
 	var head := UI.vbox(4)
-	head.add_child(UI.eyebrow(tr("LESSON_N") % (selected + 1), "accent_text"))
+	head.add_child(UI.eyebrow(tr("LESSON") if Prefs.mode == "kids" else tr("LESSON_N") % (selected + 1), "accent_text"))
 	head.add_child(UI.label(Curriculum.label(key), 18, 600, "text", true))
 	head.add_child(UI.label(tr(Curriculum.text_key(key + "_GOAL", Prefs.mode)), 14, 500, "muted"))
 	card.add_child(head)
