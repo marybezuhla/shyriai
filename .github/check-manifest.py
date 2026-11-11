@@ -61,7 +61,7 @@ def main(apk):
     if data[:4] != b"\x03\x00\x08\x00":
         print("::error::Manifest: not a compiled Android XML file")
         sys.exit(1)
-    errors, app_seen = [], False
+    errors, app_seen, last = [], False, None
     for tag, attrs in elements(data):
         print(tag, " ".join("%s=%s" % kv for kv in attrs.items()))
         if tag == "application":
@@ -75,6 +75,13 @@ def main(apk):
                 errors.append("testOnly is not false")
             if attrs.get("usesCleartextTraffic", "false") != "false":
                 errors.append("cleartext traffic is allowed")
+        if tag in COMPONENTS:
+            last = attrs
+        # An intent filter on a component that does not say "exported" makes it exported
+        # on older Android versions: it has to be on the list like any other.
+        if tag == "intent-filter" and last is not None and "exported" not in last \
+                and last.get("name", "?") not in EXPORTED_OK:
+            errors.append("component with an intent filter but no exported value: " + last.get("name", "?"))
         if tag in COMPONENTS and attrs.get("exported", "false") != "false":
             name = attrs.get("name", "?")
             if name not in EXPORTED_OK:

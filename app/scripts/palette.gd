@@ -1,6 +1,9 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-# Colours and fonts of Shyriai. Every colour on screen comes from here.
+# Colours and fonts of Shyriai. Every colour of the interface comes from here; the 3D world
+# keeps its own per-weather colours in WorldLand.PALETTES.
 # "seed" is the brown middle of a sunflower: the same in every look, as a real one.
+# "ok", "warn", "bad" fill the comfort and cargo meter: darker on light looks, so the bar
+# shows against its track.
 extends Node
 
 signal changed
@@ -20,6 +23,9 @@ const THEMES := {
 		"accent_text": Color("#FFC321"),
 		"focus": Color("#FFC321"),
 		"seed": Color("#6B4A2E"),
+		"ok": Color("#7DBE6A"),
+		"warn": Color("#F29B50"),
+		"bad": Color("#E5708B"),
 	},
 	# Day: light, for bright sunlight.
 	"day": {
@@ -35,6 +41,9 @@ const THEMES := {
 		"accent_text": Color("#5B3E86"),
 		"focus": Color("#5B3E86"),
 		"seed": Color("#6B4A2E"),
+		"ok": Color("#3E8E2F"),
+		"warn": Color("#B85F10"),
+		"bad": Color("#B8324F"),
 	},
 	# Morning: the Kids mode look. Sky-light, the same violet ink and gold.
 	"morning": {
@@ -50,7 +59,26 @@ const THEMES := {
 		"accent_text": Color("#5B3E86"),
 		"focus": Color("#5B3E86"),
 		"seed": Color("#6B4A2E"),
+		"ok": Color("#3E8E2F"),
+		"warn": Color("#B85F10"),
+		"bad": Color("#B8324F"),
 	},
+}
+
+## Fixed colours, the same in every look: the icon's ink, cream and violet, used where the
+## interface sits over the 3D world or draws the icon.
+const INK := Color("#2A1D3B")
+const CREAM := Color("#FFF0D5")
+const VIOLET := Color("#463161")
+const LOGO_DOT := Color("#39254F")
+## Toy colours for hoops, balloons, butterflies and signs: one set, so they match.
+const TOY := {
+	"pink": Color("#E5708B"),
+	"blue": Color("#5B9BD5"),
+	"gold": Color("#FFC321"),
+	"green": Color("#7DBE6A"),
+	"violet": Color("#B07CD8"),
+	"orange": Color("#F29B50"),
 }
 
 ## Kids get slightly larger text; everything else follows from it.

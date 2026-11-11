@@ -56,17 +56,17 @@ func _process(_delta: float) -> void:
 static func shoot(f) -> void:
 	if f._paused or f._finished or f.task is not PhotoTask or not f.task.kit:
 		return
-	var task: PhotoTask = f.task
-	var r: Dictionary = task.shoot(f.sim)
+	var pt: PhotoTask = f.task
+	var r: Dictionary = pt.shoot(f.sim)
 	if not r["ok"]:
 		f._sound.play("fail")
 		return
 	f._sound.play("shutter")
 	flash(f._hud)
-	var i: int = task.photos.size() - 1
+	var i: int = pt.photos.size() - 1
 	var img: Image = await picture(f)
-	if img != null and i < task.photos.size():
-		task.photos[i]["image"] = img
+	if img != null and i < pt.photos.size():
+		pt.photos[i]["image"] = img
 
 
 ## Renders the drone camera's view once, small: kept only for this flight's report.
@@ -98,7 +98,7 @@ static func picture(f) -> Image:
 ## A white flash over the whole view, gone in a blink.
 static func flash(parent: Control) -> void:
 	var f := ColorRect.new()
-	f.color = Color(1, 1, 1, 0.7)
+	f.color = Color(Color.WHITE, 0.7)
 	f.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	f.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	parent.add_child(f)

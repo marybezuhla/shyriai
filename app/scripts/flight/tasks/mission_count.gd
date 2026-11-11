@@ -32,10 +32,6 @@ func camp() -> Vector3:
 	return _camp
 
 
-func tent_count() -> int:
-	return _tents.size()
-
-
 func subjects(_sim: DroneSim) -> Array:
 	if not photos.is_empty():
 		return []

@@ -12,9 +12,9 @@ var _o := Vector2.ZERO
 var _w := 1.0
 
 
-static func make(name: String, px: float, col: Color) -> Glyph:
+static func make(icon_: String, px: float, col: Color) -> Glyph:
 	var g := Glyph.new()
-	g.icon = name
+	g.icon = icon_
 	g.color = col
 	g.custom_minimum_size = Vector2(px, px)
 	g.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -44,12 +44,7 @@ func _draw() -> void:
 	_w = stroke * _k
 	match icon:
 		"gear":
-			_ring(12, 12, 3)
-			_ring(12, 12, 6.5)
-			for i in 8:
-				var a := i * TAU / 8.0
-				var d := Vector2(cos(a), sin(a))
-				draw_line(_p(12, 12) + d * 6.5 * _k, _p(12, 12) + d * 9.5 * _k, color, _w, true)
+			_gear()
 		"back":
 			_line([[15, 5], [8, 12], [15, 19]])
 		"chevron":
@@ -65,62 +60,27 @@ func _draw() -> void:
 			_line([[6, 6], [18, 18]])
 			_line([[18, 6], [6, 18]])
 		"intercept":
-			# A ball on the move, with speed lines: the course of catching a moving target.
-			_ring(15, 12, 5)
-			_line([[3, 8], [8, 8]])
-			_line([[2, 12], [8, 12]])
-			_line([[3, 16], [8, 16]])
+			_intercept()
 		"photo":
-			# A camera: the course of aerial photography.
-			_line([[3, 8], [8, 8], [9.5, 5.5], [14.5, 5.5], [16, 8], [21, 8], [21, 19], [3, 19]], true)
-			_ring(12, 13.3, 3.6)
+			_photo()
 		"tilt_forward", "tilt_angled", "tilt_down":
-			# A camera lens and where it looks: ahead, down at an angle, straight down.
-			_ring(7, 8, 3.2)
-			var ang: float = {"tilt_forward": 0.0, "tilt_angled": 55.0, "tilt_down": 90.0}[icon]
-			var d := Vector2(cos(deg_to_rad(ang)), sin(deg_to_rad(ang)))
-			var a := Vector2(7, 8) + d * 5.0
-			var b := Vector2(7, 8) + d * 14.0
-			_line([[a.x, a.y], [b.x, b.y]])
-			var l := b - d * 4.0 + d.orthogonal() * 3.0
-			var r := b - d * 4.0 - d.orthogonal() * 3.0
-			_line([[l.x, l.y], [b.x, b.y], [r.x, r.y]])
+			_tilt()
 		"sunflower":
-			# The rating mark: gold petals round a brown middle. Not a star, on purpose.
-			for i in 8:
-				var d := Vector2.from_angle(i * TAU / 8.0)
-				draw_circle(_p(12, 12) + d * 6.6 * _k, 3.9 * _k, color, true, -1.0, true)
-			draw_circle(_p(12, 12), 4.3 * _k, Pal.c("seed"), true, -1.0, true)
+			_sunflower()
 		"sunflower_off":
-			# A sunflower still to earn: only its outline.
-			for i in 8:
-				var d := Vector2.from_angle(i * TAU / 8.0)
-				draw_arc(_p(12, 12) + d * 7.2 * _k, 2.6 * _k, 0, TAU, 20, color, _w * 0.8, true)
-			_ring(12, 12, 4.3)
+			_sunflower_off()
 		"lock":
 			_line([[6, 11], [18, 11], [18, 20], [6, 20]], true)
 			draw_arc(_p(12, 11), 4 * _k, PI, TAU, 24, color, _w, true)
 		"camera":
-			# Camera drone seen from above: four rotors around a body.
-			for p in [[5, 5], [19, 5], [5, 19], [19, 19]]:
-				_ring(p[0], p[1], 3)
-			_line([[7.5, 7.5], [9.5, 9.5]])
-			_line([[16.5, 7.5], [14.5, 9.5]])
-			_line([[7.5, 16.5], [9.5, 14.5]])
-			_line([[16.5, 16.5], [14.5, 14.5]])
-			_line([[9.5, 9.5], [14.5, 9.5], [14.5, 14.5], [9.5, 14.5]], true)
+			_camera()
 		"fpv":
 			# FPV goggles.
 			_line([[3, 9], [21, 9], [21, 15], [15.5, 16.5], [13, 14.5], [11, 14.5], [8.5, 16.5], [3, 15]], true)
 			_ring(8, 12, 1.8)
 			_ring(16, 12, 1.8)
 		"ugv":
-			# Ground robot on tracks.
-			_line([[6, 9], [18, 9], [20, 13], [4, 13]], true)
-			_line([[10, 9], [10, 6.5], [14, 6.5], [14, 9]])
-			_line([[5, 14], [19, 14], [21, 17], [19, 20], [5, 20], [3, 17]], true)
-			for x in [7, 12, 17]:
-				_ring(x, 17, 1.1)
+			_ugv()
 		"learn":
 			_line([[2.5, 9.5], [12, 4.5], [21.5, 9.5], [12, 14.5]], true)
 			_line([[6.5, 11.5], [6.5, 16], [12, 19], [17.5, 16], [17.5, 11.5]])
@@ -138,3 +98,75 @@ func _draw() -> void:
 			_line([[14, 4], [20, 4], [20, 10]])
 			_line([[20, 4], [11, 13]])
 			_line([[17, 14], [17, 20], [4, 20], [4, 7], [10, 7]])
+
+
+func _gear() -> void:
+	_ring(12, 12, 3)
+	_ring(12, 12, 6.5)
+	for i in 8:
+		var a := i * TAU / 8.0
+		var d := Vector2(cos(a), sin(a))
+		draw_line(_p(12, 12) + d * 6.5 * _k, _p(12, 12) + d * 9.5 * _k, color, _w, true)
+
+
+func _intercept() -> void:
+	# A ball on the move, with speed lines: the course of catching a moving target.
+	_ring(15, 12, 5)
+	_line([[3, 8], [8, 8]])
+	_line([[2, 12], [8, 12]])
+	_line([[3, 16], [8, 16]])
+
+
+func _photo() -> void:
+	# A camera: the course of aerial photography.
+	_line([[3, 8], [8, 8], [9.5, 5.5], [14.5, 5.5], [16, 8], [21, 8], [21, 19], [3, 19]], true)
+	_ring(12, 13.3, 3.6)
+
+
+func _tilt() -> void:
+	# A camera lens and where it looks: ahead, down at an angle, straight down.
+	_ring(7, 8, 3.2)
+	var ang: float = {"tilt_forward": 0.0, "tilt_angled": 55.0, "tilt_down": 90.0}[icon]
+	var d := Vector2(cos(deg_to_rad(ang)), sin(deg_to_rad(ang)))
+	var a := Vector2(7, 8) + d * 5.0
+	var b := Vector2(7, 8) + d * 14.0
+	_line([[a.x, a.y], [b.x, b.y]])
+	var l := b - d * 4.0 + d.orthogonal() * 3.0
+	var r := b - d * 4.0 - d.orthogonal() * 3.0
+	_line([[l.x, l.y], [b.x, b.y], [r.x, r.y]])
+
+
+func _sunflower() -> void:
+	# The rating mark: gold petals round a brown middle. Not a star, on purpose.
+	for i in 8:
+		var d := Vector2.from_angle(i * TAU / 8.0)
+		draw_circle(_p(12, 12) + d * 6.6 * _k, 3.9 * _k, color, true, -1.0, true)
+	draw_circle(_p(12, 12), 4.3 * _k, Pal.c("seed"), true, -1.0, true)
+
+
+func _sunflower_off() -> void:
+	# A sunflower still to earn: only its outline.
+	for i in 8:
+		var d := Vector2.from_angle(i * TAU / 8.0)
+		draw_arc(_p(12, 12) + d * 7.2 * _k, 2.6 * _k, 0, TAU, 20, color, _w * 0.8, true)
+	_ring(12, 12, 4.3)
+
+
+func _camera() -> void:
+	# Camera drone seen from above: four rotors around a body.
+	for p in [[5, 5], [19, 5], [5, 19], [19, 19]]:
+		_ring(p[0], p[1], 3)
+	_line([[7.5, 7.5], [9.5, 9.5]])
+	_line([[16.5, 7.5], [14.5, 9.5]])
+	_line([[7.5, 16.5], [9.5, 14.5]])
+	_line([[16.5, 16.5], [14.5, 14.5]])
+	_line([[9.5, 9.5], [14.5, 9.5], [14.5, 14.5], [9.5, 14.5]], true)
+
+
+func _ugv() -> void:
+	# Ground robot on tracks.
+	_line([[6, 9], [18, 9], [20, 13], [4, 13]], true)
+	_line([[10, 9], [10, 6.5], [14, 6.5], [14, 9]])
+	_line([[5, 14], [19, 14], [21, 17], [19, 20], [5, 20], [3, 17]], true)
+	for x in [7, 12, 17]:
+		_ring(x, 17, 1.1)

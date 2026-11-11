@@ -30,19 +30,26 @@ const NAME_MAX := 32
 ## Longer than any flight can last: a bigger time in a saved file is not trusted.
 const MAX_SECONDS := 3600.0
 
-var mode := "simple"
+## A fresh install, and what "Erase all data" goes back to.
+const DEFAULTS := {
+	"mode": "simple", "theme": "dusk", "language": "system", "text_size": "normal",
+	"kids_lock": false, "sound": true, "stick_mode": "2", "stick_feel": "normal", "pilot_name": "",
+	"free": {"wind": "none", "time": "day", "balls": true, "fpv": "angle"},
+}
+
+var mode: String = DEFAULTS["mode"]
 ## The theme the grown-up chose. Kids mode shows "morning" instead, without changing this.
-var theme := "dusk"
-var language := "system"
-var text_size := "normal"
+var theme: String = DEFAULTS["theme"]
+var language: String = DEFAULTS["language"]
+var text_size: String = DEFAULTS["text_size"]
 ## Leaving Kids mode or opening settings needs a sum solved.
-var kids_lock := false
-var sound := true
-var stick_mode := "2"
-var stick_feel := "normal"
+var kids_lock: bool = DEFAULTS["kids_lock"]
+var sound: bool = DEFAULTS["sound"]
+var stick_mode: String = DEFAULTS["stick_mode"]
+var stick_feel: String = DEFAULTS["stick_feel"]
 ## The name on the pilot's licence: optional, kept only on this phone.
-var pilot_name := ""
-var free := {"wind": "none", "time": "day", "balls": true, "fpv": "angle"}
+var pilot_name: String = DEFAULTS["pilot_name"]
+var free: Dictionary = DEFAULTS["free"].duplicate()
 ## Best result per mode and task: {"simple": {"CAM_TAKEOFF": {"f": 2, "t": 14.5}}}.
 ## "f" = most sunflowers, "t" = shortest time of a pass, each kept on its own.
 var best := {}
@@ -270,16 +277,8 @@ func erase_all() -> void:
 	_undo = {"all": _data()}
 	if path() == PATH:  # tests use a scratch file and must not touch real settings
 		DirAccess.remove_absolute(OLD_PATH)
-	mode = "simple"
-	theme = "dusk"
-	language = "system"
-	text_size = "normal"
-	kids_lock = false
-	sound = true
-	stick_mode = "2"
-	stick_feel = "normal"
-	pilot_name = ""
-	free = {"wind": "none", "time": "day", "balls": true, "fpv": "angle"}
+	for key in DEFAULTS:
+		set(key, DEFAULTS[key].duplicate() if DEFAULTS[key] is Dictionary else DEFAULTS[key])
 	best = {}
 	licences = {}
 	passed = {}
@@ -299,10 +298,6 @@ func undo_mode() -> String:
 
 func undo_kind() -> String:
 	return "" if _undo.is_empty() else ("all" if _undo.has("all") else "mode")
-
-
-func can_undo_reset() -> bool:
-	return not _undo.is_empty()
 
 
 func undo_reset() -> void:
@@ -415,6 +410,12 @@ func _read_old_config():
 
 ## Takes only what the app knows; anything else in the file is ignored.
 func _apply(d: Dictionary) -> void:
+	_apply_settings(d)
+	_apply_results(d)
+	_apply_progress(d)
+
+
+func _apply_settings(d: Dictionary) -> void:
 	var m = d.get("mode")
 	if m is String and m in MODES:
 		mode = m
@@ -449,6 +450,10 @@ func _apply(d: Dictionary) -> void:
 			if {"wind": val in FREE_WINDS, "time": val in FREE_TIMES, "fpv": val in FREE_FPV,
 					"balls": val is bool}[key]:
 				free[key] = val
+
+
+## Best results, licences and the view chosen for each vehicle.
+func _apply_results(d: Dictionary) -> void:
 	var b = d.get("best")
 	if b is Dictionary:
 		for m_ in b.keys():
@@ -470,6 +475,10 @@ func _apply(d: Dictionary) -> void:
 			if key is String and key.count("/") == 1 and key.get_slice("/", 0) in MODES \
 					and key.get_slice("/", 1) in Curriculum.VEHICLES and v[key] is String and v[key] in VIEWS:
 				views[key] = v[key]
+
+
+## Lessons and missions passed. Needs the mode, so it runs after the settings.
+func _apply_progress(d: Dictionary) -> void:
 	var p = d.get("passed")
 	if p is Dictionary:
 		for key in p.keys():
@@ -547,7 +556,8 @@ func _data() -> Dictionary:
 
 ## Writes a whole new file and then swaps it in, so the app closing mid-write leaves the old
 ## file whole. The file before is kept as .bak, and _load falls back to .tmp, then .bak.
-## Returns false if it could not be written; the old file is then left as it was.
+## Returns false if it could not be written; the old file is then left as it was. Callers may
+## ignore that: the app keeps working from memory and the next change tries to save again.
 func _save() -> bool:
 	var tmp := path() + ".tmp"
 	var f := FileAccess.open(tmp, FileAccess.WRITE)

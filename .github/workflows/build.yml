@@ -47,6 +47,11 @@ jobs:
           # 1.2.4 -> 10204 (minor and patch stay below 100, checked above)
           IFS=. read -r MA MI PA <<< "$V"
           CODE=$((MA * 10000 + MI * 100 + PA))
+          # The store shows what is new in this version, in both languages.
+          for L in uk en-US; do
+            test -s "fastlane/metadata/android/$L/changelogs/$CODE.txt" \
+              || { echo "::error::fastlane/metadata/android/$L/changelogs/$CODE.txt is missing"; exit 1; }
+          done
           sed -i -E "s/^version\/code=.*/version\/code=$CODE/; s/^version\/name=.*/version\/name=\"$V\"/" app/export_presets.cfg
           sed -i -E "s/^config\/version=.*/config\/version=\"$V\"/" app/project.godot
           grep -E "^version/" app/export_presets.cfg
@@ -82,7 +87,7 @@ jobs:
         run: |
           set -o pipefail
           godot --headless --path app --import 2>&1 | tee import.log | tail -5
-          if grep -E "SCRIPT ERROR|Parse Error|Failed to load" import.log; then echo "::error::Scripts or resources failed to import"; exit 1; fi
+          if grep -E "SCRIPT ERROR|^ERROR|Parse Error|Failed to load" import.log; then echo "::error::Scripts or resources failed to import"; exit 1; fi
           # Each lesson must be passable with the sticks alone, in every mode.
           # A test that hangs (a script error stops it before it quits) fails after the time limit.
           SHYRIAI_PREFS="$RUNNER_TEMP/sim-prefs.json" timeout 600 godot --headless --path app res://tests/sim_test.tscn 2>&1 | tee sim.log || true
@@ -98,6 +103,7 @@ jobs:
           mkdir -p build
           godot --headless --path app --export-release "Android" "$PWD/build/shyriai-unsigned.apk" 2>&1 | tee build.log
           test -s build/shyriai-unsigned.apk || { echo "::error::No APK was produced"; exit 1; }
+          if grep -E "SCRIPT ERROR|^ERROR" build.log; then echo "::error::Errors while exporting"; exit 1; fi
           ls -l build/
 
       - name: Check permissions (no internet, only what is expected)

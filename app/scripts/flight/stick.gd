@@ -91,7 +91,7 @@ func _draw() -> void:
 	var r := _radius()
 	var line := Pal.c("text")
 	# A dark see-through base, so the stick reads over a bright field as well as at dusk.
-	draw_circle(c, r, Color(0.16, 0.11, 0.23, 0.32), true, -1.0, true)
+	draw_circle(c, r, Color(Pal.INK, 0.32), true, -1.0, true)
 	var fill := line
 	fill.a = 0.08
 	draw_circle(c, r, fill, true, -1.0, true)
@@ -118,12 +118,12 @@ func _draw() -> void:
 		var ghost := Pal.c("accent")
 		ghost.a = 0.55 * (1.0 - phase)
 		draw_circle(g, _knob_radius(), ghost, true, -1.0, true)
-		draw_arc(g, _knob_radius(), 0, TAU, 40, Color(0.16, 0.11, 0.23, 0.6 * (1.0 - phase)), 2.0, true)
+		draw_arc(g, _knob_radius(), 0, TAU, 40, Color(Pal.INK, 0.6 * (1.0 - phase)), 2.0, true)
 	var k := c + Vector2(value.x, -value.y) * travel
 	var halo := Pal.c("accent")
 	halo.a = 0.2
 	draw_circle(k, _knob_radius() + 6, halo, true, -1.0, true)
 	draw_circle(k, _knob_radius(), Pal.c("accent"), true, -1.0, true)
-	draw_arc(k, _knob_radius(), 0, TAU, 40, Color("#2A1D3B"), 2.0, true)
+	draw_arc(k, _knob_radius(), 0, TAU, 40, Pal.INK, 2.0, true)
 	if kids:
 		draw_arc(k, _knob_radius() - 1.5, 0, TAU, 40, Pal.c("on_accent"), 3.0, true)

@@ -19,7 +19,8 @@
 
 - **Лише цей телефон.** Інші застосунки не мають доступу до папки Ширяя.
 - **Хмарної копії немає:** резервне копіювання Android вимкнено (`allowBackup="false"`), CI це перевіряє.
-- **Перенесення на новий телефон:** на Android 12 і новіших пряме перенесення з телефона на телефон може скопіювати цей файл: рушій Godot поки не дає це вимкнути. У файлі лише налаштування й прогрес.
+- **Перенесення на новий телефон:** на Android 12 і новіших пряме перенесення з телефона на телефон може скопіювати цей файл: спосіб збирання, яким зібрано Ширяй (без Gradle), поки не дає це вимкнути. У файлі лише налаштування й прогрес.
+- **Посилання.** У простому й дорослому режимах посилання в «Про застосунок» відкривають браузер: ці сайти бачать візит, як завжди. Сам Ширяй нічого їм не передає. У дитячому режимі посилання не відкриваються.
 - **GitHub** бачить звичайні дані про завантаження (адресу, з якої завантажено APK), як і будь-який сайт. Сам застосунок до GitHub не звертається.
 
 ## Як усе стерти
@@ -53,7 +54,8 @@ No age, contacts, location, photos, sound or identifiers of any kind. Pictures f
 
 - **Only this phone.** Other apps cannot reach Shyriai's folder.
 - **No cloud copy:** Android backup is off (`allowBackup="false"`), and CI checks it.
-- **Moving to a new phone:** on Android 12 and newer, direct phone-to-phone transfer may copy this file: the Godot engine does not yet let it be switched off. The file holds only settings and progress.
+- **Moving to a new phone:** on Android 12 and newer, direct phone-to-phone transfer may copy this file: the way Shyriai is built (without Gradle) does not yet let it be switched off. The file holds only settings and progress.
+- **Links.** In Simple and Adult modes, links in About open the browser: those sites see the visit, as usual. Shyriai itself sends them nothing. In Kids mode links do not open.
 - **GitHub** sees the usual download data (the address the APK was downloaded from), like any website. The app itself never contacts GitHub.
 
 ## How to erase it

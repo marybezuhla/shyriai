@@ -81,7 +81,7 @@ func _photo(px: int) -> Control:
 	var frame := PanelContainer.new()
 	var circle := StyleBoxFlat.new()
 	circle.bg_color = Pal.c("surface")
-	circle.set_corner_radius_all(px / 2)
+	circle.set_corner_radius_all(int(px / 2.0))
 	frame.add_theme_stylebox_override("panel", circle)
 	frame.clip_children = CanvasItem.CLIP_CHILDREN_ONLY
 	frame.custom_minimum_size = Vector2(px, px)

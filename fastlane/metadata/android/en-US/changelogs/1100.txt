@@ -1,0 +1,1 @@
+Shyriai 0.11.0: a gentler Kids mode, safer saving, larger text and bug fixes. Requires Android 7 or newer.

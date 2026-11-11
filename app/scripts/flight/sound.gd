@@ -108,7 +108,7 @@ static func _make(name_: String) -> AudioStreamWAV:
 			# Half a second holds a whole number of waves of both, so the loop has no click.
 			var f := 110.0 if name_ == "drone" else 220.0
 			var f2 := f + (2.0 if name_ == "drone" else 4.0)
-			var n := RATE / 2
+			var n := int(RATE / 2.0)  # half a second of samples
 			out.resize(n)
 			var lp := 0.0
 			for i in n:
@@ -121,7 +121,7 @@ static func _make(name_: String) -> AudioStreamWAV:
 			loop = true
 		"ugv":
 			# A low electric whine over the rumble of tracks.
-			var n := RATE / 2
+			var n := int(RATE / 2.0)  # half a second of samples
 			out.resize(n)
 			var lp := 0.0
 			for i in n:
