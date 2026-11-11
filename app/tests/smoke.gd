@@ -104,8 +104,9 @@ func _flights() -> void:
 		var keys: Array = []
 		for veh in Curriculum.VEHICLES:
 			for k in Curriculum.lessons(veh, m) + Curriculum.missions(veh, m):
-				if FlightTask.implemented(k):
-					keys.append([veh, k])
+				# Every lesson and mission must have a flight: there is no "coming soon" page any more.
+				assert(FlightTask.implemented(k), "a flight for " + k)
+				keys.append([veh, k])
 		for vk in keys:
 			var veh: String = vk[0]
 			var key: String = vk[1]
@@ -601,6 +602,18 @@ func _kids_0_11() -> void:
 	assert(not opened[0], "no answer counts while it waits")
 	await _shot("uk-morning-gate-wait")
 	g.close()
+	# Closing and reopening does not skip the wait.
+	main.guard(func(): opened[0] = true)
+	await _frames(2)
+	g = main._gate
+	for ch in str(g._a * g._b):
+		g._press(ch)
+	g._press("OK")
+	await _frames(1)
+	assert(not opened[0], "reopening the lock does not skip the wait")
+	g.close()
+	Gate._wait_until = 0
+	Gate._misses = 0
 	Prefs.set_kids_lock(false)
 	Prefs.erase_all()
 
