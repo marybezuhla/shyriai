@@ -3,8 +3,8 @@
 extends Control
 
 const STEP := 1.0 / 60.0
-## The dark edge round gold marks, so they show on a bright sky or field.
-const OUTLINE := Color("#2A1D3B")
+## Width of the progress and meter bars.
+const BAR_W := 120.0
 const DEADZONE := 0.08
 
 var app: Node  # main.gd
@@ -332,25 +332,7 @@ func set_view(v: String) -> void:
 # --- HUD --------------------------------------------------------------------
 
 func _build_hud() -> void:
-	# "No signal" over the robot's video while the radio link is down.
-	var nl := ColorRect.new()
-	nl.color = Color(0.16, 0.11, 0.23, 0.82)
-	nl.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	nl.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var nl_center := CenterContainer.new()
-	nl_center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	nl_center.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var nl_text := Label.new()
-	nl_text.text = tr("NO_SIGNAL")
-	nl_text.add_theme_font_override("font", Pal.font(600, true))
-	nl_text.add_theme_font_size_override("font_size", roundi(26 * Pal.text_scale()))
-	nl_text.add_theme_color_override("font_color", Color("#FFF0D5"))
-	nl_center.add_child(nl_text)
-	nl.add_child(nl_center)
-	nl.visible = false
-	add_child(nl)
-	_nolink = nl
-
+	_build_no_signal()
 	_hud.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_hud.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_hud)
@@ -380,6 +362,50 @@ func _build_hud() -> void:
 	top.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	top.add_child(UI.icon_button("pause", pause, tr("PAUSE"), glass))
 
+	top.add_child(UI.panel(_build_chip(), glass, 16, 10))
+
+	var gap := Control.new()
+	gap.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	gap.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	top.add_child(gap)
+
+	_build_counters(top, glass)
+	col.add_child(top)
+
+	_build_hint(col)
+
+	var fill := Control.new()
+	fill.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	fill.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	col.add_child(fill)
+
+	_build_bottom(col, ins)
+	_build_view_toggle()
+
+
+func _build_no_signal() -> void:
+	# "No signal" over the robot's video while the radio link is down.
+	var nl := ColorRect.new()
+	nl.color = Color(Pal.INK, 0.82)
+	nl.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	nl.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var nl_center := CenterContainer.new()
+	nl_center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	nl_center.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var nl_text := Label.new()
+	nl_text.text = tr("NO_SIGNAL")
+	nl_text.add_theme_font_override("font", Pal.font(600, true))
+	nl_text.add_theme_font_size_override("font_size", roundi(26 * Pal.text_scale()))
+	nl_text.add_theme_color_override("font_color", Pal.CREAM)
+	nl_center.add_child(nl_text)
+	nl.add_child(nl_center)
+	nl.visible = false
+	add_child(nl)
+	_nolink = nl
+
+
+## The title with its progress bar and, for loads, the comfort or cargo meter.
+func _build_chip() -> Control:
 	var chip := UI.vbox(6)
 	var title := Curriculum.label(task_key)
 	if not task.is_mission and not task.is_free and mode != "kids":
@@ -387,7 +413,7 @@ func _build_hud() -> void:
 	chip.add_child(UI.label(title, 14, 700, "text", false, false))
 	var bar_row := UI.hbox(8)
 	var bar := Panel.new()
-	bar.custom_minimum_size = Vector2(120, 6)
+	bar.custom_minimum_size = Vector2(BAR_W, 6)
 	bar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	bar.add_theme_stylebox_override("panel", UI.box(Pal.c("line"), 3, 0))
 	_bar_fill.add_theme_stylebox_override("panel", UI.box(Pal.c("accent"), 3, 0))
@@ -408,24 +434,22 @@ func _build_hud() -> void:
 	if task.meter >= 0.0:
 		var mrow := UI.hbox(8)
 		var mbar := Panel.new()
-		mbar.custom_minimum_size = Vector2(120, 6)
+		mbar.custom_minimum_size = Vector2(BAR_W, 6)
 		mbar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		mbar.add_theme_stylebox_override("panel", UI.box(Pal.c("line"), 3, 0))
 		_meter_fill = Panel.new()
-		_meter_fill.add_theme_stylebox_override("panel", UI.box(Color("#7DBE6A"), 3, 0))
-		_meter_fill.size = Vector2(120, 6)
+		_meter_fill.add_theme_stylebox_override("panel", UI.box(Pal.c("ok"), 3, 0))
+		_meter_fill.size = Vector2(BAR_W, 6)
 		mbar.add_child(_meter_fill)
 		mrow.add_child(mbar)
 		var meter_text := UI.label(tr(Curriculum.text_key(task.meter_label, mode)), 12, 700, "muted", false, false)
 		mrow.add_child(meter_text)
 		chip.add_child(mrow)
-	top.add_child(UI.panel(chip, glass, 16, 10))
+	return chip
 
-	var gap := Control.new()
-	gap.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	gap.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	top.add_child(gap)
 
+## Kids see a simple counter; everyone else sees the flight numbers.
+func _build_counters(top: HBoxContainer, glass: Color) -> void:
 	if mode == "kids":
 		if task.counter_shown:
 			var row := UI.hbox(8)
@@ -456,8 +480,9 @@ func _build_hud() -> void:
 			s.add_child(v)
 			stats.add_child(s)
 		top.add_child(UI.panel(stats, glass, 16, 10))
-	col.add_child(top)
 
+
+func _build_hint(col: VBoxContainer) -> void:
 	# One hint, in the middle under the top line.
 	var hint_row := CenterContainer.new()
 	hint_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -473,11 +498,7 @@ func _build_hud() -> void:
 	col.add_child(hint_row)
 
 
-	var fill := Control.new()
-	fill.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	fill.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	col.add_child(fill)
-
+func _build_bottom(col: VBoxContainer, ins: Dictionary) -> void:
 	# Sticks and the view switch at the bottom.
 	var bottom := HBoxContainer.new()
 	bottom.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -515,7 +536,6 @@ func _build_hud() -> void:
 		bottom.add_child(act)
 	bottom.add_child(_stick_with_label(_right, tr(right_label)))
 	col.add_child(bottom)
-	_build_view_toggle()
 
 
 func _stick_with_label(s: Stick, text: String) -> Control:
@@ -568,21 +588,13 @@ func _update_hud() -> void:
 		drone.set_load(_shown_load)
 	if _meter_fill:
 		var m := clampf(task.meter / 100.0, 0.0, 1.0)
-		_meter_fill.size = Vector2(120.0 * m, 6)
-		# Darker shades on light looks, so the bar shows against its track.
-		var light := Pal.c("bg").get_luminance() > 0.5
-		var col: Color
-		if m > 0.5:
-			col = Color("#3E8E2F") if light else Color("#7DBE6A")
-		elif m > 0.25:
-			col = Color("#B85F10") if light else Color("#F29B50")
-		else:
-			col = Color("#B8324F") if light else Color("#E5708B")
-		(_meter_fill.get_theme_stylebox("panel") as StyleBoxFlat).bg_color = col
+		_meter_fill.size = Vector2(BAR_W * m, 6)
+		var col := "ok" if m > 0.5 else ("warn" if m > 0.25 else "bad")
+		(_meter_fill.get_theme_stylebox("panel") as StyleBoxFlat).bg_color = Pal.c(col)
 	if _nolink:
 		_nolink.visible = not task.link_ok and view == "ugv"
 	if _bar_fill:
-		_bar_fill.size = Vector2(120.0 * task.progress, 6)
+		_bar_fill.size = Vector2(BAR_W * task.progress, 6)
 	if _bar_text:
 		_bar_text.text = "%d %%" % int(round(task.progress * 100.0))
 	if task.hint != "":
@@ -638,7 +650,7 @@ func _draw_marks() -> void:
 			_marks.draw_colored_polygon(arrow, col)
 			# A dark edge keeps the gold arrow visible against a bright sky.
 			arrow.append(arrow[0])
-			_marks.draw_polyline(arrow, OUTLINE, 2.0, true)
+			_marks.draw_polyline(arrow, Pal.INK, 2.0, true)
 		if task.ring > 0.0:
 			_ground_ring(task.marker, task.ring)
 	# A thin ring round the drone when it is far and tiny.
@@ -646,7 +658,7 @@ func _draw_marks() -> void:
 		var d := cam.position.distance_to(sim.pos)
 		if d > 14.0:
 			var q := cam.unproject_position(sim.pos + Vector3(0, 0.1, 0))
-			var col2 := Pal.c("text") if look == "dusk" else Color("#463161")
+			var col2 := Pal.c("text") if look == "dusk" else Pal.VIOLET
 			col2.a = 0.7
 			_marks.draw_arc(q, 16.0, 0, TAU, 32, col2, 2.0, true)
 
@@ -654,7 +666,7 @@ func _draw_marks() -> void:
 func _diamond(p: Vector2, r: float) -> void:
 	var col := Pal.c("accent")
 	_marks.draw_colored_polygon(PackedVector2Array([p + Vector2(0, -r), p + Vector2(r, 0), p + Vector2(0, r), p + Vector2(-r, 0)]), col)
-	_marks.draw_polyline(PackedVector2Array([p + Vector2(0, -r), p + Vector2(r, 0), p + Vector2(0, r), p + Vector2(-r, 0), p + Vector2(0, -r)]), OUTLINE, 2.0, true)
+	_marks.draw_polyline(PackedVector2Array([p + Vector2(0, -r), p + Vector2(r, 0), p + Vector2(0, r), p + Vector2(-r, 0), p + Vector2(0, -r)]), Pal.INK, 2.0, true)
 
 
 func _ground_ring(center: Vector3, radius: float) -> void:
@@ -667,7 +679,7 @@ func _ground_ring(center: Vector3, radius: float) -> void:
 			return
 		pts.append(cam.unproject_position(w))
 	var col := Pal.c("accent")
-	_marks.draw_polyline(pts, OUTLINE, 5.0, true)
+	_marks.draw_polyline(pts, Pal.INK, 5.0, true)
 	_marks.draw_polyline(pts, col, 3.0, true)
 
 

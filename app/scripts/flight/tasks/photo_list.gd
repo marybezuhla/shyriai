@@ -7,7 +7,7 @@ extends PhotoTask
 const MARK := Vector3(0, 0, -16)
 ## Round signs on posts for "a sharp picture": stop, aim, shoot, fly on.
 const SIGNS: Array[Vector3] = [Vector3(-6, 0, -12), Vector3(6, 0, -20), Vector3(-4, 0, -28)]
-const SIGN_COLORS := ["#E5708B", "#5B9BD5", "#7DBE6A"]
+const SIGN_COLORS := ["pink", "blue", "green"]
 ## The kids' subjects: the sunflowers by the field, a kitten, a blue van.
 const FLOWERS := Vector3(-12, 0, -18)
 const KITTEN := Vector3(8, 0, -14)
@@ -31,7 +31,7 @@ func setup_world() -> void:
 				{"tilts": ["down"], "min_size": 0.3, "max_size": 1.6, "center": 0.35})
 		"SRV_SHARP":
 			for i in SIGNS.size():
-				world.add_sign(SIGNS[i], Color(SIGN_COLORS[i]))
+				world.add_sign(SIGNS[i], Pal.TOY[SIGN_COLORS[i]])
 				_add("sign%d" % i, SIGNS[i] + Vector3(0, 2.2, 0), 0.45, {"min_size": 0.12, "max_size": 1.2})
 		"SRV_KIDS_FLOWER":
 			_add("flowers", FLOWERS + Vector3(0, 1.3, 0), 1.6, {"min_size": 0.15})

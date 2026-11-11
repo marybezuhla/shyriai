@@ -47,6 +47,11 @@ jobs:
           # 1.2.4 -> 10204 (minor and patch stay below 100, checked above)
           IFS=. read -r MA MI PA <<< "$V"
           CODE=$((MA * 10000 + MI * 100 + PA))
+          # The store shows what is new in this version, in both languages.
+          for L in uk en-US; do
+            test -s "fastlane/metadata/android/$L/changelogs/$CODE.txt" \
+              || { echo "::error::fastlane/metadata/android/$L/changelogs/$CODE.txt is missing"; exit 1; }
+          done
           sed -i -E "s/^version\/code=.*/version\/code=$CODE/; s/^version\/name=.*/version\/name=\"$V\"/" app/export_presets.cfg
           sed -i -E "s/^config\/version=.*/config\/version=\"$V\"/" app/project.godot
           grep -E "^version/" app/export_presets.cfg
@@ -98,6 +103,8 @@ jobs:
           mkdir -p build
           godot --headless --path app --export-release "Android" "$PWD/build/shyriai-unsigned.apk" 2>&1 | tee build.log
           test -s build/shyriai-unsigned.apk || { echo "::error::No APK was produced"; exit 1; }
+          # Only script errors: a first import prints harmless "ERROR" lines about translations.
+          if grep -E "SCRIPT ERROR|Parse Error" build.log; then echo "::error::Script errors while exporting"; exit 1; fi
           ls -l build/
 
       - name: Check permissions (no internet, only what is expected)

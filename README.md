@@ -10,7 +10,7 @@
 - 🛸 **Три машини.** Камерний дрон, який сам зависає. FPV-дрон з режимами Angle, Horizon і Acro. НРК з гусеничним керуванням, рельєфом і затримкою відео.
 - 👪 **Дитячий режим** має свою світлу тему «Ранок» і більший текст. За бажанням є батьківський замок: щоб вийти з дитячого режиму чи відкрити налаштування, треба розв'язати приклад.
 - 👀 **Три камери.** «З землі»: як пілот, що стоїть із пультом, так вчаться літати по-справжньому. «За дроном»: легше для початку. «Камера»: вигляд з самого дрона, для пошуку й огляду.
-- 🎯 **Навчання й місії.** Уроки від простого до складного з чіткими умовами зарахування. Місії: ті самі навички в сюжеті, як-от пошук у полі, траса з воротами, доставка вантажу, евакуація пораненого. Для дітей кошеня на даху, обручі, посилка бабусі.
+- 🎯 **Навчання й місії.** Уроки від простого до складного з чіткими умовами зарахування. Місії: ті самі навички в сюжеті, як-от пошук у полі, траса з воротами, доставка вантажу, евакуація пораненого. Для дітей: кошеня на даху, обручі, посилка бабусі.
 - 🎮 **Керування.** Екранні стіки, геймпад і справжній пульт через USB, щоб моторна памʼять переносилася на реальний дрон. Розкладка Mode 2 або Mode 1 і мʼякші стіки для точних рухів.
 - 📷 **Аерозйомка й пошук.** Окремий курс: камера донизу, чіткий знімок, висота й деталі, обліт, сітка; місії з пошуку людини, огляду дахів і лічби наметів зі звітом після посадки. Для дітей «Фотограф».
 - 🎯 **Перехоплення.** Окремий курс на FPV-дроні: наздогнати навчальну мішень, зрізати коло, упередження, зустрічні курси, сутінки й туман. Мішень абстрактна, а перехопленням вважається торкання. Для дітей «Метелики».
@@ -30,7 +30,7 @@
 ## Прозорість
 
 - **Дозволи:** жодних, які стосуються людини чи телефону; є лише один внутрішній технічний дозвіл бібліотеки AndroidX. Збірка зупиняється, якщо в APK зʼявляється будь-який інший дозвіл, а надто дозвіл на інтернет.
-- **Дані:** налаштування й прогрес зберігаються лише на телефоні, в одному маленькому файлі. Хмарну копію Android вимкнено, тож після видалення застосунку прогрес починається заново. Пряме перенесення на новий телефон (Android 12+) рушій Godot вимкнути не дозволяє, тож тоді файл може перенестися. У налаштуваннях можна почати режим спочатку або стерти всі дані, і одразу «Повернути». Докладніше в [PRIVACY.md](PRIVACY.md).
+- **Дані:** налаштування й прогрес зберігаються лише на телефоні, в одному маленькому файлі. Хмарну копію Android вимкнено, тож після видалення застосунку прогрес починається заново. Пряме перенесення на новий телефон (Android 12+) за нинішнього способу збирання вимкнути не можна, тож тоді файл може перенестися. У налаштуваннях можна почати режим спочатку або стерти всі дані, і одразу «Повернути». Докладніше в [PRIVACY.md](PRIVACY.md).
 - **Підпис:** справжній APK підписано сертифікатом із відбитком SHA-256 `BF:06:A3:A2:27:BB:10:32:DC:B1:41:C8:92:93:85:80:72:A5:A0:0A:F2:BF:70:39:4A:44:9E:B3:25:FF:2E:1F`. Перевірити завантажений файл: `apksigner verify --print-certs shyriai-<версія>.apk`: рядок `SHA-256 digest` має збігтися (там він малими літерами й без двокрапок).
 - **Збірка:** APK збирається з цього коду в GitHub Actions. Godot і його шаблони звіряються за SHA-512. APK підписується лише після схвалення авторки.
 - **Доступність:** розмір тексту можна збільшити в налаштуваннях. Програми читання екрана (TalkBack) поки не підтримуються: рушій Godot на Android їм нічого не передає.
@@ -38,7 +38,7 @@
 - **Як створено:** код написано за допомогою ШІ (Claude, Anthropic) під керівництвом і з тестуванням авторки.
 - **Застереження:** тренажер не замінює занять з інструктором і не дає права на польоти. Перед справжнім польотом дізнайтеся, де і як дозволено літати.
 
-© 2026 marybezuhla. Godot 4.7 · GDScript. Ліцензія GPL-3.0 або новіша. Шрифти Unbounded і Manrope за SIL Open Font License 1.1.
+© 2026 marybezuhla. Godot 4.7 · GDScript. Ліцензія GPL-3.0 або новіша. Шрифти Unbounded (лише латиниця й кирилиця, щоб APK був меншим) і Manrope за SIL Open Font License 1.1.
 
 ---
 
@@ -74,7 +74,7 @@ Shyriai teaches piloting itself. Scenarios are rescue and training only, on abst
 ## Transparency
 
 - **Permissions:** none that concern you or your phone; there is only one internal technical permission of the AndroidX library. The build stops if any other permission appears in the APK, internet above all.
-- **Data:** settings and progress stay on the phone, in one small file. Android cloud backup is off, so after uninstalling progress starts again. Direct transfer to a new phone (Android 12+) cannot be switched off in the Godot engine, so the file may be copied then. Settings can start a mode over or erase all data, with an immediate Undo. More in [PRIVACY.md](PRIVACY.md).
+- **Data:** settings and progress stay on the phone, in one small file. Android cloud backup is off, so after uninstalling progress starts again. Direct transfer to a new phone (Android 12+) cannot be switched off with the current way of building, so the file may be copied then. Settings can start a mode over or erase all data, with an immediate Undo. More in [PRIVACY.md](PRIVACY.md).
 - **Signature:** the genuine APK is signed with a certificate whose SHA-256 fingerprint is `BF:06:A3:A2:27:BB:10:32:DC:B1:41:C8:92:93:85:80:72:A5:A0:0A:F2:BF:70:39:4A:44:9E:B3:25:FF:2E:1F`. To check a downloaded file: `apksigner verify --print-certs shyriai-<version>.apk`; the `SHA-256 digest` line must match (it is printed in lower case, without the colons).
 - **Build:** the APK is built from this code in GitHub Actions. Godot and its templates are checked by SHA-512. The APK is signed only after the author's approval.
 - **Accessibility:** text size can be increased in settings. Screen readers (TalkBack) are not supported yet: the Godot engine passes them nothing on Android.
@@ -82,4 +82,4 @@ Shyriai teaches piloting itself. Scenarios are rescue and training only, on abst
 - **How it was made:** the code was written with AI (Claude, Anthropic), directed and tested by the author.
 - **Disclaimer:** the trainer does not replace lessons with an instructor and gives no right to fly. Before a real flight, find out where and how flying is allowed.
 
-© 2026 marybezuhla. Godot 4.7 · GDScript. GPL-3.0-or-later licence. Unbounded and Manrope fonts: SIL Open Font License 1.1.
+© 2026 marybezuhla. Godot 4.7 · GDScript. GPL-3.0-or-later licence. Unbounded (Latin and Cyrillic only, for a smaller APK) and Manrope fonts: SIL Open Font License 1.1.

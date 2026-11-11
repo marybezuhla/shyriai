@@ -14,8 +14,9 @@ var _note: Label
 var _rng := RandomNumberGenerator.new()
 const MISSES_BEFORE_WAIT := 3
 const WAIT_MS := 10000
-var _misses := 0
-var _wait_until := 0
+## Static, so closing and reopening the lock does not skip the wait.
+static var _misses := 0
+static var _wait_until := 0
 
 
 func _ready() -> void:
@@ -69,6 +70,8 @@ func _ready() -> void:
 	col.add_child(UI.tappable(cancel, Color(0, 0, 0, 0), close, tr("CANCEL"), 14, 0))
 	center.add_child(col)
 	_refresh()
+	# A wait started before the lock was closed and reopened still runs.
+	set_process(_wait_until > Time.get_ticks_msec())
 
 
 func close() -> void:
@@ -82,23 +85,24 @@ func _new_sum() -> void:
 
 
 func _process(_delta: float) -> void:
-	if _wait_until > 0:
-		var left := _wait_until - Time.get_ticks_msec()
-		if left <= 0:
-			_wait_until = 0
-			_note.text = ""
-		else:
-			_note.text = tr("GATE_WAIT") % ceili(left / 1000.0)
+	var left := _wait_until - Time.get_ticks_msec()
+	if left <= 0:
+		_wait_until = 0
+		_note.text = ""
+		set_process(false)
+	else:
+		_note.text = tr("GATE_WAIT") % ceili(left / 1000.0)
 
 
 func _press(k: String) -> void:
-	if _wait_until > 0:
+	if _wait_until > Time.get_ticks_msec():
 		return
 	if k == "⌫":
 		_typed = _typed.left(-1)
 	elif k == "OK":
 		if _typed.to_int() == _a * _b and _typed != "":
 			var action := on_pass
+			_misses = 0
 			queue_free()
 			if action.is_valid():
 				action.call()
@@ -108,6 +112,7 @@ func _press(k: String) -> void:
 		_misses += 1
 		if _misses % MISSES_BEFORE_WAIT == 0:
 			_wait_until = Time.get_ticks_msec() + WAIT_MS
+			set_process(true)
 	elif _typed.length() < 3:
 		_typed += k
 	_refresh()

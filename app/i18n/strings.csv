@@ -26,8 +26,6 @@ TAB_MISSIONS,Missions,Місії
 TAB_THEORY,Theory,Теорія
 LESSON_START,Start lesson,Почати урок
 LESSON_LOCKED,Pass the earlier lessons first.,Спершу пройди попередні уроки.
-SOON_TITLE,Coming soon,Скоро
-SOON_TEXT,This part is still being built and will come in the next versions of Shyriai.,Ця частина ще будується і з’явиться в наступних версіях Ширяя.
 MISSIONS_INTRO,"The same skills, in a real story.","Ті самі навички, але в живому сюжеті."
 THEORY_INTRO,The short version of what to know before you fly.,"Коротко про те, що треба знати до польоту."
 CAM_STICKS,What the sticks do,Що роблять стіки
@@ -144,7 +142,7 @@ SET_LANGUAGE,Language,Мова
 LANG_SYSTEM,System,Як у системі
 ABOUT,About,Про застосунок
 ABOUT_VERSION,Version %s,Версія %s
-ABOUT_WHAT,"Shyriai is a piloting trainer for drones and ground robots, for kids and adults. It works offline, with no accounts and no ads. Progress is stored only on this phone.","Ширяй є тренажером пілотування дронів і наземних роботів для дітей і дорослих. Працює без інтернету, без акаунтів і реклами. Прогрес зберігається лише на цьому телефоні."
+ABOUT_WHAT,"Shyriai is a piloting trainer for drones and ground robots, for kids and adults. It works offline, with no accounts and no ads. Progress is stored only on this phone.","Ширяй: тренажер пілотування дронів і наземних роботів для дітей і дорослих. Працює без інтернету, без акаунтів і реклами. Прогрес зберігається лише на цьому телефоні."
 ABOUT_LICENSE_T,Licence,Ліцензія
 ABOUT_LICENSE,"Free software under the GNU GPL 3.0 or later: you may use, study, change and share it. It comes with no warranty of any kind.","Вільна програма за ліцензією GNU GPL 3.0 або новішою: її можна використовувати, вивчати, змінювати й поширювати. Вона надається без жодних гарантій."
 ABOUT_SOURCE_T,Source code,Сирцевий код
@@ -422,6 +420,7 @@ HINT_JOLT_STRETCHER,Too sharp! It hurts the casualty,Різко! Поранен�
 HINT_JOLT_KITTEN,"Careful, the kitten got scared","Обережно, кошеня злякалося"
 HINT_JOLT_CARGO,Shaking! The cargo could break,Трясе! Вантаж може розбитися
 FAIL_JOLT_STRETCHER,"The casualty was shaken too much. Start and brake gently, turn slowly, and take potholes slowly.","Пораненого надто трясло. Рушай і гальмуй плавно, повертай повільно, а ями проїжджай поволі."
+FAIL_JOLT_STRETCHER_KIDS,The hiker was shaken too much. Drive gently.,Туриста надто трясло. Їдь плавно.
 FAIL_JOLT_KITTEN,The kitten got too shaken. Drive gently.,Кошеня надто трясло. Їдь плавно.
 FAIL_JOLT_CARGO,The cargo broke from the jolts. Slow down before potholes.,Вантаж розбився від поштовхів. Перед ямами пригальмовуй.
 FAIL_CARGO_BUMP,The robot touched an obstacle and the cargo is damaged. Give obstacles room.,"Робот зачепив перешкоду, і вантаж пошкоджено. Об’їжджай із запасом."

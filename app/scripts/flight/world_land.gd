@@ -316,7 +316,7 @@ func _decor_sunflowers(at: Vector3) -> void:
 	head.height = 0.06
 	head.radial_segments = 8
 	for i in 24:
-		var p := at + Vector3((i % 6) * 1.1, 0, (i / 6) * 1.1)
+		var p := at + Vector3((i % 6) * 1.1, 0, int(i / 6.0) * 1.1)
 		_mesh(stem, pal["poplar"], p + Vector3(0, 0.7, 0))
 		var h := _mesh(head, Color("#FFC321"), p + Vector3(0, 1.45, 0.05))
 		h.rotation.x = PI / 2.0 - 0.3

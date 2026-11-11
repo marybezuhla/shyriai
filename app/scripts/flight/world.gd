@@ -204,36 +204,6 @@ func pop_balloon(i: int) -> void:
 		tw.tween_property(_balloons[i], "scale", Vector3.ZERO, 0.1)
 
 
-## A round target board with three rings, standing upright and facing `normal`.
-func add_target(center: Vector3, normal: Vector3) -> void:
-	var n := Vector3(normal.x, 0, normal.z).normalized()
-	var c := Vector3(center.x, height(center.x, center.z) + center.y, center.z)
-	var colors := [pal["pad"], pal["roof"], pal["pad_ring"]]
-	var radii := [2.0, 1.25, 0.5]
-	for k in 3:
-		var disc := CylinderMesh.new()
-		disc.top_radius = radii[k]
-		disc.bottom_radius = radii[k]
-		disc.height = 0.1 + k * 0.02
-		disc.radial_segments = 32
-		var mi := MeshInstance3D.new()
-		mi.mesh = disc
-		var m := _mat(colors[k])
-		m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-		mi.material_override = m
-		mi.position = c
-		mi.basis = Basis(Vector3.UP, atan2(n.x, n.z)) * Basis(Vector3.RIGHT, PI / 2.0)
-		add_child(mi)
-	var stand := _box(Vector3(0.15, c.y - height(c.x, c.z), 0.15))
-	_mesh(stand, pal["roof"], Vector3(c.x, (c.y + height(c.x, c.z)) / 2.0, c.z) - n * 0.15)
-	var side := n.cross(Vector3.UP)
-	var a := c - side * 2.0 - Vector3(0, 2.0, 0) - n * 0.08
-	var b := c + side * 2.0 + Vector3(0, 2.0, 0) + n * 0.08
-	var lo := Vector3(minf(a.x, b.x), a.y, minf(a.z, b.z))
-	var hi := Vector3(maxf(a.x, b.x), b.y, maxf(a.z, b.z))
-	obstacles.append({"box": AABB(lo, hi - lo)})
-
-
 ## A round landing target lying on the ground, with three rings.
 func add_ground_target(center: Vector3) -> void:
 	var colors := [pal["pad"], pal["roof"], pal["pad_ring"]]

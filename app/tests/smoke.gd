@@ -10,7 +10,7 @@ var main: Node
 
 
 func _ready() -> void:
-	get_tree().create_timer(1100.0).timeout.connect(func(): printerr("SMOKE TIMEOUT"); get_tree().quit(1))
+	get_tree().create_timer(840.0).timeout.connect(func(): printerr("SMOKE TIMEOUT"); get_tree().quit(1))
 	main = load("res://scenes/main.tscn").instantiate()
 	get_tree().root.add_child.call_deferred(main)
 	await _frames(3)
@@ -76,8 +76,6 @@ func _visit(lang: String, theme: String) -> void:
 		sc.rebuild()
 		await _shot("%s-%s-%s-quiz" % [lang, theme, card.to_lower()])
 		main.back()
-	main.open_soon("Test")
-	await _shot("%s-%s-soon" % [lang, theme])
 	main.back()
 	main.open_tab("learn")
 	main.open_settings()
@@ -106,8 +104,9 @@ func _flights() -> void:
 		var keys: Array = []
 		for veh in Curriculum.VEHICLES:
 			for k in Curriculum.lessons(veh, m) + Curriculum.missions(veh, m):
-				if FlightTask.implemented(k):
-					keys.append([veh, k])
+				# Every lesson and mission must have a flight: there is no "coming soon" page any more.
+				assert(FlightTask.implemented(k), "a flight for " + k)
+				keys.append([veh, k])
 		for vk in keys:
 			var veh: String = vk[0]
 			var key: String = vk[1]
@@ -127,53 +126,9 @@ func _flights() -> void:
 			f.autopilot = func(sim, _task): return ap.sticks(sim)
 			await _seconds(1.5)
 			await _shot("uk-%s-flight-%s-%s" % [theme, m, key])
-			if key == "FPV_GATES":
-				for v in ["chase", "pilot", "fpv"]:
-					f.set_view(v)
-					await _shot("uk-%s-flight-%s-%s-%s" % [theme, m, key, v])
-			if key == "UGV_EVACUATION":
-				for v in ["chase", "pilot", "ugv"]:
-					f.set_view(v)
-					await _shot("uk-%s-flight-%s-%s-%s" % [theme, m, key, v])
-			if key == "MIS_UGV_EVAC":
-				f._paused = true
-				f.task.link_ok = false
-				f.task.say("HINT_LINK_LOST")
-				await _shot("uk-%s-flight-%s-%s-nolink" % [theme, m, key])
-				f.task.link_ok = true
-				f._paused = false
-			if key == "CAM_HOLD":
-				for v in ["chase", "drone", "pilot"]:
-					f.set_view(v)
-					await _shot("uk-%s-flight-%s-%s-%s" % [theme, m, key, v])
-			if f.task is PhotoTask and f.task.kit:
-				# The camera buttons: each tilt, then a picture (refused or kept, either way no error).
-				for t in Photo.TILT_ORDER:
-					f.task.tilt = t
-					await _shot("uk-%s-flight-%s-%s-tilt-%s" % [theme, m, key, t])
-				f.shutter()
-				await _frames(3)
+			await _flight_extras(f, theme, m, key)
 			if key == "MIS_CAM_SURVEY":
-				# The report after landing, with a real picture taken from the drone's camera.
-				f.autopilot = Callable()
-				f.sim.pos = f.world.houses[0]["pos"] + Vector3(0, 12, 0)
-				f.sim.on_ground = false
-				f.task.tilt = "down"
-				var shot: Dictionary = {"photo": 0, "prompt": "Q_ROOF", "answer": "ok",
-					"options": [["damaged", "OPT_DAMAGED"], ["ok", "OPT_INTACT"]]}
-				f.task.photos.append({"id": "0", "image": await f._picture()})
-				f.task.report.assign([shot, shot.duplicate()])
-				f.task.photos.append({"id": "1", "image": null})
-				f.task.report[1]["photo"] = 1
-				f.task.report_open = true
-				await _frames(3)
-				await _shot("uk-%s-flight-%s-%s-report" % [theme, m, key])
-				f.report_answer(0, "damaged")
-				f.report_answer(1, "ok")
-				await _frames(4)
-				await _shot("uk-%s-flight-%s-%s-report-result" % [theme, m, key])
-				main.close_flight()
-				await _frames(2)
+				await _survey_report(f, theme, m, key)
 				continue
 			f.pause()
 			await _shot("uk-%s-flight-%s-%s-pause" % [theme, m, key])
@@ -190,6 +145,64 @@ func _flights() -> void:
 			main.back()  # Back on the "Passed" card leaves the flight
 			await _frames(2)
 			assert(main.flight == null)
+	await _failed_and_crashed()
+
+
+## The other views, the lost link and the camera buttons, where a flight has them.
+func _flight_extras(f, theme: String, m: String, key: String) -> void:
+	if key == "FPV_GATES":
+		for v in ["chase", "pilot", "fpv"]:
+			f.set_view(v)
+			await _shot("uk-%s-flight-%s-%s-%s" % [theme, m, key, v])
+	if key == "UGV_EVACUATION":
+		for v in ["chase", "pilot", "ugv"]:
+			f.set_view(v)
+			await _shot("uk-%s-flight-%s-%s-%s" % [theme, m, key, v])
+	if key == "MIS_UGV_EVAC":
+		f._paused = true
+		f.task.link_ok = false
+		f.task.say("HINT_LINK_LOST")
+		await _shot("uk-%s-flight-%s-%s-nolink" % [theme, m, key])
+		f.task.link_ok = true
+		f._paused = false
+	if key == "CAM_HOLD":
+		for v in ["chase", "drone", "pilot"]:
+			f.set_view(v)
+			await _shot("uk-%s-flight-%s-%s-%s" % [theme, m, key, v])
+	if f.task is PhotoTask and f.task.kit:
+		# The camera buttons: each tilt, then a picture (refused or kept, either way no error).
+		for t in Photo.TILT_ORDER:
+			f.task.tilt = t
+			await _shot("uk-%s-flight-%s-%s-tilt-%s" % [theme, m, key, t])
+		f.shutter()
+		await _frames(3)
+
+
+## The report after landing, with a real picture taken from the drone's camera.
+func _survey_report(f, theme: String, m: String, key: String) -> void:
+	f.autopilot = Callable()
+	f.sim.pos = f.world.houses[0]["pos"] + Vector3(0, 12, 0)
+	f.sim.on_ground = false
+	f.task.tilt = "down"
+	var shot: Dictionary = {"photo": 0, "prompt": "Q_ROOF", "answer": "ok",
+		"options": [["damaged", "OPT_DAMAGED"], ["ok", "OPT_INTACT"]]}
+	f.task.photos.append({"id": "0", "image": await f._picture()})
+	f.task.report.assign([shot, shot.duplicate()])
+	f.task.photos.append({"id": "1", "image": null})
+	f.task.report[1]["photo"] = 1
+	f.task.report_open = true
+	await _frames(3)
+	await _shot("uk-%s-flight-%s-%s-report" % [theme, m, key])
+	f.report_answer(0, "damaged")
+	f.report_answer(1, "ok")
+	await _frames(4)
+	await _shot("uk-%s-flight-%s-%s-report-result" % [theme, m, key])
+	main.close_flight()
+	await _frames(2)
+
+
+## A failed exam in Simple mode and a crash in Adult mode.
+func _failed_and_crashed() -> void:
 	# A failed exam, in Simple mode.
 	Prefs.set_theme("dusk")
 	Prefs.set_mode("simple")
@@ -413,7 +426,7 @@ func _frames(n: int) -> void:
 		await get_tree().process_frame
 
 
-func _shot(name: String) -> void:
+func _shot(name_: String) -> void:
 	await _frames(4)
 	if shots == "" or DisplayServer.get_name() == "headless":
 		return
@@ -421,7 +434,7 @@ func _shot(name: String) -> void:
 	var low := OS.low_processor_usage_mode
 	OS.low_processor_usage_mode = false
 	await RenderingServer.frame_post_draw
-	get_viewport().get_texture().get_image().save_png(shots.path_join(name + ".png"))
+	get_viewport().get_texture().get_image().save_png(shots.path_join(name_ + ".png"))
 	OS.low_processor_usage_mode = low
 
 
@@ -589,6 +602,18 @@ func _kids_0_11() -> void:
 	assert(not opened[0], "no answer counts while it waits")
 	await _shot("uk-morning-gate-wait")
 	g.close()
+	# Closing and reopening does not skip the wait.
+	main.guard(func(): opened[0] = true)
+	await _frames(2)
+	g = main._gate
+	for ch in str(g._a * g._b):
+		g._press(ch)
+	g._press("OK")
+	await _frames(1)
+	assert(not opened[0], "reopening the lock does not skip the wait")
+	g.close()
+	Gate._wait_until = 0
+	Gate._misses = 0
 	Prefs.set_kids_lock(false)
 	Prefs.erase_all()
 

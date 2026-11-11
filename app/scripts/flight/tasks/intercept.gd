@@ -16,7 +16,7 @@ const SPEED := {
 ## Beyond this far from the pad a target has got away. Paths keep above the poplars (11 m) and the
 ## roofs wherever they cross them.
 const ARENA := 110.0
-const BUTTERFLY_COLORS := ["#E5708B", "#5B9BD5", "#FFC321", "#7DBE6A", "#B07CD8"]
+const BUTTERFLY_COLORS := ["pink", "blue", "gold", "green", "violet"]
 
 ## Each target: {"node", "pos", "vel", "kind", ... path settings, "caught", "active"}.
 var targets: Array[Dictionary] = []
@@ -90,7 +90,7 @@ func _add(t: Dictionary, light: bool) -> void:
 
 
 func _add_butterfly(center: Vector3, radius: float, rng: RandomNumberGenerator) -> void:
-	var c: String = BUTTERFLY_COLORS[targets.size() % BUTTERFLY_COLORS.size()]
+	var c: Color = Pal.TOY[BUTTERFLY_COLORS[targets.size() % BUTTERFLY_COLORS.size()]]
 	targets.append({"node": world.add_butterfly(Color(c)), "kind": "circle", "center": center, "radius": radius,
 		"phase": rng.randf() * TAU, "dir": 1.0, "butterfly": true, "caught": false, "active": true, "t": 0.0})
 	_speed = 1.2
@@ -152,8 +152,8 @@ func current() -> Dictionary:
 func lead_point(sim: DroneSim, tg: Dictionary) -> Vector3:
 	var d := sim.pos.distance_to(tg["now"])
 	var v: Vector3 = tg["speed_vec"]
-	var closing := maxf(_closing(sim, tg), 3.0)
-	return tg["now"] + v * clampf(d / closing, 0.0, 2.5)
+	var lead_speed := maxf(_closing(sim, tg), 3.0)
+	return tg["now"] + v * clampf(d / lead_speed, 0.0, 2.5)
 
 
 func _closing(sim: DroneSim, tg: Dictionary) -> float:

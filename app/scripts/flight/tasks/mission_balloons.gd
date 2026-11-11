@@ -6,7 +6,7 @@ const BALLOONS: Array[Vector3] = [
 	Vector3(-4, 2.5, -8), Vector3(4, 3, -10), Vector3(-7, 3.5, -16),
 	Vector3(6, 2.5, -17), Vector3(-2, 4, -21), Vector3(3, 3, -26),
 ]
-const COLORS := ["#E5708B", "#5B9BD5", "#FFC321", "#7DBE6A", "#B07CD8", "#F29B50"]
+const COLORS := ["pink", "blue", "gold", "green", "violet", "orange"]
 const TARGET := Vector3(0, 0, -32)
 
 var _popped: Array[int] = []
@@ -15,7 +15,7 @@ var _popped: Array[int] = []
 func setup_world() -> void:
 	counter_shown = true
 	for i in BALLOONS.size():
-		world.add_balloon(BALLOONS[i], Color(COLORS[i]))
+		world.add_balloon(BALLOONS[i], Pal.TOY[COLORS[i]])
 	world.add_ground_target(TARGET)
 
 

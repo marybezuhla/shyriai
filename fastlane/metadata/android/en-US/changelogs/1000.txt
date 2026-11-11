@@ -1,1 +1,1 @@
-Shyriai 0.10.0. Requires Android 7 or newer.
+Shyriai 0.10.0: “Medicine across the river”, “The lost puppy” for kids, and “Check yourself” questions in theory. Requires Android 7 or newer.

@@ -1,0 +1,1 @@
+Shyriai 0.8.0: an aerial survey course with camera tilt, a shutter and a photo report. Requires Android 7 or newer.

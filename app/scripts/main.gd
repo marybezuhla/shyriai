@@ -101,13 +101,6 @@ func open_theory(card: String) -> void:
 	s.card = card
 	_push(s)
 
-
-func open_soon(title: String) -> void:
-	var s := _make("res://scripts/screens/soon.gd")
-	s.title = title
-	_push(s)
-
-
 func back() -> void:
 	if is_instance_valid(_gate):
 		_gate.close()
@@ -124,12 +117,9 @@ func back() -> void:
 		get_tree().quit()
 
 
-## Opens a lesson or mission in flight, or an honest "soon" page if it is not built yet.
+## Opens a lesson or mission in flight.
 func start(vehicle: String, key: String) -> void:
-	if FlightTask.implemented(key):
-		open_flight(vehicle, key)
-	else:
-		open_soon(tr(key))
+	open_flight(vehicle, key)
 
 
 func open_flight(vehicle: String, key: String, seed_ := -1) -> void:
