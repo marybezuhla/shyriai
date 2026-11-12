@@ -43,7 +43,7 @@ func build(body: Color, front: Color) -> void:
 	sh.bottom_radius = 0.9
 	sh.height = 0.01
 	_shadow.mesh = sh
-	var m_sh := _mat(Color(0, 0, 0, 0.25))
+	var m_sh := _mat(Color(Pal.INK, 0.25))
 	m_sh.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	_shadow.material_override = m_sh
 	_shadow.top_level = true

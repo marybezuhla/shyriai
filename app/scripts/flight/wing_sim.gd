@@ -35,7 +35,7 @@ const WING := {
 	# thrust: m/s² at full throttle standing still; prop_v: speed where the propeller stops pulling.
 	"kids": {"thrust": 4.5, "prop_v": 24.0, "bank": 30.0, "roll_rate": 0.0, "cruise": 12.0,
 		"alpha_up": 7.0, "alpha_down": 7.0, "wind": 0.0, "gust": 0.0, "crash": false, "battery_s": 0.0,
-		"floor": 6.0},
+		"floor": 14.0},  # above the tallest tree, roof or tower
 	"simple": {"thrust": 4.5, "prop_v": 24.0, "bank": 35.0, "roll_rate": 0.0, "cruise": 0.0,
 		"alpha_up": 9.0, "alpha_down": 10.0, "wind": 1.0, "gust": 0.3, "crash": false, "battery_s": 0.0,
 		"floor": 0.0},
@@ -68,6 +68,7 @@ func _init(mode := "simple", seed_ := 1) -> void:
 	p = WING[_mode].duplicate()
 	p["vmax"] = 20.0
 	p["landing_assist"] = false
+	p["bounce"] = 0.0
 	kids = _mode == "kids"
 	stall_protect = _mode != "pro"
 	radius = 0.6
@@ -113,10 +114,36 @@ func step(dt: float, throttle: float, yaw_in: float, pitch: float, roll: float) 
 	if crashed:
 		_fall(dt)
 		return
-	var g := ground.call(pos.x, pos.z) as float
+	_motor(dt, throttle)
+	var elev := pitch if kids else -pitch  # a real radio: stick up is nose down; kids' up climbs
+	_elevator(dt, elev)
+	_ailerons(dt, roll, yaw_in)
+	if not kids:
+		yaw -= deg_to_rad(10.0) * yaw_in * dt  # the rudder alone yaws a little
 
-	# Motor. Kids: the app holds the cruise speed.
+	# Forces along the path.
+	var cl := lift_coefficient()
+	var lift := K_LIFT * cl * speed * speed
+	var drag := K_LIFT * (DRAG_0 + DRAG_INDUCED * cl * cl) * speed * speed
+	var thrust := float(p["thrust"]) * throttle01 * maxf(0.0, 1.0 - speed / float(p["prop_v"]))
+	if on_ground:
+		# Wheels, and brakes once the throttle is nearly closed.
+		drag += 0.6 + (2.5 if throttle01 < 0.15 else 0.0)
+	speed = maxf(0.0, speed + (thrust - drag - G * sin(gamma)) * dt)
+
+	var flying := not on_ground
+	if flying:
+		_air(dt, lift, elev)
+	else:
+		_ground_roll(dt, lift)
+	_bumped()
+	if flying:
+		_touch_down()  # not on the step it lifts off: its wheels are still on the runway
+
+
+func _motor(dt: float, throttle: float) -> void:
 	if kids:
+		# Kids: the app holds the cruise speed.
 		throttle01 = clampf(throttle01 + (float(p["cruise"]) - speed) * 0.3 * dt, 0.2, 1.0)
 	else:
 		throttle01 = clampf((throttle + 1.0) * 0.5, 0.0, 1.0)
@@ -125,26 +152,36 @@ func step(dt: float, throttle: float, yaw_in: float, pitch: float, roll: float) 
 		if battery <= 0.0:
 			throttle01 = 0.0
 
-	# Elevator -> angle of attack. On a real radio, stick up is nose down; kids' up means climb.
-	var elev := pitch if kids else -pitch
+
+## The elevator sets the angle of attack; Simple and Kids never let it pass the stall.
+func _elevator(dt: float, elev: float) -> void:
 	var want_alpha := ALPHA_TRIM + elev * deg_to_rad(p["alpha_up"] if elev > 0.0 else p["alpha_down"])
 	stall_warn = speed < V_STALL * 1.2 or want_alpha > ALPHA_STALL - deg_to_rad(2.0)
 	if stall_protect:
-		# Simple and Kids: the wing never goes past the stall; slow, the nose is lowered for you.
 		want_alpha = minf(want_alpha, ALPHA_STALL - deg_to_rad(2.5))
 		if speed < V_STALL * 1.15:
-			want_alpha = minf(want_alpha, ALPHA_TRIM - deg_to_rad(2.0))
+			want_alpha = minf(want_alpha, ALPHA_TRIM - deg_to_rad(2.0))  # slow: the nose is lowered for you
 	alpha = lerpf(alpha, want_alpha, 1.0 - exp(-dt / ALPHA_TAU))
 	var was_stalled := stalled
 	stalled = alpha > ALPHA_STALL or (not on_ground and speed < V_STALL * 0.7)
 	if stalled and not was_stalled:
 		events.append({"type": "stall", "speed": speed})
 
-	# Ailerons -> bank. Simple and Kids: the stick sets the bank and the plane levels itself.
+
+## Ailerons set the bank. Simple and Kids: the stick sets the bank and the plane levels itself;
+## Adult: the stick sets how fast it rolls. Far out over the hills, the plane banks towards home.
+func _ailerons(dt: float, roll: float, yaw_in: float) -> void:
+	var home_bank := 0.0
+	var far := Vector2(pos.x, pos.z).length() > HOME_RADIUS and not on_ground
+	if far:
+		var home := atan2(pos.x, pos.z)  # the heading that points at the centre
+		home_bank = clampf(wrapf(yaw - home, -PI, PI) * 1.2, -0.5, 0.5)
 	if p["roll_rate"] > 0.0:
 		var rate := deg_to_rad(p["roll_rate"]) * roll
 		rate += deg_to_rad(25.0) * yaw_in  # the rudder rolls a high-wing trainer too
 		rate -= bank * 0.25  # dihedral: a little self-levelling
+		if far:
+			rate += (home_bank - bank) * 2.0
 		if stalled:
 			# A stalled wing drops: one wing first, turning into a spin if nothing is done.
 			_spin = clampf(_spin + dt * 1.5, 0.0, 1.0)
@@ -154,47 +191,34 @@ func step(dt: float, throttle: float, yaw_in: float, pitch: float, roll: float) 
 		bank = wrapf(bank + rate * dt, -PI, PI)
 	else:
 		var want_bank := deg_to_rad(p["bank"]) * clampf(roll + 0.4 * yaw_in, -1.0, 1.0)
+		if far:
+			want_bank = home_bank
 		bank = lerpf(bank, want_bank, 1.0 - exp(-dt / ROLL_TAU))
-	if not kids:
-		yaw -= deg_to_rad(10.0) * yaw_in * dt  # the rudder alone yaws a little
 
-	# Turn back home, gently, when far out over the hills.
-	var flat := Vector2(pos.x, pos.z)
-	if flat.length() > HOME_RADIUS and not on_ground:
-		var home := atan2(pos.x, pos.z)  # heading that points at the centre
-		var off := wrapf(yaw - home, -PI, PI)
-		bank = lerpf(bank, clampf(off * 1.2, -0.5, 0.5), 1.0 - exp(-dt * 2.0))
 
-	# Forces along and across the path.
-	var cl := lift_coefficient()
-	var v2 := speed * speed
-	var lift := K_LIFT * cl * v2
-	var drag := K_LIFT * (DRAG_0 + DRAG_INDUCED * cl * cl) * v2
-	var thrust := float(p["thrust"]) * throttle01 * maxf(0.0, 1.0 - speed / float(p["prop_v"]))
-	if on_ground:
-		drag += 0.6 + (2.5 if throttle01 < 0.05 else 0.0)  # wheels, and brakes once the motor is off
-	speed = maxf(0.0, speed + (thrust - drag - G * sin(gamma)) * dt)
+func _ground_roll(dt: float, lift: float) -> void:
+	gamma = 0.0
+	bank = lerpf(bank, 0.0, 1.0 - exp(-dt * 6.0))
+	alpha = minf(alpha, deg_to_rad(10.0))
+	vel = forward() * speed
+	pos += vel * dt
+	pos.y = ground.call(pos.x, pos.z)
+	if lift > G * 1.02 and speed > V_STALL:
+		on_ground = false
+		events.append({"type": "took_off", "speed": 0.0})
 
-	if on_ground:
-		gamma = 0.0
-		bank = lerpf(bank, 0.0, 1.0 - exp(-dt * 6.0))
-		alpha = minf(alpha, deg_to_rad(10.0))
-		vel = forward() * speed
-		pos += vel * dt
-		pos.y = ground.call(pos.x, pos.z)
-		if lift > G * 1.02 and speed > V_STALL:
-			on_ground = false
-			events.append({"type": "took_off", "speed": 0.0})
-		_collide()
-		return
 
+func _air(dt: float, lift: float, elev: float) -> void:
 	var v := maxf(speed, 1.0)
 	if kids:
-		# Kids steer the path itself: stick up climbs, centred flies level, and the app never lets
-		# the plane come lower than the floor. The wing always carries it through the turn.
+		# Kids steer the path itself: stick up climbs, centred flies level. The app keeps the plane
+		# above the floor, looking a little ahead so hills do not catch it, and the wing always
+		# carries it through the turn.
 		var want_gamma := deg_to_rad(12.0) * elev
+		var ahead := pos + forward() * speed * 2.0
+		var g := maxf(ground.call(pos.x, pos.z) as float, ground.call(ahead.x, ahead.z) as float)
 		if pos.y - g < float(p["floor"]):
-			want_gamma = maxf(want_gamma, deg_to_rad(8.0))
+			want_gamma = maxf(want_gamma, deg_to_rad(25.0))
 		gamma = lerpf(gamma, want_gamma, 1.0 - exp(-dt * 1.5))
 		lift = G * cos(gamma) / maxf(cos(bank), 0.5)
 		speed = maxf(speed, 10.0)
@@ -202,14 +226,28 @@ func step(dt: float, throttle: float, yaw_in: float, pitch: float, roll: float) 
 		gamma += (lift * cos(bank) - G * cos(gamma)) / v * dt
 		gamma = clampf(gamma, -1.3, 1.3)
 	yaw = wrapf(yaw - lift * sin(bank) / (v * maxf(cos(gamma), 0.2)) * dt, -PI, PI)
-
 	vel = forward() * (v * cos(gamma)) + Vector3(0, v * sin(gamma), 0) + wind()
 	if speed < 1.0:
 		vel.y -= G * dt * 2.0
 	pos += vel * dt
 	tilt = Vector2(pitch_angle(), bank)
+
+
+## Against a tree, roof or tower: the push-back from _collide() alone would be undone next step
+## (the path is rebuilt from the speed), so the plane loses speed and turns along the obstacle.
+func _bumped() -> void:
+	var before := events.size()
+	var v_before := vel
 	_collide()
-	_touch_down()
+	if crashed or events.size() == before:
+		return
+	var along := Vector3(vel.x, 0, vel.z)
+	if along.length() < 0.5:
+		along = Vector3(-v_before.z, 0, v_before.x)  # head on: turn to one side
+	yaw = atan2(-along.x, -along.z)
+	speed *= 0.5
+	if kids:
+		speed = maxf(speed, 10.0)
 
 
 ## Wheels on the ground: a landing if it came down gently and wings level, a crash in Adult mode if not.
@@ -225,6 +263,8 @@ func _touch_down() -> void:
 	on_ground = true
 	gamma = 0.0
 	events.append({"type": "landed", "speed": down})
+	if down > 3.0:
+		events.append({"type": "bump", "speed": down})  # felt and heard, even where it cannot crash
 
 
 func _fall(dt: float) -> void:

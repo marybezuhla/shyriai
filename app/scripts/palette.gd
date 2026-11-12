@@ -71,6 +71,8 @@ const INK := Color("#2A1D3B")
 const CREAM := Color("#FFF0D5")
 const VIOLET := Color("#463161")
 const LOGO_DOT := Color("#39254F")
+## The bright red of a rescue jacket and of a signal tarp: seen from the air.
+const SIGNAL_RED := Color("#D9473B")
 ## Toy colours for hoops, balloons, butterflies and signs: one set, so they match.
 const TOY := {
 	"pink": Color("#E5708B"),

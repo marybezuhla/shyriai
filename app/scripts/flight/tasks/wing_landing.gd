@@ -48,7 +48,9 @@ func update(_dt: float, sim: DroneSim, _sticks: Dictionary) -> void:
 				return
 	if _down >= 0.0:
 		progress = 0.9
-		if w.on_ground and w.speed < 1.5:
+		if w.on_ground and not world.on_runway(sim.pos.x, sim.pos.z):
+			fail_with("FAIL_WING_OFF_RUNWAY")  # rolled off the end: the throttle was left open
+		elif w.on_ground and w.speed < 1.5:
 			pass_with("SUM_WING_LANDING", [FlightTask.num(_down)])
 		else:
 			say("HINT_WING_ROLL")

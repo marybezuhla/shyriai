@@ -7,8 +7,10 @@ extends RefCounted
 var target := Vector3.ZERO
 var speed := 13.0
 var max_bank := deg_to_rad(30.0)
-## Fly round the target at this bank instead of towards it (0 = off).
+## Fly round the target at this bank instead of towards it (0 = off). The circle is kept centred
+## on the target: the heading follows the tangent, corrected towards the wanted radius.
 var orbit_bank := 0.0
+var orbit_radius := 28.0
 ## The way through the next ring, if any: the pilot lines up before it.
 var through := Vector3.ZERO
 var _side_i := 0.0
@@ -30,7 +32,13 @@ func sticks(sim: WingSim) -> Dictionary:
 	var err := wrapf(heading - sim.yaw, -PI, PI)
 	var want_bank := clampf(-err * 1.6, -max_bank, max_bank)
 	if orbit_bank != 0.0:
-		want_bank = orbit_bank
+		# A right turn keeps the centre on the right wing: the heading is a right angle left of the
+		# heading to the centre, turned in a little when too far out and out when too close.
+		var to_c := target - sim.pos
+		var dist := Vector2(to_c.x, to_c.z).length()
+		var tangent := atan2(-to_c.x, -to_c.z) + PI / 2.0 - clampf((dist - orbit_radius) * 0.04, -0.6, 0.6)
+		var e2 := wrapf(tangent - sim.yaw, -PI, PI)
+		want_bank = clampf(orbit_bank - e2 * 1.2, -max_bank, max_bank)
 	var g_des := clampf((target.y - sim.pos.y) * 0.04, -0.22, 0.22)
 	return _hold(sim, want_bank, g_des, speed)
 

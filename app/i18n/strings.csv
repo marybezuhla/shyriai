@@ -932,7 +932,7 @@ WING_KIDS_STORKS_PASS,Through every ring,Крізь усі кільця
 MIS_WING_FLOOD,The river after the flood,Річка після повені
 MIS_WING_FLOOD_DESC,"Photograph four marked houses from above, so rescuers know where to go.","Сфотографуй згори чотири позначені хати, щоб рятувальники знали, куди їхати."
 MIS_WING_SEARCH,Search the big field,Пошук на великому полі
-MIS_WING_SEARCH_DESC,Someone is lost in the valley and has spread out a red tarp. Find it and circle over it three times.,Людина загубилася в долині й розстелила червоне полотно. Знайди його й тричі облети над ним.
+MIS_WING_SEARCH_DESC,Someone is lost in the valley and has spread out a red tarp. Find it and circle over it three times.,Людина загубилася в долині й розстелила червоне полотно. Знайди його й тричі покружляй над ним.
 MIS_WING_KITE,The kite in the tree,Повітряний змій застряг
 MIS_WING_KITE_DESC,"A kite is caught in a tree. Find it and fly round it, so the grown-ups see where.","Повітряний змій зачепився за дерево. Знайди його й облети довкола, щоб дорослі побачили, де він."
 MIS_WING_CLOUDS,Clouds,Хмаринки
@@ -991,7 +991,7 @@ Q_TH_WING_1_A,The stall,Звалювання
 Q_TH_WING_1_B,A better climb,Кращий набір висоти
 Q_TH_WING_1_C,"Nothing, it can hover","Нічого, він може висіти"
 Q_TH_WING_1_WHY,"Slow with the nose high, the air breaks away from the wing.",Повільно з високим носом повітря зривається з крила.
-Q_TH_WING_2,The wing has stalled. What first?,Крило звалилося. Що спершу?
+Q_TH_WING_2,The plane has stalled. What first?,Літак звалився. Що спершу?
 Q_TH_WING_2_A,"Stick forward, then throttle","Ручку від себе, потім газ"
 Q_TH_WING_2_B,Pull harder,Тягнути сильніше на себе
 Q_TH_WING_2_C,Throttle off and wait,Прибрати газ і чекати

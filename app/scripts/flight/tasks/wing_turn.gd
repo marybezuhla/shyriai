@@ -28,8 +28,9 @@ func update(_dt: float, sim: DroneSim, _sticks: Dictionary) -> void:
 	if in_place:
 		_turned += turn
 	var need := TAU * _laps()
-	progress = clampf(_turned / need, 0.0, 1.0)
-	if _turned >= need:
+	var done_turn := absf(_turned)
+	progress = clampf(done_turn / need, 0.0, 1.0)
+	if done_turn >= need:
 		pass_with("SUM_WING_TURN", [] if mode == "kids" else [roundi(sim.time)])
 		return
 	if air_warnings(sim):
@@ -43,4 +44,4 @@ func update(_dt: float, sim: DroneSim, _sticks: Dictionary) -> void:
 	elif alt > 50.0:
 		say("HINT_WING_LOWER")
 	else:
-		say("HINT_WING_TURN_GO", [ceili((need - _turned) / TAU)])
+		say("HINT_WING_TURN_GO", [ceili((need - done_turn) / TAU)])

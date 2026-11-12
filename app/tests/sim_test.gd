@@ -63,6 +63,8 @@ func _ready() -> void:
 		for key in Curriculum.lessons("wing", mode) + Curriculum.missions("wing", mode):
 			await test_wing_task(key, mode)
 	await test_wing_landing_rules()
+	await test_wing_obstacles()
+	await test_wing_stall_needs_slowing()
 	test_quiz_texts()
 	test_rating_rules()
 	test_results_are_kept()

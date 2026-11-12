@@ -33,7 +33,7 @@ func setup_world() -> void:
 			AirProps.add_cloud(world, r["c"], 6.0)
 	if key == "WING_KIDS_STORKS":
 		_storks = AirProps.add_storks(world, 3)
-	# Kids follow the storks and rings; no numbers on their screen.
+	# No counter: kids follow the storks and rings, with no numbers on their screen.
 
 
 func update(dt: float, sim: DroneSim, _sticks: Dictionary) -> void:

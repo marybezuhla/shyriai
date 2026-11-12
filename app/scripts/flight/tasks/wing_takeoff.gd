@@ -21,7 +21,7 @@ func update(_dt: float, sim: DroneSim, _sticks: Dictionary) -> void:
 	if w.on_ground:
 		if not world.on_runway(sim.pos.x, sim.pos.z):
 			fail_with("FAIL_WING_OFF_RUNWAY")
-		elif w.throttle01 < 0.9:
+		elif w.throttle01 < 0.9 and mode != "kids":
 			say("HINT_WING_THROTTLE_UP")
 			stick_hint = {"left": Vector2.UP}
 		else:

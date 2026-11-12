@@ -33,12 +33,13 @@ func air_warnings(sim: DroneSim) -> bool:
 	return false
 
 
-## How far the plane has turned since the last call, in radians, either way.
+## How far the plane has turned since the last call, in radians; left is positive. Callers add it
+## up with its sign, so S-turns cancel out and only real circles count.
 func turned(sim: DroneSim) -> float:
 	if _last_yaw == INF:
 		_last_yaw = sim.yaw
 		return 0.0
-	var d := absf(wrapf(sim.yaw - _last_yaw, -PI, PI))
+	var d := wrapf(sim.yaw - _last_yaw, -PI, PI)
 	_last_yaw = sim.yaw
 	return d
 

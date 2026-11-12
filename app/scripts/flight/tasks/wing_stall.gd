@@ -8,6 +8,8 @@ const START_ALT := 70.0
 
 var _stalled_at := -1.0
 var _stall_time := 0.0
+## Seconds flown slowly with the throttle closed: a stall counts only after real slowing down.
+var _slow_time := 0.0
 
 
 func start_position() -> Vector3:
@@ -21,12 +23,14 @@ func tune(sim: DroneSim) -> void:
 	w.p["alpha_up"] = maxf(float(w.p["alpha_up"]), 12.0)
 
 
-func update(_dt: float, sim: DroneSim, _sticks: Dictionary) -> void:
+func update(dt: float, sim: DroneSim, _sticks: Dictionary) -> void:
 	var w := sim as WingSim
+	if w.throttle01 < 0.2 and w.speed < 11.0:
+		_slow_time += dt
 	if _stalled_at < 0.0:
 		progress = clampf((14.0 - w.speed) / 6.0, 0.0, 0.5)
 		# A real stall: slow, not a quick jerk of the stick at cruise speed.
-		if w.stalled and w.speed < WingSim.V_STALL * 1.25:
+		if w.stalled and w.speed < WingSim.V_STALL * 1.25 and _slow_time >= 2.0:
 			_stalled_at = sim.altitude()
 			_stall_time = sim.time
 			say_for("HINT_WING_STALL_NOW")

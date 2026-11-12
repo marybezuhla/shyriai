@@ -66,7 +66,7 @@ func add_person(at: Vector3) -> void:
 	var n := Node3D.new()
 	n.position = Vector3(at.x, height(at.x, at.z), at.z)
 	add_child(n)
-	var jacket := _mat(Color("#D9473B"))
+	var jacket := _mat(Pal.SIGNAL_RED)
 	var skin := _mat(Color("#E7B992"))
 	var dark := _mat(Color("#39254F"))
 	var parts := [
@@ -663,7 +663,7 @@ func add_kit() -> Node3D:
 	for size in [Vector3(0.22, 0.01, 0.07), Vector3(0.07, 0.01, 0.2)]:
 		var c := MeshInstance3D.new()
 		c.mesh = _box(size)
-		c.material_override = _shared_mat(Color("#D9473B"))
+		c.material_override = _shared_mat(Pal.SIGNAL_RED)
 		c.position = Vector3(0, 0.115, 0)
 		n.add_child(c)
 	return n

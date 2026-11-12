@@ -36,7 +36,7 @@ static func add_storks(world: Node3D, n: int) -> Array[Node3D]:
 		s.position = Vector3(6 + i * 3.0, 28, -40)
 		world.add_child(s)
 		_part(s, _box(Vector3(0.35, 0.35, 1.3)), Color.WHITE, Vector3.ZERO)
-		_part(s, _box(Vector3(0.1, 0.1, 0.5)), Color("#E5703B"), Vector3(0, 0, -0.85))  # beak
+		_part(s, _box(Vector3(0.1, 0.1, 0.5)), Pal.TOY["orange"], Vector3(0, 0, -0.85))  # beak
 		for side in [-1.0, 1.0]:
 			var w := Node3D.new()
 			w.name = "wing_l" if side < 0.0 else "wing_r"
@@ -64,14 +64,14 @@ static func add_cloud(world: Node3D, center: Vector3, radius: float) -> void:
 	for i in 6:
 		var a := TAU * i / 6.0 + 0.3
 		var at := center + Vector3(cos(a) * (radius + 2.0), sin(a) * (radius + 1.5), 0)
-		var mi := _part(world, puff, Color("#FBFBFF"), at)
+		var mi := _part(world, puff, Color.WHITE, at)
 		mi.scale = Vector3.ONE * (0.8 + 0.25 * float(i % 3))
 
 
 ## A bright red tarp on the ground: what a lost person spreads out to be seen from the air.
 static func add_tarp(world: FlightWorld, at: Vector3) -> void:
 	var y := world.height(at.x, at.z)
-	_part(world, _box(Vector3(4.0, 0.05, 4.0)), Color("#D9473B"), Vector3(at.x + 2.5, y + 0.03, at.z))
+	_part(world, _box(Vector3(4.0, 0.05, 4.0)), Pal.SIGNAL_RED, Vector3(at.x + 2.5, y + 0.03, at.z))
 	world.add_person(at)
 
 
@@ -87,7 +87,7 @@ static func add_kite_tree(world: FlightWorld, at: Vector3) -> Vector3:
 	trunk.top_radius = 0.35
 	trunk.bottom_radius = 0.45
 	trunk.height = 4.0
-	_part(world, trunk, Color("#6B4A2E"), Vector3(at.x, y + 2.0, at.z))
+	_part(world, trunk, Pal.c("seed"), Vector3(at.x, y + 2.0, at.z))
 	_part(world, crown, world.pal["poplar"], Vector3(at.x, y + 6.5, at.z))
 	world.obstacles.append({"cyl": Vector2(at.x, at.z), "r": 3.5, "h": 9.5, "y": y})
 	var kite := Node3D.new()

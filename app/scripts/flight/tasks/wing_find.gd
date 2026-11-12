@@ -32,7 +32,8 @@ func update(_dt: float, sim: DroneSim, _sticks: Dictionary) -> void:
 		marker = _spot
 	if not _found:
 		progress = 0.0
-		if d < 35.0 and sim.altitude() < 70.0:
+		# Found when close over it: flying past in the distance is not searching.
+		if d < 18.0 and sim.altitude() < 70.0:
 			_found = true
 			say_for("HINT_WING_FOUND")
 		elif not air_warnings(sim):
@@ -41,9 +42,10 @@ func update(_dt: float, sim: DroneSim, _sticks: Dictionary) -> void:
 	if d < 60.0:
 		_turned += turn
 	var need := TAU * _laps()
-	progress = 0.3 + 0.7 * clampf(_turned / need, 0.0, 1.0)
-	if _turned >= need:
+	var done_turn := absf(_turned)
+	progress = 0.3 + 0.7 * clampf(done_turn / need, 0.0, 1.0)
+	if done_turn >= need:
 		var t := int(ceil(sim.time))
 		pass_with("SUM_" + key, [] if mode == "kids" else [floori(t / 60.0), t % 60])
 	elif not air_warnings(sim):
-		say("HINT_WING_CIRCLE" if d < 60.0 else "HINT_WING_BACK", [ceili((need - _turned) / TAU)])
+		say("HINT_WING_CIRCLE" if d < 60.0 else "HINT_WING_BACK", [ceili((need - done_turn) / TAU)])

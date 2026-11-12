@@ -6,7 +6,7 @@ extends WingTask
 
 const HOUSES := [0, 1, 2, 3]
 const NEAR := 12.0
-const LOW := 50.0
+const LOW := 20.0  # low enough for a clear picture of the roof
 
 var _done: Array[int] = []
 var _t := 0.0
