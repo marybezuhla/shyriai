@@ -9,7 +9,7 @@ func build() -> void:
 	look.add_child(UI.eyebrow(tr("SET_THEME")))
 	if Prefs.mode == "kids":
 		# Kids mode has its own light look; the grown-up's choice comes back after Kids mode.
-		look.add_child(UI.panel(UI.label(tr("THEME_KIDS_NOTE"), 14, 600), Pal.c("surface"), 18, 14))
+		look.add_child(UI.panel(UI.label(tr("THEME_KIDS_NOTE"), UI.BODY, 600), Pal.c("surface"), 18, 14))
 	else:
 		look.add_child(UI.segmented([
 			["dusk", tr("THEME_DUSK")], ["day", tr("THEME_DAY")], ["system", tr("THEME_SYSTEM")],
@@ -42,12 +42,12 @@ func build() -> void:
 		sticks.add_child(UI.eyebrow(tr("SET_STICKS")))
 		sticks.add_child(UI.segmented([["2", "Mode 2"], ["1", "Mode 1"]], Prefs.stick_mode,
 			func(v): Prefs.set_stick_mode(v)))
-		sticks.add_child(UI.label(tr("STICKS_MODE_DESC"), 13, 500, "muted"))
-		sticks.add_child(UI.label(tr("STICKS_FEEL"), 15, 700))
+		sticks.add_child(UI.label(tr("STICKS_MODE_DESC"), UI.SMALL, 500, "muted"))
+		sticks.add_child(UI.label(tr("STICKS_FEEL"), UI.TEXT, 700))
 		sticks.add_child(UI.segmented([
 			["normal", tr("FEEL_NORMAL")], ["soft", tr("FEEL_SOFT")], ["softer", tr("FEEL_SOFTER")],
 		], Prefs.stick_feel, func(v): Prefs.set_stick_feel(v)))
-		sticks.add_child(UI.label(tr("STICKS_FEEL_DESC"), 13, 500, "muted"))
+		sticks.add_child(UI.label(tr("STICKS_FEEL_DESC"), UI.SMALL, 500, "muted"))
 		add_child(sticks)
 
 	var kids := UI.vbox(10)
@@ -60,7 +60,7 @@ func build() -> void:
 
 	var row := UI.hbox(14)
 	row.add_child(Glyph.make("info", 22, Pal.c("accent_text")))
-	var t := UI.label(tr("ABOUT"), 16, 700)
+	var t := UI.label(tr("ABOUT"), UI.LEAD, 700)
 	t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(t)
 	row.add_child(Glyph.make("chevron", 20, Pal.c("muted")))
@@ -81,24 +81,24 @@ func _progress_section() -> void:
 	if undo != "":
 		var col := UI.vbox(10)
 		var undone := tr("MODE_" + Prefs.undo_mode().to_upper())
-		col.add_child(UI.label(tr("ERASE_DONE") if undo == "all" else tr("RESET_DONE") % undone, 14, 600))
+		col.add_child(UI.label(tr("ERASE_DONE") if undo == "all" else tr("RESET_DONE") % undone, UI.BODY, 600))
 		col.add_child(UI.primary(tr("RESET_UNDO"), func(): Prefs.undo_reset(); rebuild()))
 		box.add_child(UI.panel(col, Pal.c("surface"), 18, 14))
 	elif _confirm != "":
 		var all := _confirm == "all"
 		var col2 := UI.vbox(10)
-		col2.add_child(UI.label(tr("ERASE_ASK") if all else tr("RESET_ASK") % mode_name, 14, 600))
+		col2.add_child(UI.label(tr("ERASE_ASK") if all else tr("RESET_ASK") % mode_name, UI.BODY, 600))
 		var r := UI.hbox(10)
 		var yes_text := tr("ERASE_YES") if all else tr("RESET_YES")
 		var yes := CenterContainer.new()
 		yes.custom_minimum_size = Vector2(0, 52)
-		yes.add_child(UI.label(yes_text, 15, 800, "on_accent", false, false))
+		yes.add_child(UI.label(yes_text, UI.TEXT, 800, "on_accent", false, false))
 		var y := UI.tappable(yes, Pal.c("accent"), confirm_erase, yes_text, 16, 0)
 		y.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		r.add_child(y)
 		var no := CenterContainer.new()
 		no.custom_minimum_size = Vector2(0, 52)
-		no.add_child(UI.label(tr("CANCEL"), 15, 700, "text", false, false))
+		no.add_child(UI.label(tr("CANCEL"), UI.TEXT, 700, "text", false, false))
 		var n := UI.tappable(no, Pal.c("surface2"), func(): _confirm = ""; rebuild(), tr("CANCEL"), 16, 0)
 		n.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		r.add_child(n)
@@ -122,7 +122,7 @@ func confirm_erase() -> void:
 
 func _action_row(text: String, active: bool, kind: String) -> Control:
 	var row := UI.hbox(12)
-	var t := UI.label(text, 16, 700, "text" if active else "muted")
+	var t := UI.label(text, UI.LEAD, 700, "text" if active else "muted")
 	t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(t)
 	if not active:

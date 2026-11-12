@@ -13,13 +13,13 @@ func build() -> void:
 	var names := UI.vbox(2)
 	names.alignment = BoxContainer.ALIGNMENT_CENTER
 	names.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	names.add_child(UI.label(tr("APP_NAME"), 22, 600, "text", true))
-	names.add_child(UI.label(tr("ABOUT_VERSION") % ProjectSettings.get_setting("application/config/version", "?"), 13, 600, "muted"))
+	names.add_child(UI.label(tr("APP_NAME"), UI.TITLE_L, 600, "text", true))
+	names.add_child(UI.label(tr("ABOUT_VERSION") % ProjectSettings.get_setting("application/config/version", "?"), UI.SMALL, 600, "muted"))
 	top.add_child(names)
 	add_child(top)
 
-	add_child(UI.label(tr("ABOUT_WHAT"), 15, 500))
-	add_child(UI.label(tr("ABOUT_COPYRIGHT"), 13, 600, "muted"))
+	add_child(UI.label(tr("ABOUT_WHAT"), UI.TEXT, 500))
+	add_child(UI.label(tr("ABOUT_COPYRIGHT"), UI.SMALL, 600, "muted"))
 
 	# The letter speaks of the war, and the defence fundraisers are for grown-ups:
 	# Kids mode shows only the humanitarian help.
@@ -31,7 +31,7 @@ func build() -> void:
 	var src := UI.vbox(6)
 	src.add_child(UI.eyebrow(tr("ABOUT_SOURCE_T")))
 	var link_row := UI.hbox(10)
-	var url := UI.label(SOURCE_URL.trim_prefix("https://"), 15, 700, "accent_text")
+	var url := UI.label(SOURCE_URL.trim_prefix("https://"), UI.TEXT, 700, "accent_text")
 	url.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	link_row.add_child(url)
 	link_row.add_child(Glyph.make("link", 18, Pal.c("accent_text")))
@@ -46,7 +46,7 @@ func build() -> void:
 	add_child(_section(tr("ABOUT_PARTS_T"), tr("ABOUT_PARTS")))
 
 	var row := UI.hbox(12)
-	var t := UI.label(tr("ABOUT_FULL_LICENSES"), 15, 700)
+	var t := UI.label(tr("ABOUT_FULL_LICENSES"), UI.TEXT, 700)
 	t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(t)
 	row.add_child(Glyph.make("chevron", 20, Pal.c("muted")))
@@ -56,7 +56,7 @@ func build() -> void:
 func _section(title: String, body: String) -> Control:
 	var v := UI.vbox(6)
 	v.add_child(UI.eyebrow(title))
-	v.add_child(UI.label(body, 14, 500, "muted"))
+	v.add_child(UI.label(body, UI.BODY, 500, "muted"))
 	return v
 
 
@@ -65,12 +65,12 @@ func _letter() -> Control:
 	var v := UI.vbox(12)
 	for i in range(1, 8):
 		# Left-aligned: long centred lines are hard to follow with low vision.
-		v.add_child(UI.label(tr("LETTER_%d" % i), 15, 500))
-	var sig := UI.label(tr("LETTER_SIGN"), 15, 600, "accent_text")
+		v.add_child(UI.label(tr("LETTER_%d" % i), UI.TEXT, 500))
+	var sig := UI.label(tr("LETTER_SIGN"), UI.TEXT, 600, "accent_text")
 	sig.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(sig)
 	v.add_child(_photo(72))
-	var who := UI.label(tr("AUTHOR_NAME"), 14, 600)
+	var who := UI.label(tr("AUTHOR_NAME"), UI.BODY, 600)
 	who.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(who)
 	return UI.panel(v, Pal.c("surface"))
@@ -99,17 +99,17 @@ func _photo(px: int) -> Control:
 func _support() -> Control:
 	var v := UI.vbox(10)
 	v.add_child(UI.eyebrow(tr("SUPPORT_TITLE")))
-	v.add_child(UI.label(tr("SUPPORT_KIDS") if Prefs.mode == "kids" else tr("SUPPORT_NOTE"), 13, 500, "muted"))
+	v.add_child(UI.label(tr("SUPPORT_KIDS") if Prefs.mode == "kids" else tr("SUPPORT_NOTE"), UI.SMALL, 500, "muted"))
 	# Learning first (Brave1), then the state's own fundraising
 	var groups := [["SUPPORT_DEFENCE", ["BRAVE1", "UNITED24_DEFENCE", "NBU"]], ["SUPPORT_HUMANITARIAN", ["UNITED24_HUMANITARIAN", "REDCROSS"]]]
 	if Prefs.mode == "kids":
 		groups = groups.slice(1)
 	for group in groups:
-		v.add_child(UI.label(tr(group[0]), 15, 700, "accent_text"))
+		v.add_child(UI.label(tr(group[0]), UI.TEXT, 700, "accent_text"))
 		for org in group[1]:
 			v.add_child(_cause(org))
 	if Prefs.mode != "kids":
-		v.add_child(UI.label(tr("SUPPORT_ANY"), 13, 500, "muted"))
+		v.add_child(UI.label(tr("SUPPORT_ANY"), UI.SMALL, 500, "muted"))
 	return v
 
 
@@ -118,9 +118,9 @@ func _cause(key: String) -> Control:
 	var url: String = tr("ORG_%s_URL" % base)
 	var what: String = tr("ORG_%s" % key) if key != base else tr("ORG_%s_WHAT" % base)
 	var col := UI.vbox(2)
-	col.add_child(UI.label(tr("ORG_%s" % base), 15, 700))
-	col.add_child(UI.label(what, 13, 500, "muted"))
-	col.add_child(UI.label(url.trim_prefix("https://").get_slice("/", 0), 13, 700, "accent_text"))
+	col.add_child(UI.label(tr("ORG_%s" % base), UI.TEXT, 700))
+	col.add_child(UI.label(what, UI.SMALL, 500, "muted"))
+	col.add_child(UI.label(url.trim_prefix("https://").get_slice("/", 0), UI.SMALL, 700, "accent_text"))
 	if Prefs.mode == "kids":
 		return UI.panel(col, Pal.c("surface"))
 	return UI.tappable(col, Pal.c("surface"), func(): OS.shell_open(url), tr("ORG_%s" % base))

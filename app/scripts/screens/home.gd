@@ -9,7 +9,7 @@ func build() -> void:
 	# App name and settings
 	var top := UI.hbox(10)
 	top.add_child(Logo.make(36))
-	var app_name := UI.label(tr("APP_NAME"), 20, 600, "text", true, false)
+	var app_name := UI.label(tr("APP_NAME"), UI.TITLE, 600, "text", true, false)
 	app_name.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	app_name.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	top.add_child(app_name)
@@ -24,7 +24,7 @@ func build() -> void:
 	mode_box.add_child(UI.segmented([
 		["kids", tr("MODE_KIDS")], ["simple", tr("MODE_SIMPLE")], ["pro", tr("MODE_PRO")],
 	], Prefs.mode, _pick_mode))
-	var desc := UI.label(tr("MODE_%s_DESC" % Prefs.mode.to_upper()), 14, 500, "muted")
+	var desc := UI.label(tr("MODE_%s_DESC" % Prefs.mode.to_upper()), UI.BODY, 500, "muted")
 	desc.custom_minimum_size = Vector2(0, 40)
 	mode_box.add_child(desc)
 	add_child(mode_box)
@@ -77,11 +77,11 @@ func _continue_card() -> Control:
 	text.add_child(UI.eyebrow(tr("HOME_CONTINUE") if done > 0 else tr("HOME_START"), "on_accent"))
 	var kids := Prefs.mode == "kids"
 	var lesson := Curriculum.label(lessons[idx]) if kids else tr("LESSON_N") % (idx + 1) + ". " + Curriculum.label(lessons[idx])
-	text.add_child(UI.label(lesson, 16, 600, "on_accent", true))
+	text.add_child(UI.label(lesson, UI.LEAD, 600, "on_accent", true))
 	var where := Curriculum.label("VEH_" + vehicle.to_upper())
 	if not kids:
 		where += " · " + tr("LESSONS_OF") % [done, lessons.size()]
-	text.add_child(UI.label(where, 13, 600, "on_accent"))
+	text.add_child(UI.label(where, UI.SMALL, 600, "on_accent"))
 
 	var play := PanelContainer.new()
 	play.add_theme_stylebox_override("panel", UI.box(Pal.c("on_accent"), 24, 0))
@@ -109,15 +109,15 @@ func _vehicle_card(v: String) -> Control:
 	var text := UI.vbox(3)
 	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	text.alignment = BoxContainer.ALIGNMENT_CENTER
-	text.add_child(UI.label(Curriculum.label("VEH_" + v.to_upper()), 16, 700))
-	text.add_child(UI.label(Curriculum.label("VEH_%s_DESC" % v.to_upper()), 14, 500, "muted"))
+	text.add_child(UI.label(Curriculum.label("VEH_" + v.to_upper()), UI.LEAD, 700))
+	text.add_child(UI.label(Curriculum.label("VEH_%s_DESC" % v.to_upper()), UI.BODY, 500, "muted"))
 
 	var done := Prefs.passed_count(v)
 	var row := UI.hbox(14)
 	row.add_child(icon_bg)
 	row.add_child(text)
 	if Prefs.mode != "kids":
-		row.add_child(UI.label("%d/%d" % [done, Curriculum.lessons(v, Prefs.mode).size()], 13, 700, "accent_text" if done > 0 else "muted", false, false))
+		row.add_child(UI.label("%d/%d" % [done, Curriculum.lessons(v, Prefs.mode).size()], UI.SMALL, 700, "accent_text" if done > 0 else "muted", false, false))
 	return UI.tappable(row, Pal.c("surface"), func(): app.open_lessons(v), Curriculum.label("VEH_" + v.to_upper()))
 
 
@@ -134,8 +134,8 @@ func _cards_card() -> Control:
 	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	text.alignment = BoxContainer.ALIGNMENT_CENTER
 	var title := tr("HOME_CARDS_KIDS" if kids else "HOME_CARDS")
-	text.add_child(UI.label(title, 16, 700))
-	text.add_child(UI.label(tr("HOME_CARDS_DESC_KIDS" if kids else "HOME_CARDS_DESC"), 14, 500, "muted"))
+	text.add_child(UI.label(title, UI.LEAD, 700))
+	text.add_child(UI.label(tr("HOME_CARDS_DESC_KIDS" if kids else "HOME_CARDS_DESC"), UI.BODY, 500, "muted"))
 	var row := UI.hbox(14)
 	row.add_child(icon_bg)
 	row.add_child(text)

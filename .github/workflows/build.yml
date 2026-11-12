@@ -61,6 +61,9 @@ jobs:
           distribution: temurin
           java-version: 17
 
+      - name: Check that every text in strings.csv is used
+        run: python3 .github/check-strings.py app
+
       - name: Get Godot and its Android templates (checked by SHA-512)
         shell: bash
         run: |

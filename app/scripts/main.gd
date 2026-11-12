@@ -230,7 +230,7 @@ func _build_nav() -> void:
 		var ic := CenterContainer.new()
 		ic.add_child(Glyph.make(t[1], 24, Pal.c(token)))
 		col.add_child(ic)
-		var l := UI.label(tr(t[2]), 12, 700 if on else 600, token, false, false)
+		var l := UI.label(tr(t[2]), UI.CAPTION, 700 if on else 600, token, false, false)
 		l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		col.add_child(l)
 		col.custom_minimum_size = Vector2(0, 48)

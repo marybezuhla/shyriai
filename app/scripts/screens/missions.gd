@@ -4,16 +4,16 @@ extends Screen
 
 
 func build() -> void:
-	add_child(UI.label(tr("TAB_MISSIONS"), 24, 600, "text", true))
-	add_child(UI.label(tr("MISSIONS_INTRO"), 14, 500, "muted"))
+	add_child(UI.label(tr("TAB_MISSIONS"), UI.DISPLAY, 600, "text", true))
+	add_child(UI.label(tr("MISSIONS_INTRO"), UI.BODY, 500, "muted"))
 	for v in Curriculum.VEHICLES:
 		var group := UI.vbox(10)
 		group.add_child(UI.eyebrow(Curriculum.label("VEH_" + v.to_upper())))
 		for m in Curriculum.missions(v, Prefs.mode):
 			var text := UI.vbox(3)
 			text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-			text.add_child(UI.label(Curriculum.label(m), 16, 700))
-			text.add_child(UI.label(tr(m + "_DESC"), 13, 500, "muted"))
+			text.add_child(UI.label(Curriculum.label(m), UI.LEAD, 700))
+			text.add_child(UI.label(tr(m + "_DESC"), UI.SMALL, 500, "muted"))
 			var row := UI.hbox(12)
 			row.add_child(text)
 			var done: bool = Prefs.mission_done(m)

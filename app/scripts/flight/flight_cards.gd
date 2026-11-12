@@ -7,7 +7,7 @@ extends RefCounted
 
 static func pause(f) -> Control:
 	var col := UI.vbox(12)
-	col.add_child(UI.label(f.tr("PAUSE"), 20, 600, "text", true))
+	col.add_child(UI.label(f.tr("PAUSE"), UI.TITLE, 600, "text", true))
 	col.add_child(UI.primary(f.tr("RESUME"), f.resume, "play"))
 	col.add_child(secondary(f.tr("RESTART"), f.restart))
 	col.add_child(secondary(f.tr("EXIT"), f.leave))
@@ -16,10 +16,10 @@ static func pause(f) -> Control:
 
 static func passed(f, got: int, before: Dictionary, next: String) -> Control:
 	var col := UI.vbox(12)
-	col.add_child(UI.label(f.tr("PASSED_KIDS") if f.mode == "kids" else f.tr("PASSED"), 22, 600, "text", true))
+	col.add_child(UI.label(f.tr("PASSED_KIDS") if f.mode == "kids" else f.tr("PASSED"), UI.TITLE_L, 600, "text", true))
 	col.add_child(rating(f, got, before))
 	if f.task.summary != "":
-		col.add_child(UI.label(summary(f), 14, 500, "muted"))
+		col.add_child(UI.label(summary(f), UI.BODY, 500, "muted"))
 	if f.task is PhotoTask and not f.task.wrong.is_empty():
 		col.add_child(Report.mistakes(f, f.task))
 	if next != "":
@@ -57,29 +57,29 @@ static func rating(f, got: int, before: Dictionary) -> Control:
 			line = f.tr("RESULT_RECORD") % t
 		else:
 			line = f.tr("RESULT_TIME") % [t, FlightTask.clock(float(Prefs.best_of(f.task_key)["t"]))]
-		box.add_child(UI.label(line, 14, 600, "text", false, false))
+		box.add_child(UI.label(line, UI.BODY, 600, "text", false, false))
 	var tip := Rating.next_tip(f.task_key, f.mode, got)
 	if tip[0] != "":
 		var s: String = f.tr(tip[0])
 		if not tip[1].is_empty():
 			s = s % tip[1]
-		box.add_child(UI.label(s, 13, 500, "muted"))
+		box.add_child(UI.label(s, UI.SMALL, 500, "muted"))
 	return box
 
 
 static func crashed(f) -> Control:
 	var col := UI.vbox(12)
 	if f.sim is UgvSim:
-		col.add_child(UI.label(f.tr("CRASHED_UGV"), 22, 600, "text", true))
+		col.add_child(UI.label(f.tr("CRASHED_UGV"), UI.TITLE_L, 600, "text", true))
 		var tipped := false
 		for e in f.sim.events:
 			tipped = tipped or e["type"] == "tipped"
 		var why: String = f.tr("CRASHED_UGV_TIP") if tipped else f.tr("CRASHED_UGV_HIT")
 		var speed: float = f.sim.crash_speed
-		col.add_child(UI.label(why % (FlightTask.num(speed, 0) if tipped else FlightTask.num(speed)), 14, 500, "muted"))
+		col.add_child(UI.label(why % (FlightTask.num(speed, 0) if tipped else FlightTask.num(speed)), UI.BODY, 500, "muted"))
 	else:
-		col.add_child(UI.label(f.tr("CRASHED"), 22, 600, "text", true))
-		col.add_child(UI.label(f.tr("CRASHED_TEXT") % FlightTask.num(f.sim.crash_speed), 14, 500, "muted"))
+		col.add_child(UI.label(f.tr("CRASHED"), UI.TITLE_L, 600, "text", true))
+		col.add_child(UI.label(f.tr("CRASHED_TEXT") % FlightTask.num(f.sim.crash_speed), UI.BODY, 500, "muted"))
 	col.add_child(UI.primary(f.tr("AGAIN"), f.restart, "play"))
 	col.add_child(secondary(f.tr("EXIT"), f.leave))
 	return col
@@ -87,8 +87,8 @@ static func crashed(f) -> Control:
 
 static func not_this_time(f) -> Control:
 	var col := UI.vbox(12)
-	col.add_child(UI.label(f.tr("NOT_THIS_TIME"), 22, 600, "text", true))
-	col.add_child(UI.label(summary(f), 14, 500, "muted"))
+	col.add_child(UI.label(f.tr("NOT_THIS_TIME"), UI.TITLE_L, 600, "text", true))
+	col.add_child(UI.label(summary(f), UI.BODY, 500, "muted"))
 	if f.task is PhotoTask and not f.task.wrong.is_empty():
 		col.add_child(Report.mistakes(f, f.task))
 	col.add_child(UI.primary(f.tr("AGAIN"), f.restart, "play"))
@@ -106,7 +106,7 @@ static func summary(f) -> String:
 static func secondary(text: String, on_press: Callable) -> Control:
 	var c := CenterContainer.new()
 	c.custom_minimum_size = Vector2(0, 48)
-	c.add_child(UI.label(text, 15, 700, "text", false, false))
+	c.add_child(UI.label(text, UI.TEXT, 700, "text", false, false))
 	return UI.tappable(c, Pal.c("surface2"), on_press, text, 16, 0)
 
 

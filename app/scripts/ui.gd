@@ -8,6 +8,21 @@ const RADIUS_CARD := 18
 const RADIUS_PILL := 14
 
 
+## Text sizes in design units, before the reader's text-size setting. One place, so the
+## whole app can be tuned together.
+const MICRO := 11
+const CAPTION := 12
+const SMALL := 13
+const BODY := 14
+const TEXT := 15
+const LEAD := 16
+const TITLE_S := 18
+const TITLE := 20
+const TITLE_L := 22
+const DISPLAY := 24
+const DISPLAY_L := 30
+
+
 static func label(text: String, px: int, weight := 500, token := "text", display := false, wraps := true) -> Label:
 	var l := Label.new()
 	l.text = text

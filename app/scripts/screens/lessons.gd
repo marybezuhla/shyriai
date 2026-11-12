@@ -46,8 +46,8 @@ func _build_lessons(lessons: Array, done: int) -> void:
 		var text := UI.vbox(1)
 		text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		text.alignment = BoxContainer.ALIGNMENT_CENTER
-		text.add_child(UI.label(Curriculum.label(lessons[i]), 15, 700, "text" if i <= done else "muted"))
-		text.add_child(UI.label(tr(Curriculum.text_key(lessons[i] + "_NOTE", Prefs.mode)), 13, 500, "muted"))
+		text.add_child(UI.label(Curriculum.label(lessons[i]), UI.TEXT, 700, "text" if i <= done else "muted"))
+		text.add_child(UI.label(tr(Curriculum.text_key(lessons[i] + "_NOTE", Prefs.mode)), UI.SMALL, 500, "muted"))
 		if state == "done":
 			text.add_child(_flowers(lessons[i], 16))
 		var row := UI.hbox(14)
@@ -63,7 +63,7 @@ func _build_lessons(lessons: Array, done: int) -> void:
 		path.add_row(t, dot)
 	add_child(path)
 	if Prefs.mode != "pro" and Curriculum.lessons(vehicle).any(func(k): return k in Curriculum.PRO_ONLY):
-		add_child(UI.label(tr("LESSON_PRO_ONLY"), 13, 600, "muted"))
+		add_child(UI.label(tr("LESSON_PRO_ONLY"), UI.SMALL, 600, "muted"))
 	add_child(_lesson_card(lessons, done))
 
 
@@ -79,7 +79,7 @@ func _dot(i: int, state: String) -> Control:
 	elif Prefs.mode == "kids":
 		c.add_child(Glyph.make("play" if state == "next" else "lock", 18, Pal.c("accent_text") if state == "next" else Pal.c("faint")))
 	else:
-		var n := UI.label(str(i + 1), 15, 800, "accent_text" if state == "next" else "faint", false, false)
+		var n := UI.label(str(i + 1), UI.TEXT, 800, "accent_text" if state == "next" else "faint", false, false)
 		c.add_child(n)
 	p.add_child(c)
 	p.size_flags_vertical = Control.SIZE_SHRINK_CENTER
@@ -91,19 +91,19 @@ func _lesson_card(lessons: Array, done: int) -> Control:
 	var card := UI.vbox(12)
 	var head := UI.vbox(4)
 	head.add_child(UI.eyebrow(tr("LESSON") if Prefs.mode == "kids" else tr("LESSON_N") % (selected + 1), "accent_text"))
-	head.add_child(UI.label(Curriculum.label(key), 18, 600, "text", true))
-	head.add_child(UI.label(tr(Curriculum.text_key(key + "_GOAL", Prefs.mode)), 14, 500, "muted"))
+	head.add_child(UI.label(Curriculum.label(key), UI.TITLE_S, 600, "text", true))
+	head.add_child(UI.label(tr(Curriculum.text_key(key + "_GOAL", Prefs.mode)), UI.BODY, 500, "muted"))
 	card.add_child(head)
 	var chips := HFlowContainer.new()
 	chips.add_theme_constant_override("h_separation", 8)
 	chips.add_theme_constant_override("v_separation", 8)
 	for part in tr(Curriculum.text_key(key + "_PASS", Prefs.mode)).split("|"):
-		chips.add_child(UI.panel(UI.label(part.strip_edges(), 13, 700, "text", false, false), Pal.c("surface2"), 10, 7))
+		chips.add_child(UI.panel(UI.label(part.strip_edges(), UI.SMALL, 700, "text", false, false), Pal.c("surface2"), 10, 7))
 	card.add_child(chips)
 	if selected <= done:
 		card.add_child(UI.primary(tr("LESSON_START"), func(): app.start(vehicle, key), "play"))
 	else:
-		card.add_child(UI.label(tr("LESSON_LOCKED"), 13, 600, "muted"))
+		card.add_child(UI.label(tr("LESSON_LOCKED"), UI.SMALL, 600, "muted"))
 	return UI.panel(card, Pal.c("surface"), 22, 18)
 
 
@@ -112,8 +112,8 @@ func _build_missions() -> void:
 	for m in Curriculum.missions(vehicle, Prefs.mode):
 		var text := UI.vbox(3)
 		text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		text.add_child(UI.label(Curriculum.label(m), 16, 700))
-		text.add_child(UI.label(tr(m + "_DESC"), 13, 500, "muted"))
+		text.add_child(UI.label(Curriculum.label(m), UI.LEAD, 700))
+		text.add_child(UI.label(tr(m + "_DESC"), UI.SMALL, 500, "muted"))
 		if Prefs.mission_done(m):
 			text.add_child(_flowers(m, 16))
 		var row := UI.hbox(12)
@@ -147,7 +147,7 @@ func _flowers(key: String, px: int) -> Control:
 func _build_free() -> void:
 	var col := UI.vbox(14)
 	var machine := Curriculum.machine(vehicle)
-	col.add_child(UI.label(tr("FREE_DESC_UGV" if machine == "ugv" else "FREE_DESC"), 14, 500, "muted"))
+	col.add_child(UI.label(tr("FREE_DESC_UGV" if machine == "ugv" else "FREE_DESC"), UI.BODY, 500, "muted"))
 	if Prefs.mode != "kids":
 		if machine != "ugv":
 			col.add_child(UI.eyebrow(tr("FREE_WIND")))

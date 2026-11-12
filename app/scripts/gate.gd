@@ -39,12 +39,12 @@ func _ready() -> void:
 
 	var col := UI.vbox(14)
 	col.custom_minimum_size = Vector2(300, 0)
-	col.add_child(UI.label(tr("GATE_TITLE"), 20, 600, "text", true))
-	col.add_child(UI.label(tr("GATE_TEXT"), 14, 500, "muted"))
-	_answer = UI.label("", 30, 600, "text", true, false)
+	col.add_child(UI.label(tr("GATE_TITLE"), UI.TITLE, 600, "text", true))
+	col.add_child(UI.label(tr("GATE_TEXT"), UI.BODY, 500, "muted"))
+	_answer = UI.label("", UI.DISPLAY_L, 600, "text", true, false)
 	_answer.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	col.add_child(UI.panel(_answer, Pal.c("surface2"), 16, 14))
-	_note = UI.label("", 13, 600, "accent_text")
+	_note = UI.label("", UI.SMALL, 600, "accent_text")
 	col.add_child(_note)
 
 	var grid := GridContainer.new()
@@ -56,7 +56,7 @@ func _ready() -> void:
 		c.custom_minimum_size = Vector2(0, 52)
 		var is_ok: bool = k == "OK"
 		var text: String = tr("GATE_OK") if is_ok else k
-		c.add_child(UI.label(text, 20, 700, "on_accent" if is_ok else "text", false, false))
+		c.add_child(UI.label(text, UI.TITLE, 700, "on_accent" if is_ok else "text", false, false))
 		var key: String = k
 		var name_: String = tr("GATE_ERASE") if k == "⌫" else text
 		var t := UI.tappable(c, Pal.c("accent") if is_ok else Pal.c("surface"), func(): _press(key), name_, 14, 0)
@@ -66,7 +66,7 @@ func _ready() -> void:
 
 	var cancel := CenterContainer.new()
 	cancel.custom_minimum_size = Vector2(0, 44)
-	cancel.add_child(UI.label(tr("CANCEL"), 15, 700, "muted", false, false))
+	cancel.add_child(UI.label(tr("CANCEL"), UI.TEXT, 700, "muted", false, false))
 	col.add_child(UI.tappable(cancel, Color(0, 0, 0, 0), close, tr("CANCEL"), 14, 0))
 	center.add_child(col)
 	_refresh()

@@ -18,7 +18,7 @@ func build(task_: FlightTask, sim_: DroneSim) -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var c := CenterContainer.new()
 	c.custom_minimum_size = Vector2(76, 76)
-	_label = UI.label("", 13, 800, "on_accent", false, false)
+	_label = UI.label("", UI.SMALL, 800, "on_accent", false, false)
 	_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	c.add_child(_label)
 	_tap = UI.tappable(c, Pal.c("accent"), func(): task.act(sim), "", 38, 0)

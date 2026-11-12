@@ -14,9 +14,9 @@ static func card(f, task: PhotoTask) -> Control:
 		i += 1
 	var item: Dictionary = task.report[i]
 	var col := UI.vbox(10)
-	col.add_child(UI.label(f.tr("REPORT_N") % [i + 1, task.report.size()], 18, 600, "text", true))
+	col.add_child(UI.label(f.tr("REPORT_N") % [i + 1, task.report.size()], UI.TITLE_S, 600, "text", true))
 	col.add_child(picture(task.photos[item["photo"]].get("image"), THUMB))
-	col.add_child(UI.label(f.tr(item["prompt"]), 15, 700, "text"))
+	col.add_child(UI.label(f.tr(item["prompt"]), UI.TEXT, 700, "text"))
 	var row := HFlowContainer.new()
 	row.add_theme_constant_override("h_separation", 8)
 	row.add_theme_constant_override("v_separation", 8)
@@ -24,7 +24,7 @@ static func card(f, task: PhotoTask) -> Control:
 		var id: String = opt[0]
 		var c := CenterContainer.new()
 		c.custom_minimum_size = Vector2(130, 46)
-		c.add_child(UI.label(_option(f, opt[1]), 15, 800, "on_accent", false, false))
+		c.add_child(UI.label(_option(f, opt[1]), UI.TEXT, 800, "on_accent", false, false))
 		row.add_child(UI.tappable(c, Pal.c("accent"), func(): f.report_answer(i, id), _option(f, opt[1]), 14, 0))
 	col.add_child(row)
 	return col
@@ -41,7 +41,7 @@ static func mistakes(f, task: PhotoTask) -> Control:
 		row.add_child(pic)
 		var said := _label_of(f, item, item["given"])
 		var truth := _label_of(f, item, item["answer"])
-		var l := UI.label(f.tr("REPORT_WRONG") % [j + 1, said, truth], 13, 600, "text")
+		var l := UI.label(f.tr("REPORT_WRONG") % [j + 1, said, truth], UI.SMALL, 600, "text")
 		l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		row.add_child(l)
 		col.add_child(row)

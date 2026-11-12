@@ -410,7 +410,7 @@ func _build_chip() -> Control:
 	var title := Curriculum.label(task_key)
 	if not task.is_mission and not task.is_free and mode != "kids":
 		title = tr("LESSON_N") % (Curriculum.lessons(vehicle, mode).find(task_key) + 1) + " · " + title
-	chip.add_child(UI.label(title, 14, 700, "text", false, false))
+	chip.add_child(UI.label(title, UI.BODY, 700, "text", false, false))
 	var bar_row := UI.hbox(8)
 	var bar := Panel.new()
 	bar.custom_minimum_size = Vector2(BAR_W, 6)
@@ -421,7 +421,7 @@ func _build_chip() -> Control:
 	bar.add_child(_bar_fill)
 	bar_row.add_child(bar)
 	if mode != "kids":
-		_bar_text = UI.label("0 %", 12, 700, "muted", false, false)
+		_bar_text = UI.label("0 %", UI.CAPTION, 700, "muted", false, false)
 		bar_row.add_child(_bar_text)
 	if task.is_free:
 		# Free flight has no progress: the bar is not shown, and not kept either.
@@ -442,7 +442,7 @@ func _build_chip() -> Control:
 		_meter_fill.size = Vector2(BAR_W, 6)
 		mbar.add_child(_meter_fill)
 		mrow.add_child(mbar)
-		var meter_text := UI.label(tr(Curriculum.text_key(task.meter_label, mode)), 12, 700, "muted", false, false)
+		var meter_text := UI.label(tr(Curriculum.text_key(task.meter_label, mode)), UI.CAPTION, 700, "muted", false, false)
 		mrow.add_child(meter_text)
 		chip.add_child(mrow)
 	return chip
@@ -456,7 +456,7 @@ func _build_counters(top: HBoxContainer, glass: Color) -> void:
 			# Sunflowers are what the kitten mission collects; other counts need no picture.
 			if task.key == "MIS_CAM_KITTEN":
 				row.add_child(Glyph.make("sunflower", 26, Pal.c("accent")))
-			_counter = UI.label("0", 18, 700, "text", true, false)
+			_counter = UI.label("0", UI.TITLE_S, 700, "text", true, false)
 			row.add_child(_counter)
 			top.add_child(UI.panel(row, glass, 22, 10))
 	else:
@@ -475,7 +475,7 @@ func _build_counters(top: HBoxContainer, glass: Color) -> void:
 			var head := UI.eyebrow(tr("STAT_" + n))
 			head.autowrap_mode = TextServer.AUTOWRAP_OFF
 			s.add_child(head)
-			var v := UI.label("–", 16, 800, "text", false, false)
+			var v := UI.label("–", UI.LEAD, 800, "text", false, false)
 			_stats[n] = v
 			s.add_child(v)
 			stats.add_child(s)
@@ -544,7 +544,7 @@ func _stick_with_label(s: Stick, text: String) -> Control:
 	v.add_child(s)
 	if mode != "kids":
 		# On a small glass pill, so the label reads over any part of the world.
-		var l := UI.label(text, 12, 700, "text", false, false)
+		var l := UI.label(text, UI.CAPTION, 700, "text", false, false)
 		l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		var glass := Pal.c("bg")
 		glass.a = 0.78

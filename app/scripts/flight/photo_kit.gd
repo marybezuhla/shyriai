@@ -27,7 +27,7 @@ func build(task_: PhotoTask, kids: bool, shutter: Callable) -> void:
 		var ic := CenterContainer.new()
 		ic.add_child(_tilt_icon)
 		col.add_child(ic)
-		_tilt_label = UI.label(tr("TILT_" + task.tilt.to_upper()), 11, 700, "text", false, false)
+		_tilt_label = UI.label(tr("TILT_" + task.tilt.to_upper()), UI.MICRO, 700, "text", false, false)
 		_tilt_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		col.add_child(_tilt_label)
 		var tilt := UI.tappable(col, glass, _cycle, tr("TILT"), 14, 6)
