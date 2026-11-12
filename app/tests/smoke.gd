@@ -119,8 +119,13 @@ func _flights() -> void:
 				ap = load("res://tests/fpv_autopilot.gd").new()
 			elif f.sim is UgvSim:
 				ap = load("res://tests/ugv_autopilot.gd").new()
-			ap.height = 3.0
-			ap.target = f.world.hold_mark
+			if f.sim is WingSim:
+				# The plane flies on, level, towards the far end of the valley.
+				ap = load("res://tests/wing_autopilot.gd").new()
+				ap.target = f.sim.pos + Vector3(0, 0, -200)
+			else:
+				ap.height = 3.0
+				ap.target = f.world.hold_mark
 			if key == "MIS_CAM_KITTEN":
 				ap.target = f.world.kitten.lerp(f.world.pad, 0.6)
 			f.autopilot = func(sim, _task): return ap.sticks(sim)

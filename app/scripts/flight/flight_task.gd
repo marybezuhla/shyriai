@@ -63,6 +63,18 @@ const FILES := {
 	"FREE_INTERCEPT": "res://scripts/flight/tasks/free_flight.gd",
 	"MIS_CAM_MEDS": "res://scripts/flight/tasks/mission_meds.gd",
 	"MIS_CAM_DOG": "res://scripts/flight/tasks/mission_dog.gd",
+	"WING_LEVEL": "res://scripts/flight/tasks/wing_rings.gd",
+	"WING_TURN": "res://scripts/flight/tasks/wing_turn.gd",
+	"WING_TAKEOFF": "res://scripts/flight/tasks/wing_takeoff.gd",
+	"WING_CIRCUIT": "res://scripts/flight/tasks/wing_rings.gd",
+	"WING_STALL": "res://scripts/flight/tasks/wing_stall.gd",
+	"WING_LANDING": "res://scripts/flight/tasks/wing_landing.gd",
+	"WING_KIDS_STORKS": "res://scripts/flight/tasks/wing_rings.gd",
+	"MIS_WING_CLOUDS": "res://scripts/flight/tasks/wing_rings.gd",
+	"MIS_WING_KITE": "res://scripts/flight/tasks/wing_find.gd",
+	"MIS_WING_SEARCH": "res://scripts/flight/tasks/wing_find.gd",
+	"MIS_WING_FLOOD": "res://scripts/flight/tasks/wing_flood.gd",
+	"FREE_WING": "res://scripts/flight/tasks/free_flight.gd",
 }
 ## The racing gates of the FPV lessons and the race, in order, centre 2.2 m up.
 const GATE_COURSE: Array[Vector3] = [
@@ -174,6 +186,8 @@ func make_sim(vehicle_: String) -> DroneSim:
 		var u := UgvSim.new(mode, 11)
 		u.grip = world.grip
 		sim = u
+	elif vehicle_ == "wing":
+		sim = WingSim.new(mode, 11)
 	elif vehicle_ == "fpv" and mode != "kids":
 		var f := FpvSim.new(mode, 11)
 		f.flight_mode = flight_mode
@@ -189,7 +203,13 @@ func make_sim(vehicle_: String) -> DroneSim:
 	sim.ground = world.height
 	sim.obstacles = world.obstacles
 	sim.place(start_position(), start_heading())
+	tune(sim)
 	return sim
+
+
+## Override: adjust the physics once it is placed (e.g. the stall lesson turns off stall protection).
+func tune(_sim: DroneSim) -> void:
+	pass
 
 
 ## What the vehicle gets from the sticks: nothing while the radio link is down.

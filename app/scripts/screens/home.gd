@@ -2,8 +2,6 @@
 # First screen: who is flying, what to continue, which vehicle.
 extends Screen
 
-const VEHICLE_ICONS := {"camera": "camera", "fpv": "fpv", "ugv": "ugv", "survey": "photo", "intercept": "intercept"}
-
 
 func build() -> void:
 	# App name and settings
@@ -103,7 +101,7 @@ func _vehicle_card(v: String) -> Control:
 	icon_bg.add_theme_stylebox_override("panel", UI.box(Pal.c("surface2"), 16, 0))
 	var ic := CenterContainer.new()
 	ic.custom_minimum_size = Vector2(52, 52)
-	ic.add_child(Glyph.make(VEHICLE_ICONS[v], 30, Pal.c("accent_text")))
+	ic.add_child(Glyph.make(Curriculum.ICONS[v], 30, Pal.c("accent_text")))
 	icon_bg.add_child(ic)
 
 	var text := UI.vbox(3)

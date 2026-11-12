@@ -3,8 +3,6 @@
 # certificate instead, with no numbers. The name is optional and stays on this phone.
 extends Screen
 
-const ICONS := {"camera": "camera", "fpv": "fpv", "ugv": "ugv", "survey": "photo", "intercept": "intercept"}
-
 
 func build() -> void:
 	var kids := Prefs.mode == "kids"
@@ -59,7 +57,7 @@ func _card(vehicle: String, date: String, kids: bool) -> Control:
 	var brand := UI.eyebrow(tr("CARD_BRAND"))
 	brand.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	top.add_child(brand)
-	top.add_child(Glyph.make(ICONS[vehicle], 26, Pal.c("accent_text")))
+	top.add_child(Glyph.make(Curriculum.ICONS[vehicle], 26, Pal.c("accent_text")))
 	col.add_child(top)
 	col.add_child(UI.label(tr("CARD_KIDS" if kids else "CARD"), UI.TITLE_L, 600, "text", true))
 	col.add_child(UI.label(Curriculum.label("VEH_" + vehicle.to_upper()), UI.BODY, 600, "muted"))

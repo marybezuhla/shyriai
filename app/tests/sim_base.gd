@@ -32,6 +32,7 @@ var _flown := {}
 func _flight(key: String, mode: String, vehicle := "camera") -> Array:
 	var task := FlightTask.make(key, mode, _seed)
 	var world := FlightWorld.new()
+	world.airfield = Curriculum.machine(vehicle) == "wing"
 	add_child(world)
 	world.build("day", 7)
 	task.world = world

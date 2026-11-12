@@ -881,3 +881,133 @@ Q_TH_RULES_KIDS_2_A,In Shyriai,У Ширяї
 Q_TH_RULES_KIDS_2_B,Over the school,Над школою
 Q_TH_RULES_KIDS_2_C,Over a river,Над річкою
 Q_TH_RULES_KIDS_2_WHY,Here you can practise all you want.,Тут можна тренуватися скільки хочеш.
+VEH_WING,Plane,Літак
+VEH_WING_DESC,"Flies on its wing: speed, banked turns, take-off and landing","Тримається на крилі: швидкість, віражі, зліт і посадка"
+VEH_WING_KIDS,Little plane,Літачок
+VEH_WING_DESC_KIDS,Fly with the storks and through the clouds,Літай із лелеками й крізь хмаринки
+VIEW_NOSE,Nose,З носа
+VIEW_CHASE_WING,Behind,За літаком
+STICK_LEFT_WING,Throttle · rudder,Газ · кермо
+STICK_RIGHT_WING,Elevator · bank,Висота · крен
+STICK_LEFT_WING_M1,Elevator · rudder,Висота · кермо
+STICK_RIGHT_WING_M1,Throttle · bank,Газ · крен
+FREE_WING,Free flight,Вільний політ
+WING_LEVEL,Straight and level,Прямо й рівно
+WING_LEVEL_NOTE,"Throttle is speed, the stick is height","Газ дає швидкість, ручка висоту"
+WING_LEVEL_GOAL,The plane is already flying. Keep it straight and through the three rings at one height. A plane cannot hover: it flies only while it moves.,"Літак уже летить. Веди його прямо крізь три кільця на одній висоті. Літак не вміє висіти: він тримається, лише поки рухається."
+WING_LEVEL_PASS,3 rings | One height,3 кільця | Одна висота
+WING_LEVEL_NOTE_KIDS,Through the rings,Крізь кільця
+WING_LEVEL_GOAL_KIDS,"The little plane is flying. Fly it through the three gold rings. Stick up to climb, down to come lower.","Літачок уже летить. Проведи його крізь три золоті кільця. Стік угору, щоб піднятися, униз, щоб знизитися."
+WING_LEVEL_PASS_KIDS,Three rings,Три кільця
+WING_TURN,Banked turn,Віраж
+WING_TURN_NOTE,"Bank, then pull a little","Крен, а тоді трохи на себе"
+WING_TURN_GOAL,Circle the water tower twice without losing height. A plane turns by banking: tilt the wings and pull the stick a little.,"Облети водонапірну вежу двічі, не втрачаючи висоти. Літак повертає креном: нахили крила й трохи візьми ручку на себе."
+WING_TURN_PASS,2 circles | 15 to 50 m up,2 кола | Висота 15–50 м
+WING_TURN_NOTE_KIDS,Round the tower,Довкола вежі
+WING_TURN_GOAL_KIDS,Fly once round the water tower. Push the stick to the side and the plane leans into the turn.,"Облети довкола водонапірної вежі. Хили стік убік, і літачок нахилиться в поворот."
+WING_TURN_PASS_KIDS,Once round,Одне коло
+WING_TAKEOFF,Take-off,Зліт
+WING_TAKEOFF_NOTE,"Speed first, then lift","Спершу швидкість, потім підйом"
+WING_TAKEOFF_GOAL,"Throttle fully up and roll down the runway. Once it is fast, lift the nose gently and climb to 25 m with the wings level.","Газ до упору й розгін смугою. Коли набереш швидкість, плавно підніми ніс і набери 25 м з рівними крилами."
+WING_TAKEOFF_PASS,25 m up | Wings level,Висота 25 м | Крила рівно
+WING_CIRCUIT,Circuit over the field,Коло над полем
+WING_CIRCUIT_NOTE,"Four turns, one height","Чотири віражі, одна висота"
+WING_CIRCUIT_GOAL,Fly through four rings around the field at 30 m. Plan each turn early: a plane needs room.,Пролети чотири кільця довкола поля на висоті 30 м. Починай віраж заздалегідь: літакові потрібне місце.
+WING_CIRCUIT_PASS,4 rings | 30 m,4 кільця | 30 м
+WING_CIRCUIT_NOTE_KIDS,Round the field,Довкола поля
+WING_CIRCUIT_GOAL_KIDS,Fly through four gold rings around the field. Turn in good time.,Пролети чотири золоті кільця довкола поля. Повертай заздалегідь.
+WING_CIRCUIT_PASS_KIDS,Four rings,Чотири кільця
+WING_STALL,The stall,Звалювання
+WING_STALL_NOTE,The most important skill on a wing,Найважливіше вміння на крилі
+WING_STALL_GOAL,"High up, take the throttle off and keep pulling until the wing stops lifting. Then push the stick forward and add throttle until the plane flies again.","Високо вгорі прибери газ і тягни ручку на себе, доки крило не перестане тримати. Тоді ручку від себе й газ, доки літак знову не полетить."
+WING_STALL_PASS,Stall | Flying again,Звалювання | Знову летить
+WING_LANDING,Landing,Посадка
+WING_LANDING_NOTE,"Little throttle, a gentle glide","Мало газу, плавне зниження"
+WING_LANDING_GOAL,"Come down through the three rings to the runway, then level off and touch down gently. The plane must stop on the runway.","Знижуйся крізь три кільця до смуги, над нею вирівняйся й м’яко торкнися. Літак має зупинитися на смузі."
+WING_LANDING_PASS,On the runway | Up to 3 m/s down,На смузі | До 3 м/с униз
+WING_KIDS_STORKS,With the storks,Політ із лелеками
+WING_KIDS_STORKS_NOTE,Follow the flock,Лети за зграєю
+WING_KIDS_STORKS_GOAL,Three storks fly ahead through the rings. Follow them!,Три лелеки летять попереду крізь кільця. Лети за ними!
+WING_KIDS_STORKS_PASS,Through every ring,Крізь усі кільця
+MIS_WING_FLOOD,The river after the flood,Річка після повені
+MIS_WING_FLOOD_DESC,"Photograph four marked houses from above, so rescuers know where to go.","Сфотографуй згори чотири позначені хати, щоб рятувальники знали, куди їхати."
+MIS_WING_SEARCH,Search the big field,Пошук на великому полі
+MIS_WING_SEARCH_DESC,Someone is lost in the valley and has spread out a red tarp. Find it and circle over it three times.,Людина загубилася в долині й розстелила червоне полотно. Знайди його й тричі облети над ним.
+MIS_WING_KITE,The kite in the tree,Повітряний змій застряг
+MIS_WING_KITE_DESC,"A kite is caught in a tree. Find it and fly round it, so the grown-ups see where.","Повітряний змій зачепився за дерево. Знайди його й облети довкола, щоб дорослі побачили, де він."
+MIS_WING_CLOUDS,Clouds,Хмаринки
+MIS_WING_CLOUDS_DESC,Fly through five cloud rings.,Пролети крізь п’ять хмарних кілець.
+HINT_WING_RINGS,"Next ring, rings left: %d","До наступного кільця, лишилось: %d"
+HINT_WING_RINGS_KIDS,Fly through the next ring,Лети крізь наступне кільце
+HINT_WING_SLOW,Slow! Lower the nose or add throttle,Мала швидкість! Опусти ніс або додай газу
+HINT_WING_STALL,Stall! Stick forward and throttle up,Звалювання! Ручку від себе й газ
+HINT_WING_TOWER,Back towards the tower,Повертай до вежі
+HINT_WING_TOWER_WIDE,Too close to the tower: a wider circle,Надто близько до вежі: ширше коло
+HINT_WING_HIGHER,Too low: climb a little,Надто низько: піднімись
+HINT_WING_LOWER,Too high: come down a little,Надто високо: знизься
+HINT_WING_TURN_GO,"Bank and keep turning, circles left: %d","Крен і далі по колу, лишилось кіл: %d"
+HINT_WING_TURN_GO_KIDS,Lean the plane and fly round the tower,Нахили літачок і лети довкола вежі
+HINT_WING_THROTTLE_UP,Throttle fully up,Газ до упору
+HINT_WING_ROTATE,"When it is fast, pull the stick gently","Коли розженешся, плавно ручку на себе"
+HINT_WING_CLIMB,"Climb smoothly, %d m to go","Набирай висоту плавно, ще %d м"
+HINT_WING_STALL_SLOW,Throttle off and pull the stick slowly,Газ до нуля й повільно ручку на себе
+HINT_WING_STALL_NOW,Stall! Stick forward and throttle up,Звалювання! Ручку від себе й газ
+HINT_WING_GLIDE,"Through the rings: little throttle, nose a touch up","Крізь кільця: мало газу, ніс трохи вгору"
+HINT_WING_FLARE,Over the runway: level off and touch down gently,Над смугою: вирівняйся й м’яко торкнися
+HINT_WING_ROLL,On the runway: throttle off and roll to a stop,"На смузі: газ до нуля, котись до зупинки"
+HINT_WING_GO_AROUND,"Missed it: throttle up, circle round and try again","Не вийшло: газ, коло й заходь ще раз"
+HINT_WING_SEARCH,Look for a red tarp in the valley,Шукай червоне полотно в долині
+HINT_WING_KITE_GO,Follow the arrow to the kite,Лети за стрілкою до змія
+HINT_WING_FOUND,Found! Now circle over it,Знайдено! Тепер кружляй над ним
+HINT_WING_CIRCLE,"Keep circling, circles left: %d","Кружляй далі, лишилось кіл: %d"
+HINT_WING_CIRCLE_KIDS,Fly round it,Облети довкола
+HINT_WING_BACK,"Back over the spot, circles left: %d","Повертай до місця, лишилось кіл: %d"
+HINT_WING_BACK_KIDS,Come back to the kite,Повертай до змія
+HINT_WING_FLOOD,"Fly low over the next marked roof, houses left: %d","Пролети низько над наступним позначеним дахом, лишилось хат: %d"
+HINT_WING_PHOTO,Photo taken!,Знімок зроблено!
+SUM_WING_LEVEL,"Three rings in %d s, straight and level.","Три кільця за %d с, прямо й рівно."
+SUM_WING_LEVEL_KIDS,All three rings!,Усі три кільця!
+SUM_WING_CIRCUIT,A full circuit in %d s.,Ціле коло за %d с.
+SUM_WING_CIRCUIT_KIDS,All the way round the field!,Довкола всього поля!
+SUM_WING_KIDS_STORKS,With the storks through every ring!,Разом із лелеками крізь усі кільця!
+SUM_MIS_WING_CLOUDS,Through every cloud!,Крізь усі хмаринки!
+SUM_WING_TURN,Two circles round the tower in %d s.,Два кола довкола вежі за %d с.
+SUM_WING_TURN_KIDS,Round the tower!,Довкола вежі!
+SUM_WING_TAKEOFF,"Up to 25 m in %d s, wings level.","25 м за %d с, крила рівно."
+SUM_WING_STALL,"Out of the stall, %d m of height lost.","Вихід зі звалювання, втрачено %d м висоти."
+SUM_WING_LANDING,"On the runway, %s m/s down.","На смузі, %s м/с униз."
+SUM_MIS_WING_FLOOD,Four houses photographed in %d s.,Чотири хати сфотографовано за %d с.
+SUM_MIS_WING_SEARCH,Found and marked in %d:%02d.,Знайдено й позначено за %d:%02d.
+SUM_MIS_WING_KITE,The kite is found!,Змія знайдено!
+FAIL_WING_OFF_RUNWAY,The wheels touched the grass: take-off and landing are on the runway.,Колеса торкнулися трави: зліт і посадка лише на смузі.
+FAIL_WING_HARD,"Touched down at %s m/s, too hard. Level off just above the runway.","Торкання %s м/с, надто жорстко. Вирівнюйся над самою смугою."
+FAIL_WING_STALL_LOW,Too low after the stall. Push the stick forward sooner.,Надто низько після звалювання. Ручку від себе треба раніше.
+TH_WING,How a wing flies,Як літає крило
+TH_WING_DESC,"Speed, lift, banked turns and the stall.","Швидкість, підйомна сила, віражі й звалювання."
+TH_WING_BODY,"A wing lifts only while air flows over it: a plane must keep moving.|More speed, or the nose a little higher, gives more lift; too high and the air breaks away from the wing. That is the stall.|In a stall: stick forward, then throttle. Height lets you recover, so practise high up.|A plane turns by banking: the wing lifts sideways too. Pull a little in the turn to keep the height.|Take off and land into the wind: less speed over the ground, a shorter run.","Крило тримає, лише поки по ньому тече повітря: літак мусить рухатися.|Більше швидкості чи трохи вищий ніс дають більше підйомної сили; задирати надто високо не можна, бо повітря зривається з крила. Це звалювання.|Під час звалювання: ручку від себе, потім газ. Вийти допомагає висота, тож тренуйся високо.|Літак повертає креном: крило тягне й убік. У віражі трохи бери на себе, щоб не втрачати висоту.|Злітай і сідай проти вітру: менша швидкість над землею, коротший розбіг."
+TH_WING_KIDS,"A plane cannot hover like a drone: it flies only while it moves.|To turn, the plane leans to the side, like a bird.|Little planes take off and land on a runway.","Літак не вміє висіти, як дрон: він тримається, лише поки летить.|Щоб повернути, літак нахиляється вбік, як пташка.|Літачки злітають і сідають на смузі."
+Q_TH_WING_1,The plane is slow and the nose is high. What is close?,"Літак повільний, а ніс задертий. Що близько?"
+Q_TH_WING_1_A,The stall,Звалювання
+Q_TH_WING_1_B,A better climb,Кращий набір висоти
+Q_TH_WING_1_C,"Nothing, it can hover","Нічого, він може висіти"
+Q_TH_WING_1_WHY,"Slow with the nose high, the air breaks away from the wing.",Повільно з високим носом повітря зривається з крила.
+Q_TH_WING_2,The wing has stalled. What first?,Крило звалилося. Що спершу?
+Q_TH_WING_2_A,"Stick forward, then throttle","Ручку від себе, потім газ"
+Q_TH_WING_2_B,Pull harder,Тягнути сильніше на себе
+Q_TH_WING_2_C,Throttle off and wait,Прибрати газ і чекати
+Q_TH_WING_2_WHY,Lowering the nose lets the air flow over the wing again.,Опущений ніс знову пускає повітря по крилу.
+Q_TH_WING_3,How does a plane turn?,Як повертає літак?
+Q_TH_WING_3_A,"It banks, and the wing lifts it sideways","Нахиляється, і крило тягне його вбік"
+Q_TH_WING_3_B,It stops and turns on the spot,Зупиняється й розвертається на місці
+Q_TH_WING_3_C,"Only with the rudder, wings flat","Лише кермом, крила рівно"
+Q_TH_WING_3_WHY,Banking tilts the lift; that pulls the plane round.,"Крен нахиляє підйомну силу, і вона веде літак по колу."
+Q_TH_WING_KIDS_1,Can a plane hover in one place?,Чи може літак висіти на місці?
+Q_TH_WING_KIDS_1_A,"No, it flies only while it moves","Ні, він тримається, лише поки летить"
+Q_TH_WING_KIDS_1_B,"Yes, like a drone","Так, як дрон"
+Q_TH_WING_KIDS_1_C,Only at night,Лише вночі
+Q_TH_WING_KIDS_1_WHY,A wing needs air flowing over it.,"Крилу потрібне повітря, що тече по ньому."
+Q_TH_WING_KIDS_2,How does a plane turn?,Як повертає літак?
+Q_TH_WING_KIDS_2_A,"It leans to the side, like a bird","Нахиляється вбік, як пташка"
+Q_TH_WING_KIDS_2_B,It jumps,Підстрибує
+Q_TH_WING_KIDS_2_C,It stops first,Спершу зупиняється
+Q_TH_WING_KIDS_2_WHY,Birds and planes lean into a turn.,Пташки й літаки нахиляються в поворот.

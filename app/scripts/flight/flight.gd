@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # The flight screen: the 3D world, the drone, two sticks, a thin status line and one hint.
+class_name Flight
 extends Control
 
 const STEP := 1.0 / 60.0
@@ -9,7 +10,7 @@ const DEADZONE := 0.08
 
 var app: Node  # main.gd
 var vehicle := "camera"
-## What is flown: the course's machine ("camera", "fpv" or "ugv").
+## What is flown: the course's machine ("camera", "fpv", "ugv" or "wing").
 var machine := "camera"
 var task_key := "CAM_STICKS"
 var mode := "simple"
@@ -22,7 +23,7 @@ var autopilot := Callable()
 var sim: DroneSim
 var task: FlightTask
 var world: FlightWorld
-var drone: Node3D  # DroneView or UgvView
+var drone: Node3D  # DroneView, UgvView or WingView
 ## The robot's camera pose a moment ago, for late video: [pos, basis] per physics step.
 var _cam_history: Array = []
 var _shown_load := ""
@@ -89,6 +90,8 @@ func _ready() -> void:
 	if task.look != "":
 		look = task.look
 	world = FlightWorld.new()
+	# The plane needs room: a flat valley along the runway for take-offs and landings.
+	world.airfield = machine == "wing"
 	add_child(world)
 	world.build(look, 7)
 	task.world = world
@@ -106,6 +109,10 @@ func _ready() -> void:
 		world.add_child(drone)
 		drone.build(world.pal["drone"], world.pal["drone_front"], task.load_kind)
 		_shown_load = task.load_kind
+	elif machine == "wing":
+		drone = WingView.new()
+		world.add_child(drone)
+		drone.build(world.pal["drone"], world.pal["drone_front"])
 	else:
 		drone = DroneView.new()
 		world.add_child(drone)
@@ -180,7 +187,7 @@ func _process(delta: float) -> void:
 func _motor_load() -> float:
 	if sim is UgvSim:
 		return 0.25 + 0.75 * clampf(maxf(absf(sim.tracks.x), absf(sim.tracks.y)), 0.0, 1.0)
-	if sim is FpvSim:
+	if sim is FpvSim or sim is WingSim:
 		return sim.throttle01
 	var h := Vector2(sim.vel.x, sim.vel.z).length() / 8.0
 	return clampf(0.45 + 0.3 * _sticks["throttle"] + 0.25 * h, 0.2, 1.0)
@@ -191,6 +198,8 @@ func _motors_running() -> bool:
 		return false
 	if sim is UgvSim:
 		return true
+	if sim is WingSim:
+		return sim.throttle01 > 0.02
 	return not sim.on_ground or _sticks["throttle"] > 0.05 or (sim is FpvSim and sim.throttle01 > 0.05)
 
 
@@ -278,48 +287,7 @@ func _bigger(a: float, b: float) -> float:
 # --- Camera -----------------------------------------------------------------
 
 func _place_camera(delta: float) -> void:
-	var target := sim.pos + Vector3(0, 0.15, 0)
-	if view == "fpv":
-		# The FPV camera is fixed to the drone, tilted up, so the horizon tilts with it.
-		var up_tilt := 10.0 if sim is not FpvSim else (20.0 if mode == "simple" else 30.0)
-		var b := sim.orientation()
-		cam.global_basis = b * Basis(Vector3.RIGHT, deg_to_rad(up_tilt))
-		cam.position = sim.pos + b * Vector3(0, 0.12, -0.45)
-		cam.fov = 95.0
-	elif view == "drone":
-		# The drone's own camera on a steady gimbal: tilted down a little, or as far as the survey
-		# camera is tilted. The shutter uses the very same pose.
-		cam.position = Photo.camera_position(sim.pos, sim.yaw)
-		cam.global_basis = Photo.camera_basis(sim.yaw, task.tilt if task is PhotoTask else "forward")
-		cam.fov = Photo.FOV
-	elif view == "ugv":
-		# The robot's own camera on its mast. Some tasks show its video late, as over a slow radio link.
-		var pose: Array = [sim.pos, sim.orientation()]
-		var back := int(round(task.video_delay / STEP))
-		if back > 0 and _cam_history.size() > back:
-			pose = _cam_history[_cam_history.size() - 1 - back]
-		var b: Basis = pose[1]
-		cam.global_basis = b * Basis(Vector3.RIGHT, deg_to_rad(-8.0))
-		cam.position = pose[0] + b * Vector3(0, 1.2, -0.6)
-		cam.fov = 80.0
-	elif view == "chase":
-		var back := -sim.forward() * 6.0 + Vector3(0, 2.6, 0)
-		var want := target + back
-		var g := sim.ground.call(want.x, want.z) as float
-		want.y = maxf(want.y, g + 1.0)
-		var k := 1.0 - exp(-delta * 4.0)
-		cam.position = cam.position.lerp(want, k) if cam.position != Vector3.ZERO else want
-		cam.fov = 62.0
-		cam.look_at(target + sim.forward() * 2.0, Vector3.UP)
-	else:
-		# The pilot stands behind the pad and turns the head; far away, the view zooms in a little.
-		cam.position = world.pilot
-		var d := cam.position.distance_to(target)
-		cam.fov = lerpf(cam.fov, clampf(70.0 - d * 0.9, 32.0, 62.0), 1.0 - exp(-delta * 2.0))
-		# Straight overhead, looking up would need another "up": just keep the last view there.
-		if d > 0.5 and Vector2(target.x - world.pilot.x, target.z - world.pilot.z).length() > 0.3:
-			var look_at := target.lerp(world.pilot + (target - world.pilot) * 0.5, 0.15)
-			cam.look_at(look_at, Vector3.UP)
+	FlightCamera.place(self, delta)
 
 
 func set_view(v: String) -> void:
@@ -466,7 +434,7 @@ func _build_counters(top: HBoxContainer, glass: Color) -> void:
 			names = ["ALT", "SPEED", "BATTERY", "TIME"]
 		if machine == "ugv":
 			names = ["SPEED", "BATTERY", "TIME"] if mode == "pro" else ["SPEED", "TIME"]
-		elif machine == "fpv" and mode != "pro":
+		elif machine in ["fpv", "wing"] and mode != "pro":
 			names = ["ALT", "SPEED", "TIME"]
 		if task.target_info:
 			names = ["TARGET", "CLOSING", "SPEED", "TIME"] if mode == "pro" else ["TARGET", "CLOSING", "TIME"]
@@ -511,14 +479,18 @@ func _build_bottom(col: VBoxContainer, ins: Dictionary) -> void:
 		s.kids = mode == "kids"
 		s.custom_minimum_size = Vector2(stick_px, stick_px)
 	# The FPV throttle stays where the thumb leaves it, like on a real radio, and starts at zero.
-	if machine == "fpv" and mode != "kids":
+	if machine in ["fpv", "wing"] and mode != "kids":
 		_thr.spring_y = false
-		_thr.value.y = -1.0
+		# A plane that starts in the air has its motor already running at cruise.
+		_thr.value.y = sim.throttle01 * 2.0 - 1.0 if sim is WingSim else -1.0
 	var left_label := "STICK_LEFT_FPV" if not _left.spring_y else "STICK_LEFT"
 	var right_label := "STICK_RIGHT"
+	if machine == "wing":
+		left_label = "STICK_LEFT_WING"
+		right_label = "STICK_RIGHT_WING"
 	if _mode1:
-		left_label = "STICK_LEFT_M1"
-		right_label = "STICK_RIGHT_FPV_M1" if machine == "fpv" else "STICK_RIGHT_M1"
+		left_label = "STICK_LEFT_WING_M1" if machine == "wing" else "STICK_LEFT_M1"
+		right_label = {"fpv": "STICK_RIGHT_FPV_M1", "wing": "STICK_RIGHT_WING_M1"}.get(machine, "STICK_RIGHT_M1")
 	if sim is UgvSim:
 		left_label = "STICK_TRACK_L" if sim.tank else "STICK_DRIVE"
 		right_label = "STICK_TRACK_R" if sim.tank else "STICK_TURN"
@@ -563,6 +535,7 @@ func _build_view_toggle() -> void:
 	_view_box.add_child(fill)
 	var views := [["ugv", Curriculum.label("VIEW_DRONE")], ["chase", Curriculum.label("VIEW_BEHIND")], ["pilot", Curriculum.label("VIEW_PILOT")]] if machine == "ugv" \
 		else [["fpv", Curriculum.label("VIEW_FPV")], ["chase", Curriculum.label("VIEW_CHASE")], ["pilot", Curriculum.label("VIEW_PILOT")]] if machine == "fpv" \
+		else [["chase", Curriculum.label("VIEW_CHASE_WING")], ["pilot", Curriculum.label("VIEW_PILOT")], ["fpv", Curriculum.label("VIEW_NOSE")]] if machine == "wing" \
 		else [["pilot", Curriculum.label("VIEW_PILOT")], ["chase", Curriculum.label("VIEW_CHASE")], ["drone", Curriculum.label("VIEW_DRONE")]]
 	var seg := UI.segmented(views, view, set_view)
 	seg.custom_minimum_size = Vector2(360, 0)

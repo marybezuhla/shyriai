@@ -54,6 +54,14 @@ const PALETTES := {
 
 var pal: Dictionary
 var pad := Vector3.ZERO
+## The plane's world: the hills open into a flat valley along the runway, so take-offs and landings
+## have room. Set before build_land().
+var airfield := false
+## The runway: centre line at x, from z0 (near the pad) to z1 (far end), RUNWAY_W wide.
+const RUNWAY_X := 6.0
+const RUNWAY_Z0 := -6.0
+const RUNWAY_Z1 := -66.0
+const RUNWAY_W := 7.0
 var pilot := Vector3(0, 1.7, 11)
 var obstacles: Array[Dictionary] = []
 ## Every house: {"pos": Vector3, "rot": float}. The roof ridge is 6 m above the ground.
@@ -78,6 +86,8 @@ func build_land(look: String, seed_ := 7) -> void:
 	_terrain()
 	_field()
 	_pad()
+	if airfield:
+		_runway()
 	_poplars()
 	for h in HOUSE_SPOTS:
 		_house(h, atan2(h.x, h.z) + PI)  # front door towards the pad
@@ -125,6 +135,8 @@ func _base_height(x: float, z: float) -> float:
 	if r <= FLAT:
 		return 0.0
 	var ramp := smoothstep(FLAT, FLAT + 45.0, r)
+	if airfield and z < 40.0:
+		ramp *= smoothstep(70.0, 110.0, absf(x))  # the valley along the runway, all the way out
 	return ramp * (6.0 + 9.0 * (_noise.get_noise_2d(x, z) + 0.6))
 
 
@@ -269,6 +281,23 @@ func _pad() -> void:
 	dot.height = 0.06
 	dot.radial_segments = 16
 	_mesh(dot, pal["pad_mark"], pad + Vector3(0, 0.035, 0))
+
+
+func _runway() -> void:
+	var len_ := RUNWAY_Z0 - RUNWAY_Z1
+	var mid := Vector3(RUNWAY_X, 0.02, (RUNWAY_Z0 + RUNWAY_Z1) / 2.0)
+	_mesh(_box(Vector3(RUNWAY_W, 0.03, len_)), pal["road"], mid)
+	# Centre-line dashes, so its direction reads from the air.
+	var dash := _box(Vector3(0.35, 0.04, 3.0))
+	var z := RUNWAY_Z0 - 4.0
+	while z > RUNWAY_Z1 + 3.0:
+		_mesh(dash, pal["pad"], Vector3(RUNWAY_X, 0.03, z))
+		z -= 7.0
+
+
+## True if (x, z) is on the runway.
+func on_runway(x: float, z: float) -> bool:
+	return absf(x - RUNWAY_X) <= RUNWAY_W / 2.0 and z <= RUNWAY_Z0 and z >= RUNWAY_Z1
 
 
 func _poplars() -> void:

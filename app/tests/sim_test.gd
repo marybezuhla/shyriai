@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # Tests of the drone physics and of every lesson: each lesson must be passable with the sticks alone,
 # in every mode. CI fails if anything here fails. Not shipped in the APK.
-extends "res://tests/sim_courses.gd"
+extends "res://tests/sim_wing.gd"
 
 
 func _ready() -> void:
@@ -58,6 +58,11 @@ func _ready() -> void:
 		await test_meds(mode)
 	await test_meds_rules()
 	await test_dog()
+	test_wing_physics()
+	for mode in Prefs.MODES:
+		for key in Curriculum.lessons("wing", mode) + Curriculum.missions("wing", mode):
+			await test_wing_task(key, mode)
+	await test_wing_landing_rules()
 	test_quiz_texts()
 	test_rating_rules()
 	test_results_are_kept()
@@ -78,6 +83,9 @@ func _ready() -> void:
 				await test_intercept_task(key, mode)
 		for key in ["MIS_UGV_CARGO", "MIS_UGV_EVAC"]:
 			await test_ugv_task(key, "simple")
+		for key in ["MIS_WING_SEARCH", "MIS_WING_FLOOD"]:
+			await test_wing_task(key, "simple")
+		await test_wing_task("MIS_WING_KITE", "kids")
 	_seed = 7
 	# Every lesson and mission the app offers was flown in every mode that offers it.
 	for v in Curriculum.VEHICLES:

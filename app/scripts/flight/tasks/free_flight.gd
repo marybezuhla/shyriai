@@ -35,19 +35,28 @@ func setup_world() -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = task_seed
 	var ground := key == "FREE_UGV"
+	# A plane cannot hover: its balls are higher, further out and bigger to catch.
+	var plane := key == "FREE_WING"
 	var tries := 0
 	while _balls.size() < BALLS and tries < 200:
 		tries += 1
 		var a := rng.randf() * TAU
-		var d := rng.randf_range(8.0, 34.0)
+		var d := rng.randf_range(40.0, 130.0) if plane else rng.randf_range(8.0, 34.0)
 		var x := sin(a) * d
 		var z := -cos(a) * d
 		# Not inside a house or a tree: the drone must be able to reach every ball.
 		if _blocked(x, z):
 			continue
-		var up := 0.7 if ground else rng.randf_range(2.0, 6.0)
+		var up := 0.7 if ground else (rng.randf_range(15.0, 40.0) if plane else rng.randf_range(2.0, 6.0))
 		_balls.append(Vector3(x, world.height(x, z) + up, z))
 		world.add_balloon(_balls[-1], Pal.c("accent"))
+
+
+## The plane starts in the air over the runway; the rest start on the pad.
+func start_position() -> Vector3:
+	if key == "FREE_WING":
+		return Vector3(WorldLand.RUNWAY_X, 30.0, -12.0)
+	return super()
 
 
 func _blocked(x: float, z: float) -> bool:
@@ -62,7 +71,7 @@ func _blocked(x: float, z: float) -> bool:
 
 func update(_dt: float, sim: DroneSim, _sticks: Dictionary) -> void:
 	counter_max = _balls.size()
-	var reach := 1.4 if key == "FREE_UGV" else 1.1
+	var reach: float = {"FREE_UGV": 1.4, "FREE_WING": 3.0}.get(key, 1.1)
 	for i in _balls.size():
 		if i not in _taken and sim.pos.distance_to(_balls[i]) < reach:
 			_taken.append(i)

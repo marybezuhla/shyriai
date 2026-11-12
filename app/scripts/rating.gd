@@ -29,6 +29,12 @@ const PAR := {
 	"MIS_CAM_MEDS": 35,
 	# The test pilot knows where the puppy is; a child looks for it by "warmer, colder".
 	"MIS_CAM_DOG": 90,
+	"WING_LEVEL": 20, "WING_TURN": 145, "WING_TAKEOFF": 40, "WING_CIRCUIT": 115, "WING_LANDING": 45,
+	"WING_KIDS_STORKS": 50, "MIS_WING_CLOUDS": 45, "MIS_WING_KITE": 45, "MIS_WING_FLOOD": 90,
+	# The test pilot stalls and recovers at once; a person first reads, then slows down with care.
+	"WING_STALL": 30,
+	# The test pilot knows where the lost person is; a pilot has to search the valley: four minutes.
+	"MIS_WING_SEARCH": 240,
 }
 ## Kids get half as much time again: the third sunflower should be reachable, not a race.
 const KIDS_SLACK := 1.5
