@@ -1154,3 +1154,29 @@ QUAD_5IN,5-inch,5 дюймів
 QUAD_3IN,"3-inch, lighter","3 дюйми, легший"
 FPV_QUAD_DESC,"The 3-inch drone has less thrust and less momentum: it drifts less, and its battery is shorter.","У 3-дюймового менше тяги й інерції: його менше заносить, а батареї вистачає на коротше."
 FPV_MISSION_MODE,Flight mode for missions,Режим польоту в місіях
+PAD,Radio and gamepad,Пульт і геймпад
+PAD_DESC,"Which stick is which, the dead zone, buttons","Які стіки де, мертва зона, кнопки"
+PAD_NONE,"Not connected: plug in a radio or gamepad, or pair it over Bluetooth",Не підключено: під’єднай пульт чи геймпад кабелем або Bluetooth
+PAD_CONNECTED,Connected: %s,Підключено: %s
+PAD_THROTTLE,"Throttle, height","Газ, висота"
+PAD_YAW,Turn,Поворот
+PAD_PITCH,Forward and back,Уперед-назад
+PAD_ROLL,Sideways,Убік
+PAD_AXIS,Axis %d,Вісь %d
+PAD_INVERTED,reversed,обернено
+PAD_MOVE_UP,Push that stick up…,Порухай цей стік угору…
+PAD_MOVE_RIGHT,Push that stick right…,Порухай цей стік управо…
+PAD_AXES_DESC,"Tap a row and move that stick on the radio: the app learns it from the move, and which way it goes.","Торкнись рядка й порухай цей стік на пульті: застосунок запам’ятає його з руху, разом із напрямком."
+PAD_DEAD,Dead zone,Мертва зона
+PAD_DEAD_SMALL,Small,Мала
+PAD_DEAD_MEDIUM,Medium,Середня
+PAD_DEAD_LARGE,Large,Велика
+PAD_DEAD_DESC,How far a stick moves from the middle before it counts. A larger one stops a worn stick from creeping.,"Скільки стік проходить від середини, перш ніж рух зарахується. Більша зона не дає старому стіку повзти."
+PAD_PAUSE,Pause,Пауза
+PAD_VIEW,Next view,Наступний вид
+PAD_ARM,Arm (FPV),Звести (FPV)
+PAD_BUTTON,Button %d,Кнопка %d
+PAD_SWITCH,"Switch, axis %d","Перемикач, вісь %d"
+PAD_PRESS,Press it on the radio…,Натисни на пульті…
+PAD_CHECK,Check the sticks,Перевірити стіки
+PAD_RESET,Back to the usual layout,Повернути звичне розташування

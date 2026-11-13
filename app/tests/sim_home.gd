@@ -106,3 +106,19 @@ func test_fpv_setup() -> void:
 	var easy := FpvSim.new("simple", 3)
 	easy.configure("sharp", "3in")
 	check(float(easy.p["rate"]) == float(FpvSim.FPV["simple"]["rate"]), "FPV: Simple mode keeps its own gentle rates")
+
+
+## Radio and gamepad settings are checked like everything else read from the saved file.
+func test_pad_prefs() -> void:
+	Prefs._apply({"pad_axes": {"throttle": {"a": 2, "inv": true}, "roll": {"a": 99, "inv": false}, "nope": {"a": 1, "inv": false}},
+		"pad_buttons": {"pause": {"b": 6}, "arm": {"a": 4}, "view": {"b": -3}}, "pad_dead": "huge"})
+	check(Prefs.pad_axes.keys() == ["throttle"] and int(Prefs.pad_axes["throttle"]["a"]) == 2, "only real sticks and axes are kept")
+	check(Prefs.pad_buttons.has("pause") and Prefs.pad_buttons.has("arm") and not Prefs.pad_buttons.has("view"), "only real buttons and switches are kept")
+	check(Prefs.pad_dead == "medium", "an unknown dead zone is ignored")
+	Prefs.set_pad_axis("yaw", 3, false)
+	check(int(Prefs.pad_axes["yaw"]["a"]) == 3, "a stick can be learnt")
+	Prefs.reset_pad()
+	check(Prefs.pad_axes.is_empty() and Prefs.pad_buttons.is_empty(), "back to the usual layout")
+	check(int(FlightInput.default_axis("throttle", false)["a"]) == JOY_AXIS_LEFT_Y and int(FlightInput.default_axis("throttle", true)["a"]) == JOY_AXIS_RIGHT_Y,
+		"the usual layout follows Mode 2 and Mode 1")
+	Prefs.erase_all()

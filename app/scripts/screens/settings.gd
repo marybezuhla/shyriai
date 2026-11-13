@@ -48,6 +48,14 @@ func build() -> void:
 			["normal", tr("FEEL_NORMAL")], ["soft", tr("FEEL_SOFT")], ["softer", tr("FEEL_SOFTER")],
 		], Prefs.stick_feel, func(v): Prefs.set_stick_feel(v)))
 		sticks.add_child(UI.label(tr("STICKS_FEEL_DESC"), UI.SMALL, 500, "muted"))
+		var pad := UI.hbox(12)
+		var pt := UI.vbox(2)
+		pt.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		pt.add_child(UI.label(tr("PAD"), UI.LEAD, 700))
+		pt.add_child(UI.label(tr("PAD_DESC"), UI.SMALL, 500, "muted"))
+		pad.add_child(pt)
+		pad.add_child(Glyph.make("chevron", 20, Pal.c("muted")))
+		sticks.add_child(UI.tappable(pad, Pal.c("surface"), func(): app.open_pad(), tr("PAD")))
 		add_child(sticks)
 		var fpv := UI.vbox(10)
 		fpv.add_child(UI.eyebrow(tr("SET_FPV")))

@@ -115,6 +115,10 @@ func open_pilot_cards() -> void:
 	_push(_make("res://scripts/screens/pilot_cards.gd"))
 
 
+func open_pad() -> void:
+	_push(_make("res://scripts/screens/pad.gd"))
+
+
 func open_glossary() -> void:
 	_push(_make("res://scripts/screens/glossary.gd"))
 
@@ -165,7 +169,7 @@ func open_flight(vehicle: String, key: String, seed_ := -1, practice := false) -
 		flight.flight_seed = seed_
 	else:
 		# The plane's wind changes every flight too.
-		var varies := key.begins_with("MIS_") or (Curriculum.machine(vehicle) == "wing" and Prefs.mode != "kids")
+		var varies: bool = key.begins_with("MIS_") or (Curriculum.machine(vehicle) == "wing" and Prefs.mode != "kids")
 		flight.flight_seed = randi_range(1, 9999) if varies else 7
 	add_child(flight)
 

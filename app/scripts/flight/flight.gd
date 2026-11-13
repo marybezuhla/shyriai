@@ -83,7 +83,7 @@ var _stuck := 0.0
 const KIDS_HELP_AFTER := 15.0
 var _first_sticks := {}
 var _sticks := {"throttle": 0.0, "yaw": 0.0, "pitch": 0.0, "roll": 0.0}
-var _input := FlightInput.new()
+var _pad := FlightInput.new()
 var _sound := FlightSound.new()
 ## What the task had done a physics step ago, so each new ball, gate or step gets its blip.
 var _last_progress := 0.0
@@ -188,6 +188,10 @@ func _physics_process(_delta: float) -> void:
 	_read_sticks()
 	if autopilot.is_valid() and sim is FpvSim:
 		sim.armed = true
+	elif FlightBottom.arm_button(self):
+		var sw := _pad.arm_switch()
+		if sw != 0 and (sw > 0) != sim.armed:
+			_toggle_arm()
 	_alert_t = maxf(0.0, _alert_t - STEP)
 	var pilot := _sticks
 	# No radio link: the robot gets no commands and stops by itself.
@@ -293,7 +297,7 @@ func _sound_events() -> void:
 
 
 func _read_sticks() -> void:
-	_sticks = autopilot.call(sim, task) if autopilot.is_valid() else _input.read(self)
+	_sticks = autopilot.call(sim, task) if autopilot.is_valid() else _pad.read(self)
 
 
 # --- Camera -----------------------------------------------------------------
@@ -306,7 +310,7 @@ func set_view(v: String) -> void:
 	view = v
 	Prefs.set_view(mode, vehicle, v)
 	cam.position = Vector3.ZERO
-	_build_view_toggle()
+	FlightBottom.build_view_toggle(self)
 
 
 # --- HUD --------------------------------------------------------------------
@@ -361,8 +365,8 @@ func _build_hud() -> void:
 	fill.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	col.add_child(fill)
 
-	_build_bottom(col, ins)
-	_build_view_toggle()
+	FlightBottom.build_bottom(self, col, ins)
+	FlightBottom.build_view_toggle(self)
 	if not get_viewport().size_changed.is_connected(_on_resize):
 		get_viewport().size_changed.connect(_on_resize)
 
@@ -438,75 +442,6 @@ func _build_hint(col: VBoxContainer) -> void:
 	col.add_child(hint_row)
 
 
-func _build_bottom(col: VBoxContainer, ins: Dictionary) -> void:
-	# Sticks and the view switch at the bottom.
-	var bottom := HBoxContainer.new()
-	bottom.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	# Sticks as big as fit beside the view switch and any camera or action buttons. When the full
-	# switch leaves too little room (narrow phones, the largest text), it becomes one button that
-	# steps through the views.
-	var room := get_viewport_rect().size.x - 2.0 * SIDE - float(ins["left"]) - float(ins["right"]) - 24.0
-	if (task is PhotoTask and task.kit) or task.action != "" or _home_button() or _arm_button():
-		room -= 96.0
-	_view_compact = (room - VIEW_FULL) / 2.0 < 104.0
-	room -= VIEW_COMPACT if _view_compact else VIEW_FULL
-	# A square screen (an unfolded phone held upright) is narrower still: the button shows only
-	# its icon.
-	_view_icon = _view_compact and room / 2.0 < 92.0
-	if _view_icon:
-		room += VIEW_COMPACT - 60.0
-	var stick_px := int(clampf(room / 2.0, 80.0, 150.0 if mode == "kids" else 128.0))
-	for s in [_left, _right]:
-		s.kids = mode == "kids"
-		s.custom_minimum_size = Vector2(stick_px, stick_px)
-	# The FPV throttle stays where the thumb leaves it, like on a real radio, and starts at zero.
-	if machine in ["fpv", "wing"] and mode != "kids":
-		_thr.spring_y = false
-		# A plane that starts in the air has its motor already running at cruise.
-		_thr.value.y = sim.throttle01 * 2.0 - 1.0 if sim is WingSim else -1.0
-	var left_label := "STICK_LEFT_FPV" if not _left.spring_y and machine == "fpv" else "STICK_LEFT"
-	var right_label := "STICK_RIGHT"
-	if machine == "wing":
-		left_label = "STICK_LEFT_WING"
-		right_label = "STICK_RIGHT_WING"
-	if _mode1:
-		left_label = "STICK_LEFT_WING_M1" if machine == "wing" else "STICK_LEFT_M1"
-		right_label = {"fpv": "STICK_RIGHT_FPV_M1", "wing": "STICK_RIGHT_WING_M1"}.get(machine, "STICK_RIGHT_M1")
-	if sim is UgvSim:
-		left_label = "STICK_TRACK_L" if sim.tank else "STICK_DRIVE"
-		right_label = "STICK_TRACK_R" if sim.tank else "STICK_TURN"
-	bottom.add_child(_stick_with_label(_left, tr(left_label)))
-	_view_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_view_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	bottom.add_child(_view_box)
-	if task is PhotoTask and task.kit:
-		_kit = PhotoKit.new()
-		_kit.build(task, mode == "kids", shutter)
-		bottom.add_child(_kit)
-	if task.action != "":
-		var act := ActionButton.new()
-		act.build(task, sim)
-		bottom.add_child(act)
-	elif _home_button():
-		bottom.add_child(_round_button("home", "RTH", func(): home.start(sim)))
-	elif _arm_button():
-		var b := _round_button("power", "ARM", _toggle_arm)
-		_arm_label = b.find_children("*", "Label", true, false)[0]
-		bottom.add_child(b)
-	bottom.add_child(_stick_with_label(_right, tr(right_label)))
-	col.add_child(bottom)
-
-
-## Adult camera drones have a "Home" button beside the right stick.
-func _home_button() -> bool:
-	return home != null and mode == "pro" and not (task is PhotoTask and task.kit)
-
-
-## Adult FPV drones are armed with a button beside the right stick.
-func _arm_button() -> bool:
-	return sim is FpvSim and mode == "pro" and task.action == ""
-
-
 func _toggle_arm() -> void:
 	var f := sim as FpvSim
 	if f.armed:
@@ -520,92 +455,28 @@ func _toggle_arm() -> void:
 	alert("HINT_ARMED", false)
 
 
+## A radio's or gamepad's own buttons: pause, the next view, arm.
+func _input(event: InputEvent) -> void:
+	if not event is InputEventJoypadButton:
+		return
+	match FlightInput.button_action(event):
+		"pause":
+			if _paused:
+				resume()
+			elif not _finished:
+				pause()
+		"view":
+			if not _paused and not _finished:
+				FlightBottom.next_view(self)
+		"arm":
+			if FlightBottom.arm_button(self) and not _paused:
+				_toggle_arm()
+
+
 func alert(key: String, warn: bool, seconds := 3.0) -> void:
 	_alert = key
 	_alert_t = seconds
 	_alert_warn = warn
-
-
-## A round button beside the right stick: an icon and a word.
-func _round_button(icon: String, key: String, on_press: Callable) -> Control:
-	var box := VBoxContainer.new()
-	box.alignment = BoxContainer.ALIGNMENT_END
-	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var col := UI.vbox(2)
-	col.alignment = BoxContainer.ALIGNMENT_CENTER
-	col.custom_minimum_size = Vector2(76, 76)
-	var ic := CenterContainer.new()
-	ic.add_child(Glyph.make(icon, 26, Pal.c("on_accent")))
-	col.add_child(ic)
-	var l := UI.label(tr(key), UI.CAPTION, 800, "on_accent", false, false)
-	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	col.add_child(l)
-	box.add_child(UI.tappable(col, Pal.c("accent"), on_press, tr(key), 38, 0))
-	return box
-
-
-func _stick_with_label(s: Stick, text: String) -> Control:
-	var v := UI.vbox(4)
-	v.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	v.add_child(s)
-	if mode != "kids":
-		# On a small glass pill, so the label reads over any part of the world.
-		var l := UI.label(text, UI.CAPTION, 700, "text", false, false)
-		l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		# Never wider than its stick: a long label would push the other stick off the screen.
-		var w := l.get_minimum_size().x
-		if w > s.custom_minimum_size.x - 16.0:
-			l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-			l.custom_minimum_size.x = s.custom_minimum_size.x - 16.0
-		var glass := Pal.c("bg")
-		glass.a = 0.78
-		var pill := UI.panel(l, glass, 10, 4)
-		pill.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-		v.add_child(pill)
-	return v
-
-
-func _build_view_toggle() -> void:
-	for c in _view_box.get_children():
-		c.queue_free()
-	var fill := Control.new()
-	fill.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	fill.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_view_box.add_child(fill)
-	var views := [["ugv", Curriculum.label("VIEW_DRONE")], ["chase", Curriculum.label("VIEW_BEHIND")], ["pilot", Curriculum.label("VIEW_PILOT")]] if machine == "ugv" \
-		else [["fpv", Curriculum.label("VIEW_FPV")], ["chase", Curriculum.label("VIEW_CHASE")], ["pilot", Curriculum.label("VIEW_PILOT")]] if machine == "fpv" \
-		else [["chase", Curriculum.label("VIEW_CHASE_WING")], ["pilot", Curriculum.label("VIEW_PILOT")], ["fpv", Curriculum.label("VIEW_NOSE")]] if machine == "wing" \
-		else [["pilot", Curriculum.label("VIEW_PILOT")], ["chase", Curriculum.label("VIEW_CHASE")], ["drone", Curriculum.label("VIEW_DRONE")]]
-	var center := CenterContainer.new()
-	if _view_compact:
-		center.add_child(_view_cycle(views))
-		center.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		_view_box.add_child(center)
-		return
-	var seg := UI.segmented(views, view, set_view)
-	seg.custom_minimum_size = Vector2(VIEW_FULL, 0)
-	center.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	center.add_child(seg)
-	_view_box.add_child(center)
-
-
-## One button showing the view now; a tap moves on to the next one.
-func _view_cycle(views: Array) -> Control:
-	var i := 0
-	for k in views.size():
-		if views[k][0] == view:
-			i = k
-	var next: String = views[(i + 1) % views.size()][0]
-	var row := UI.hbox(6)
-	row.alignment = BoxContainer.ALIGNMENT_CENTER
-	row.add_child(Glyph.make("camera", 18, Pal.c("text")))
-	if not _view_icon:
-		row.add_child(UI.label(views[i][1], UI.SMALL, 700, "text", false, false))
-	var glass := Pal.c("bg")
-	glass.a = 0.78
-	var t := UI.tappable(row, glass, func(): set_view(next), tr("A11Y_VIEW") % views[i][1], UI.RADIUS_PILL, 12)
-	t.custom_minimum_size = Vector2(52 if _view_icon else VIEW_COMPACT, 52)
-	return t
 
 
 func _update_hud() -> void:
