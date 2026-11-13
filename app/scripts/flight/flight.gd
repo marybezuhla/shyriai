@@ -21,6 +21,8 @@ var mode := "simple"
 var look := "dusk"
 ## Which world and task variant to build; tests and "Start over" keep it, a new attempt changes it.
 var flight_seed := 7
+## Practice: the same task with no timer, no sunflowers and nothing saved.
+var practice := false
 ## Tests set this to fly by themselves: func(sim, task) -> {"throttle", "yaw", "pitch", "roll"}.
 var autopilot := Callable()
 
@@ -60,6 +62,13 @@ var _rebuild_queued := false
 var _view_compact := false
 var _view_icon := false
 var _finished := false
+## Nothing moves and no time counts until the pilot first moves a stick.
+var _waiting := true
+## Seconds with no step forward in the task.
+var _stuck := 0.0
+## Kids get help after this long with no step forward.
+const KIDS_HELP_AFTER := 15.0
+var _first_sticks := {}
 var _sticks := {"throttle": 0.0, "yaw": 0.0, "pitch": 0.0, "roll": 0.0}
 var _input := FlightInput.new()
 var _sound := FlightSound.new()
@@ -158,8 +167,11 @@ func _physics_process(_delta: float) -> void:
 	_read_sticks()
 	# No radio link: the robot gets no commands and stops by itself.
 	_sticks = task.controls(_sticks)
-	sim.step(STEP, _sticks["throttle"], _sticks["yaw"], _sticks["pitch"], _sticks["roll"])
-	task.step(STEP, sim, _sticks)
+	if _waiting and not _ready_to_go():
+		task.step(0.0, sim, _sticks)  # sets the first hints; no time passes
+	else:
+		sim.step(STEP, _sticks["throttle"], _sticks["yaw"], _sticks["pitch"], _sticks["roll"])
+		task.step(STEP, sim, _sticks)
 	_sound_events()
 	_cam_history.append([sim.pos, sim.orientation()])
 	if _cam_history.size() > 90:
@@ -174,6 +186,26 @@ func _physics_process(_delta: float) -> void:
 		# The battery ran out and the drone has come down (or the robot has stopped): say so.
 		task.fail_with("FAIL_BATTERY_UGV" if sim is UgvSim else "FAIL_BATTERY")
 		_not_this_time()
+
+
+## The flight starts with the first move of a stick, so reading the goal costs no time. Tests and
+## free flight start at once.
+func _ready_to_go() -> bool:
+	if autopilot.is_valid() or task_key.begins_with("FREE_"):
+		_waiting = false
+		return true
+	if _first_sticks.is_empty():
+		_first_sticks = _sticks.duplicate()
+		return false
+	for k in _sticks:
+		if absf(float(_sticks[k]) - float(_first_sticks[k])) > 0.12:
+			_waiting = false
+			return true
+	return false
+
+
+func kids_help() -> bool:
+	return mode == "kids" and _stuck > KIDS_HELP_AFTER and task.marker != Vector3.INF
 
 
 func _process(delta: float) -> void:
@@ -217,6 +249,8 @@ func _sound_events() -> void:
 	var jumped := task.progress - _last_progress >= 0.04 or task.counter > _last_counter
 	if jumped and not task.done:
 		_sound.play("blip")
+	# Kids: a while with no step forward brings a gentle reminder of where to go.
+	_stuck = 0.0 if task.progress != _last_progress or task.counter != _last_counter else _stuck + STEP
 	_last_progress = task.progress
 	_last_counter = task.counter
 	for e in sim.events:
@@ -246,7 +280,7 @@ func set_view(v: String) -> void:
 # --- HUD --------------------------------------------------------------------
 
 func _build_hud() -> void:
-	_build_no_signal()
+	FlightHud.build_no_signal(self)
 	_hud.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_hud.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_hud)
@@ -277,16 +311,16 @@ func _build_hud() -> void:
 	top.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	top.add_child(UI.icon_button("pause", pause, tr("PAUSE"), glass))
 
-	top.add_child(UI.panel(_build_chip(), glass, 16, 10))
+	top.add_child(UI.panel(FlightHud.build_chip(self), glass, 16, 10))
 
 	var gap := Control.new()
 	gap.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	gap.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	top.add_child(gap)
 
-	_build_counters(top, glass)
+	FlightHud.build_counters(self, top, glass)
 	col.add_child(top)
-	_fit_top(top)
+	FlightHud.fit_top(self, top)
 
 	_build_hint(col)
 
@@ -347,135 +381,9 @@ func stick_band() -> float:
 
 
 ## The top line must fit the screen: drop the least needed numbers until it does.
-func _fit_top(top: HBoxContainer) -> void:
-	var room := get_viewport_rect().size.x - 2.0 * SIDE - _ins_x()
-	var order := ["TIME", "BATTERY", "CLOSING", "SPEED", "TARGET", "ALT"]
-	for n in order:
-		if top.get_combined_minimum_size().x <= room:
-			return
-		if _stats.has(n):
-			var cell: Control = _stats[n].get_parent()
-			cell.get_parent().remove_child(cell)
-			cell.queue_free()
-			_stats.erase(n)
-	if _stats.is_empty() and top.get_child_count() > 3:
-		var panel := top.get_child(top.get_child_count() - 1)
-		top.remove_child(panel)  # nothing left in the numbers panel
-		panel.queue_free()
-	# Still too wide (an unfolded phone held upright): the lesson title gets "…".
-	var over := top.get_combined_minimum_size().x - room
-	if over > 0.0:
-		var title: Label = top.get_child(1).find_children("*", "Label", true, false)[0]
-		var w := title.get_combined_minimum_size().x
-		title.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-		title.clip_text = true
-		title.custom_minimum_size.x = maxf(40.0, w - over)
-
-
 func _ins_x() -> float:
 	var ins: Dictionary = app.insets() if app else {}
 	return float(ins.get("left", 0.0)) + float(ins.get("right", 0.0))
-
-
-func _build_no_signal() -> void:
-	# "No signal" over the robot's video while the radio link is down.
-	var nl := ColorRect.new()
-	nl.color = Color(Pal.INK, 0.82)
-	nl.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	nl.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var nl_center := CenterContainer.new()
-	nl_center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	nl_center.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var nl_text := Label.new()
-	nl_text.text = tr("NO_SIGNAL")
-	nl_text.add_theme_font_override("font", Pal.font(600, true))
-	nl_text.add_theme_font_size_override("font_size", roundi(26 * Pal.text_scale()))
-	nl_text.add_theme_color_override("font_color", Pal.CREAM)
-	nl_center.add_child(nl_text)
-	nl.add_child(nl_center)
-	nl.visible = false
-	add_child(nl)
-	_nolink = nl
-
-
-## The title with its progress bar and, for loads, the comfort or cargo meter.
-func _build_chip() -> Control:
-	var chip := UI.vbox(6)
-	var title := Curriculum.label(task_key)
-	if not task.is_mission and not task.is_free and mode != "kids":
-		title = tr("LESSON_N") % (Curriculum.lessons(vehicle, mode).find(task_key) + 1) + " · " + title
-	chip.add_child(UI.label(title, UI.BODY, 700, "text", false, false))
-	var bar_row := UI.hbox(8)
-	var bar := Panel.new()
-	bar.custom_minimum_size = Vector2(BAR_W, 6)
-	bar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	bar.add_theme_stylebox_override("panel", UI.box(Pal.c("line"), 3, 0))
-	_bar_fill.add_theme_stylebox_override("panel", UI.box(Pal.c("accent"), 3, 0))
-	_bar_fill.size = Vector2(0, 6)
-	bar.add_child(_bar_fill)
-	bar_row.add_child(bar)
-	if mode != "kids":
-		_bar_text = UI.label("0 %", UI.CAPTION, 700, "muted", false, false)
-		bar_row.add_child(_bar_text)
-	if task.is_free:
-		# Free flight has no progress: the bar is not shown, and not kept either.
-		bar_row.free()
-		_bar_fill = null
-		_bar_text = null
-	else:
-		chip.add_child(bar_row)
-	# A second bar for how the load is doing, e.g. the casualty's comfort.
-	if task.meter >= 0.0:
-		var mrow := UI.hbox(8)
-		var mbar := Panel.new()
-		mbar.custom_minimum_size = Vector2(BAR_W, 6)
-		mbar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		mbar.add_theme_stylebox_override("panel", UI.box(Pal.c("line"), 3, 0))
-		_meter_fill = Panel.new()
-		_meter_fill.add_theme_stylebox_override("panel", UI.box(Pal.c("ok"), 3, 0))
-		_meter_fill.size = Vector2(BAR_W, 6)
-		mbar.add_child(_meter_fill)
-		mrow.add_child(mbar)
-		var meter_text := UI.label(tr(Curriculum.text_key(task.meter_label, mode)), UI.CAPTION, 700, "muted", false, false)
-		mrow.add_child(meter_text)
-		chip.add_child(mrow)
-	return chip
-
-
-## Kids see a simple counter; everyone else sees the flight numbers.
-func _build_counters(top: HBoxContainer, glass: Color) -> void:
-	if mode == "kids":
-		if task.counter_shown:
-			var row := UI.hbox(8)
-			# Sunflowers are what the kitten mission collects; other counts need no picture.
-			if task.key == "MIS_CAM_KITTEN":
-				row.add_child(Glyph.make("sunflower", 26, Pal.c("accent")))
-			_counter = UI.label("0", UI.TITLE_S, 700, "text", true, false)
-			row.add_child(_counter)
-			top.add_child(UI.panel(row, glass, 22, 10))
-	else:
-		var stats := UI.hbox(18)
-		var names := ["ALT", "TIME"]
-		if mode == "pro":
-			names = ["ALT", "SPEED", "BATTERY", "TIME"]
-		if machine == "ugv":
-			names = ["SPEED", "BATTERY", "TIME"] if mode == "pro" else ["SPEED", "TIME"]
-		elif machine in ["fpv", "wing"] and mode != "pro":
-			names = ["ALT", "SPEED", "TIME"]
-		if task.target_info:
-			names = ["TARGET", "CLOSING", "SPEED", "TIME"] if mode == "pro" else ["TARGET", "CLOSING", "TIME"]
-		for n in names:
-			var s := UI.vbox(1)
-			var head := UI.eyebrow(tr("STAT_" + n))
-			head.autowrap_mode = TextServer.AUTOWRAP_OFF
-			s.add_child(head)
-			var v := UI.label("–", UI.LEAD, 800, "text", false, false)
-			# As wide as a real reading from the start, so the top line is measured right.
-			v.custom_minimum_size.x = v.get_theme_font("font").get_string_size("88,8 м/с", HORIZONTAL_ALIGNMENT_LEFT, -1, v.get_theme_font_size("font_size")).x
-			_stats[n] = v
-			s.add_child(v)
-			stats.add_child(s)
-		top.add_child(UI.panel(stats, glass, 16, 10))
 
 
 func _build_hint(col: VBoxContainer) -> void:
@@ -520,7 +428,7 @@ func _build_bottom(col: VBoxContainer, ins: Dictionary) -> void:
 		_thr.spring_y = false
 		# A plane that starts in the air has its motor already running at cruise.
 		_thr.value.y = sim.throttle01 * 2.0 - 1.0 if sim is WingSim else -1.0
-	var left_label := "STICK_LEFT_FPV" if not _left.spring_y else "STICK_LEFT"
+	var left_label := "STICK_LEFT_FPV" if not _left.spring_y and machine == "fpv" else "STICK_LEFT"
 	var right_label := "STICK_RIGHT"
 	if machine == "wing":
 		left_label = "STICK_LEFT_WING"
@@ -531,7 +439,7 @@ func _build_bottom(col: VBoxContainer, ins: Dictionary) -> void:
 	if sim is UgvSim:
 		left_label = "STICK_TRACK_L" if sim.tank else "STICK_DRIVE"
 		right_label = "STICK_TRACK_R" if sim.tank else "STICK_TURN"
-	bottom.add_child(_stick_with_label(_left, tr(left_label)))
+	bottom.add_child(_stick_with_label(_left, tr(Curriculum.text_key(left_label, mode))))
 	_view_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_view_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	bottom.add_child(_view_box)
@@ -543,7 +451,7 @@ func _build_bottom(col: VBoxContainer, ins: Dictionary) -> void:
 		var act := ActionButton.new()
 		act.build(task, sim)
 		bottom.add_child(act)
-	bottom.add_child(_stick_with_label(_right, tr(right_label)))
+	bottom.add_child(_stick_with_label(_right, tr(Curriculum.text_key(right_label, mode))))
 	col.add_child(bottom)
 
 
@@ -636,8 +544,12 @@ func _update_hud() -> void:
 		_bar_fill.size = Vector2(BAR_W * task.progress, 6)
 	if _bar_text:
 		_bar_text.text = "%d %%" % int(round(task.progress * 100.0))
-	if task.hint != "":
-		var text := tr(task.hint)
+	var ready := "HINT_PRACTICE" if practice else Curriculum.text_key("HINT_READY", mode)
+	var hint_key := ready if _waiting and (task.hint == "" or practice) else task.hint
+	if kids_help():
+		hint_key = "HINT_KIDS_HELP"
+	if hint_key != "":
+		var text := tr(hint_key)
 		if not task.hint_args.is_empty() and text.contains("%"):
 			text = text % task.hint_args
 		if text != _hint.text:
@@ -647,7 +559,7 @@ func _update_hud() -> void:
 			var wrap := minf(520.0, get_viewport_rect().size.x - 2.0 * SIDE - _ins_x() - 24.0)
 			_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART if w > wrap else TextServer.AUTOWRAP_OFF
 			_hint.custom_minimum_size = Vector2(wrap, 0) if w > wrap else Vector2.ZERO
-	_hint_panel.visible = task.hint != ""
+	_hint_panel.visible = hint_key != ""
 	if _counter:
 		_counter.text = "%d / %d" % [task.counter, task.counter_max]
 	if _stats.has("ALT"):
@@ -706,7 +618,7 @@ func resume() -> void:
 
 ## "Start over" keeps the same layout (the same house, the same field); "Again" after a result too.
 func restart() -> void:
-	app.open_flight(vehicle, task_key, flight_seed)
+	app.open_flight(vehicle, task_key, flight_seed, practice)
 
 
 func leave() -> void:
@@ -726,6 +638,11 @@ func _finish() -> void:
 	_finished = true
 	_sound.stop_motors()
 	_sound.play("chime")
+	if practice:
+		_show_overlay(FlightCards.practice_done(self))
+		return
+	if app:
+		app.fails.erase(task_key)
 	if task.is_mission:
 		Prefs.mark_mission(task_key)
 	else:
@@ -739,14 +656,22 @@ func _crashed() -> void:
 	_finished = true
 	_sound.stop_motors()
 	_sound.play("thud")
-	_show_overlay(FlightCards.crashed(self))
+	_show_overlay(FlightCards.crashed(self, _fail_streak()))
 
 
 func _not_this_time() -> void:
 	_finished = true
 	_sound.stop_motors()
 	_sound.play("fail")
-	_show_overlay(FlightCards.not_this_time(self))
+	_show_overlay(FlightCards.not_this_time(self, _fail_streak()))
+
+
+## Tries in a row that did not pass, this one included. Practice tries do not count.
+func _fail_streak() -> int:
+	if app == null or practice:
+		return 0
+	app.fails[task_key] = int(app.fails.get(task_key, 0)) + 1
+	return app.fails[task_key]
 
 
 func _next_task() -> String:

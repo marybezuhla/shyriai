@@ -13,7 +13,11 @@ static func draw(f: Flight) -> void:
 		# Keep the arrow clear of the sticks along the bottom: under a thumb it cannot be seen.
 		var inner := rect.grow_individual(-40, -40, -40, -maxf(40.0, f.stick_band()))
 		if not behind and inner.has_point(p):
-			_diamond(f, p, 9.0)
+			# Grows and pulses when a child needs help finding it.
+			var r := 9.0
+			if f.kids_help():
+				r = 13.0 + 3.0 * sin(Time.get_ticks_msec() / 160.0)
+			_diamond(f, p, r)
 		else:
 			# An arrow at the edge of the screen, pointing towards the target.
 			var c := inner.get_center()

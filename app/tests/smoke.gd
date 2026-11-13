@@ -38,6 +38,7 @@ func _ready() -> void:
 	await _kids_0_11()
 	await _check_title_fits()
 	await _hud_fits()
+	await preload("res://tests/smoke_steps.gd").new(self).run()
 	Prefs.set_language("system")
 	Prefs.set_theme("dusk")
 	Prefs.set_mode("simple")

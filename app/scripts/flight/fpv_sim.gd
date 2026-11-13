@@ -139,6 +139,7 @@ func _touch_ground_fpv() -> void:
 	pos.y = g
 	if p["crash"] and (down > float(p["crash_fall"]) or side > 7.0):
 		crash_speed = maxf(down, side)
+		crash_kind = "ground"
 		crashed = true
 		events.append({"type": "crash", "speed": crash_speed})
 		return

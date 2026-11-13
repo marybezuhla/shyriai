@@ -29,7 +29,7 @@ func configure() -> void:
 
 
 func step(dt: float, sim: DroneSim, sticks: Dictionary) -> void:
-	if _prev_yaw != INF:
+	if _prev_yaw != INF and dt > 0.0:
 		turn = wrapf(sim.yaw - _prev_yaw, -PI, PI) / dt
 	_prev_yaw = sim.yaw
 	super.step(dt, sim, sticks)

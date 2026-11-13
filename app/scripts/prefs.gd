@@ -33,7 +33,7 @@ const MAX_SECONDS := 3600.0
 ## A fresh install, and what "Erase all data" goes back to.
 const DEFAULTS := {
 	"mode": "simple", "theme": "dusk", "language": "system", "text_size": "normal",
-	"kids_lock": false, "sound": true, "stick_mode": "2", "stick_feel": "normal", "pilot_name": "",
+	"welcomed": false, "kids_lock": false, "sound": true, "stick_mode": "2", "stick_feel": "normal", "pilot_name": "",
 	"free": {"wind": "none", "time": "day", "balls": true, "fpv": "angle"},
 }
 
@@ -42,6 +42,8 @@ var mode: String = DEFAULTS["mode"]
 var theme: String = DEFAULTS["theme"]
 var language: String = DEFAULTS["language"]
 var text_size: String = DEFAULTS["text_size"]
+## The first-run question "Who will play?" has been answered.
+var welcomed: bool = DEFAULTS["welcomed"]
 ## Leaving Kids mode or opening settings needs a sum solved.
 var kids_lock: bool = DEFAULTS["kids_lock"]
 var sound: bool = DEFAULTS["sound"]
@@ -110,6 +112,18 @@ func set_text_size(value: String) -> void:
 		_undo = {}
 		_save()
 		_apply_theme()
+
+
+## The answer to the first-run question: a child gets Kids mode with the grown-ups' lock on,
+## a grown-up gets Simple mode. Either can be changed later.
+func welcome(child: bool) -> void:
+	welcomed = true
+	mode = "kids" if child else "simple"
+	kids_lock = child
+	_undo = {}
+	_save()
+	_apply_theme()
+	changed.emit()
 
 
 func set_kids_lock(on: bool) -> void:
@@ -428,6 +442,9 @@ func _apply_settings(d: Dictionary) -> void:
 	var ts = d.get("text_size")
 	if ts is String and TEXT_SIZES.has(ts):
 		text_size = ts
+	var w = d.get("welcomed")
+	# Files from before the question existed belong to pilots who already know the app.
+	welcomed = w if w is bool else true
 	var k = d.get("kids_lock")
 	if k is bool:
 		kids_lock = k
@@ -547,7 +564,7 @@ func _read_missions(list: Array) -> Array:
 func _data() -> Dictionary:
 	return {
 		"version": 1, "mode": mode, "theme": theme, "language": language, "text_size": text_size,
-		"kids_lock": kids_lock, "sound": sound, "stick_mode": stick_mode, "stick_feel": stick_feel,
+		"welcomed": welcomed, "kids_lock": kids_lock, "sound": sound, "stick_mode": stick_mode, "stick_feel": stick_feel,
 		"views": views.duplicate(true), "passed": passed.duplicate(true),
 		"missions": missions.duplicate(true), "best": best.duplicate(true),
 		"licences": licences.duplicate(true), "pilot_name": pilot_name, "free": free.duplicate(),

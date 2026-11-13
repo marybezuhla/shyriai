@@ -19,6 +19,10 @@ var _nav := PanelContainer.new()
 var _insets := {"top": 0.0, "bottom": 0.0, "left": 0.0, "right": 0.0}
 var flight: Control = null
 var _gate: Control = null
+var _welcoming := false
+## Tries in a row that did not pass, per task, since the app started: the third brings a tip and
+## the offer to practise.
+var fails := {}
 
 
 func _ready() -> void:
@@ -43,6 +47,24 @@ func _ready() -> void:
 	Prefs.changed.connect(_restyle)
 	get_viewport().size_changed.connect(_apply_insets)
 	_apply_insets()
+	if Prefs.welcomed:
+		open_tab("learn")
+	else:
+		_open_welcome()
+
+
+## The first start: "Who will play?" fills the screen, with no tabs under it.
+func _open_welcome() -> void:
+	for s in stack:
+		s.queue_free()
+	stack.clear()
+	stack.append(_make("res://scripts/screens/welcome.gd"))
+	_welcoming = true
+	_show()
+
+
+func welcome(child: bool) -> void:
+	Prefs.welcome(child)
 	open_tab("learn")
 
 
@@ -64,6 +86,7 @@ func _unhandled_input(event: InputEvent) -> void:
 # --- Navigation -------------------------------------------------------------
 
 func open_tab(name_: String) -> void:
+	_welcoming = false
 	for s in stack:
 		s.queue_free()
 	stack.clear()
@@ -90,6 +113,10 @@ func open_about() -> void:
 
 func open_pilot_cards() -> void:
 	_push(_make("res://scripts/screens/pilot_cards.gd"))
+
+
+func open_glossary() -> void:
+	_push(_make("res://scripts/screens/glossary.gd"))
 
 
 func open_licenses() -> void:
@@ -122,7 +149,7 @@ func start(vehicle: String, key: String) -> void:
 	open_flight(vehicle, key)
 
 
-func open_flight(vehicle: String, key: String, seed_ := -1) -> void:
+func open_flight(vehicle: String, key: String, seed_ := -1, practice := false) -> void:
 	if flight:
 		flight.queue_free()
 		remove_child(flight)
@@ -132,6 +159,7 @@ func open_flight(vehicle: String, key: String, seed_ := -1) -> void:
 	_frame.visible = false
 	flight = load("res://scripts/flight/flight.gd").new()
 	flight.setup(self, vehicle, key)
+	flight.practice = practice
 	# Missions change a little each attempt: another house, another place in the field.
 	if seed_ >= 0:
 		flight.flight_seed = seed_
@@ -211,7 +239,7 @@ func _restyle() -> void:
 func _build_nav() -> void:
 	for c in _nav.get_children():
 		c.queue_free()
-	_nav.visible = stack.size() == 1
+	_nav.visible = stack.size() == 1 and not _welcoming
 	var style := UI.box(Pal.c("bg"), 0, 0)
 	style.border_color = Pal.c("surface2")
 	style.border_width_top = 1

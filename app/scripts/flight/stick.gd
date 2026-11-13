@@ -83,6 +83,26 @@ func _set_from(local: Vector2) -> void:
 	queue_redraw()
 
 
+## A drawn thumb resting on the ghost knob, coming from below like a real one, so it is clear the
+## knob is to be pushed with a finger.
+func _thumb(at: Vector2, alpha: float) -> void:
+	var w := _knob_radius() * 0.8
+	var skin := Color(Pal.CREAM, 0.9 * alpha)
+	var edge := Color(Pal.INK, 0.7 * alpha)
+	var tip := at + Vector2(0, w * 0.1)
+	var base := tip + Vector2(w * 0.35, w * 2.6)
+	var side := (base - tip).orthogonal().normalized() * w
+	var body := PackedVector2Array([tip + side, base + side, base - side, tip - side])
+	draw_circle(tip, w, skin, true, -1.0, true)
+	draw_colored_polygon(body, skin)
+	draw_arc(tip, w, side.angle(), side.angle() - PI, 24, edge, 2.0, true)
+	draw_line(tip + side, base + side, edge, 2.0, true)
+	draw_line(tip - side, base - side, edge, 2.0, true)
+	# The nail.
+	var nail := tip + (base - tip).normalized() * w * 0.15
+	draw_arc(nail, w * 0.45, side.angle(), side.angle() - PI, 16, Color(Pal.INK, 0.35 * alpha), 2.0, true)
+
+
 func _knob_radius() -> float:
 	return _radius() * (0.36 if kids else 0.34)
 
@@ -120,6 +140,7 @@ func _draw() -> void:
 		ghost.a = 0.55 * (1.0 - phase)
 		draw_circle(g, _knob_radius(), ghost, true, -1.0, true)
 		draw_arc(g, _knob_radius(), 0, TAU, 40, Color(Pal.INK, 0.6 * (1.0 - phase)), 2.0, true)
+		_thumb(g, 1.0 - phase * 0.7)
 	var k := c + Vector2(value.x, -value.y) * travel
 	var halo := Pal.c("accent")
 	halo.a = 0.2

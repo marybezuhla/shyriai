@@ -4,6 +4,9 @@
 class_name FlightCamera
 extends RefCounted
 
+## The first lessons are watched from closer: the drone looks bigger and its moves are easy to see.
+const CLOSE := ["CAM_STICKS", "CAM_TAKEOFF"]
+
 
 static func place(f: Flight, delta: float) -> void:
 	var target := f.sim.pos + Vector3(0, 0.15, 0)
@@ -49,6 +52,8 @@ static func place(f: Flight, delta: float) -> void:
 	else:
 		# The pilot stands behind the pad and turns the head; far away, the f.view zooms in a little.
 		f.cam.position = f.world.pilot
+		if f.task_key in CLOSE:
+			f.cam.position = f.world.pilot.lerp(f.world.pad + Vector3(0, 1.7, 0), 0.45)
 		var d := f.cam.position.distance_to(target)
 		f.cam.fov = lerpf(f.cam.fov, clampf(70.0 - d * 0.9, 32.0, 62.0), 1.0 - exp(-delta * 2.0))
 		# Straight overhead, looking up would need another "up": just keep the last f.view there.

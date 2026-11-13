@@ -67,7 +67,11 @@ static func rating(f, got: int, before: Dictionary) -> Control:
 	return box
 
 
-static func crashed(f) -> Control:
+## Tries in a row that did not pass before a tip and practice are offered.
+const STREAK := 3
+
+
+static func crashed(f, streak := 0) -> Control:
 	var col := UI.vbox(12)
 	if f.sim is UgvSim:
 		col.add_child(UI.label(f.tr("CRASHED_UGV"), UI.TITLE_L, 600, "text", true))
@@ -80,18 +84,63 @@ static func crashed(f) -> Control:
 	else:
 		col.add_child(UI.label(f.tr("CRASHED"), UI.TITLE_L, 600, "text", true))
 		col.add_child(UI.label(f.tr("CRASHED_TEXT") % FlightTask.num(f.sim.crash_speed), UI.BODY, 500, "muted"))
-	col.add_child(UI.primary(f.tr("AGAIN"), f.restart, "play"))
-	col.add_child(secondary(f.tr("EXIT"), f.leave))
+		col.add_child(_tip_box(safe_speed(f)))
+	_retry_buttons(f, col, streak, "TIP_CRASH")
 	return col
 
 
-static func not_this_time(f) -> Control:
+## What the machine can take without harm, as one line with a tip: for the crash card.
+static func safe_speed(f) -> String:
+	var kind: String = f.sim.crash_kind
+	if kind == "wingtip":
+		return f.tr("CRASHED_SAFE_WINGTIP")
+	if kind == "obstacle":
+		return f.tr("CRASHED_SAFE_HIT") % FlightTask.num(float(f.sim.p.get("crash_speed", DroneSim.CRASH_SPEED)))
+	var key := "CRASHED_SAFE_GROUND_WING" if f.sim is WingSim else "CRASHED_SAFE_GROUND"
+	return f.tr(key) % FlightTask.num(float(f.sim.p.get("crash_fall", DroneSim.CRASH_FALL)))
+
+
+static func not_this_time(f, streak := 0) -> Control:
 	var col := UI.vbox(12)
 	col.add_child(UI.label(f.tr("NOT_THIS_TIME"), UI.TITLE_L, 600, "text", true))
 	col.add_child(UI.label(summary(f), UI.BODY, 500, "muted"))
 	if f.task is PhotoTask and not f.task.wrong.is_empty():
 		col.add_child(Report.mistakes(f, f.task))
+	_retry_buttons(f, col, streak, "TIP_" + String(f.task.summary))
+	return col
+
+
+## "Again" and "Exit"; from the third try in a row, a tip first and the offer to practise.
+static func _retry_buttons(f, col: VBoxContainer, streak: int, tip: String) -> void:
+	if streak >= STREAK:
+		col.add_child(_tip_box(f.tr("TIP") + " " + f.tr(tip_key(tip, f.task_key, f.mode))))
 	col.add_child(UI.primary(f.tr("AGAIN"), f.restart, "play"))
+	if streak >= STREAK and f.mode != "kids":
+		col.add_child(secondary(f.tr("PRACTICE"), func(): f.app.open_flight(f.vehicle, f.task_key, f.flight_seed, true)))
+	col.add_child(secondary(f.tr("EXIT"), f.leave))
+
+
+## The most fitting tip there is: for this very failure, then for the lesson, then a general one.
+static func tip_key(first: String, task_key: String, mode: String) -> String:
+	for t in [first, "TIP_" + task_key, "TIP_GENERIC"]:
+		var key := Curriculum.text_key(t, mode)
+		if String(TranslationServer.translate(key)) != key:
+			return key
+	return "TIP_GENERIC"
+
+
+static func _tip_box(text: String) -> Control:
+	var l := UI.label(text, UI.SMALL, 600, "text")
+	return UI.panel(l, Pal.c("surface2"), 14, 12)
+
+
+## A practice try that passed: nothing is saved, so the real try is offered next.
+static func practice_done(f) -> Control:
+	var col := UI.vbox(12)
+	col.add_child(UI.label(f.tr("PRACTICE_DONE"), UI.TITLE_L, 600, "text", true))
+	col.add_child(UI.label(f.tr("PRACTICE_DONE_TEXT"), UI.BODY, 500, "muted"))
+	col.add_child(UI.primary(f.tr("PRACTICE_REAL"), func(): f.app.open_flight(f.vehicle, f.task_key, f.flight_seed), "play"))
+	col.add_child(secondary(f.tr("PRACTICE_MORE"), f.restart))
 	col.add_child(secondary(f.tr("EXIT"), f.leave))
 	return col
 

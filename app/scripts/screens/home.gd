@@ -27,6 +27,8 @@ func build() -> void:
 	mode_box.add_child(desc)
 	add_child(mode_box)
 
+	if _new_pilot():
+		add_child(_welcome_card())
 	add_child(_continue_card())
 
 	# Vehicles
@@ -48,6 +50,19 @@ func _pick_mode(m: String) -> void:
 		app.guard(func(): Prefs.set_mode(m))
 	else:
 		Prefs.set_mode(m)
+
+
+## Nothing flown yet in this mode: the home screen greets and points at the first lesson.
+static func _new_pilot() -> bool:
+	return Curriculum.VEHICLES.all(func(v): return Prefs.passed_count(v) == 0) \
+		and Curriculum.VEHICLES.all(func(v): return Curriculum.missions(v, Prefs.mode).all(func(m): return not Prefs.mission_done(m)))
+
+
+func _welcome_card() -> Control:
+	var col := UI.vbox(4)
+	col.add_child(UI.label(tr("HOME_HELLO"), UI.LEAD, 600, "text", true))
+	col.add_child(UI.label(tr(Curriculum.text_key("HOME_HELLO_TEXT", Prefs.mode)), UI.BODY, 500, "muted"))
+	return UI.panel(col, Pal.c("surface"), 20, 16)
 
 
 ## Continue where the pilot stopped: the course with most progress that is not finished
@@ -93,7 +108,9 @@ func _continue_card() -> Control:
 	row.add_child(text)
 	row.add_child(play)
 	var name_ := "%s: %s" % [tr("HOME_CONTINUE"), lesson]
-	return UI.tappable(row, Pal.c("accent"), func(): app.open_lessons(vehicle), name_, 20, 16)
+	# The very first lesson starts straight away: there is nothing to choose yet.
+	var go := (func(): app.start(vehicle, lessons[0])) if done == 0 else (func(): app.open_lessons(vehicle))
+	return UI.tappable(row, Pal.c("accent"), go, name_, 20, 16)
 
 
 func _vehicle_card(v: String) -> Control:
@@ -108,9 +125,18 @@ func _vehicle_card(v: String) -> Control:
 	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	text.alignment = BoxContainer.ALIGNMENT_CENTER
 	text.add_child(UI.label(Curriculum.label("VEH_" + v.to_upper()), UI.LEAD, 700))
-	text.add_child(UI.label(Curriculum.label("VEH_%s_DESC" % v.to_upper()), UI.BODY, 500, "muted"))
-
 	var done := Prefs.passed_count(v)
+	var desc := Curriculum.label("VEH_%s_DESC" % v.to_upper())
+	if v == "camera" and _new_pilot():
+		desc = tr("HOME_START_HERE")
+	text.add_child(UI.label(desc, UI.BODY, 500, "muted"))
+	# A hint, never a lock: some courses go better after another one.
+	var after: String = Curriculum.AFTER.get(v, "")
+	if after != "" and done == 0 and Prefs.passed_count(after) < 2:
+		var tag := UI.label(tr("HOME_AFTER") % Curriculum.label("VEH_" + after.to_upper()), UI.CAPTION, 700, "muted")
+		var tp := UI.panel(tag, Pal.c("surface2"), 8, 6)
+		tp.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+		text.add_child(tp)
 	var row := UI.hbox(14)
 	row.add_child(icon_bg)
 	row.add_child(text)

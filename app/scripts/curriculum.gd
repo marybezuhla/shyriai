@@ -9,6 +9,8 @@ const VEHICLES := ["camera", "fpv", "ugv", "survey", "intercept", "wing"]
 ## The picture for each course, on the home screen and the licences.
 const ICONS := {"camera": "camera", "fpv": "fpv", "ugv": "ugv", "survey": "photo", "intercept": "intercept", "wing": "wing"}
 const MACHINE := {"survey": "camera", "intercept": "fpv"}
+## A course that goes better after another one: shown as a hint on the course card, never a lock.
+const AFTER := {"fpv": "camera", "survey": "camera", "intercept": "fpv", "wing": "camera"}
 
 const LESSONS := {
 	"camera": [
