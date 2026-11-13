@@ -69,6 +69,8 @@ const FILES := {
 	"WING_CIRCUIT": "res://scripts/flight/tasks/wing_rings.gd",
 	"WING_STALL": "res://scripts/flight/tasks/wing_stall.gd",
 	"WING_LANDING": "res://scripts/flight/tasks/wing_landing.gd",
+	"WING_INTO_WIND": "res://scripts/flight/tasks/wing_pattern.gd",
+	"WING_PATTERN": "res://scripts/flight/tasks/wing_pattern.gd",
 	"WING_KIDS_STORKS": "res://scripts/flight/tasks/wing_rings.gd",
 	"MIS_WING_CLOUDS": "res://scripts/flight/tasks/wing_rings.gd",
 	"MIS_WING_KITE": "res://scripts/flight/tasks/wing_find.gd",
@@ -426,6 +428,7 @@ func ring_step(sim: DroneSim) -> String:
 	return res
 
 
-func restart_rings() -> void:
-	ring_i = 0
+## Back to a ring (the first by default): the rings from there count again.
+func restart_rings(from := 0) -> void:
+	ring_i = from
 	_prev = Vector3.INF

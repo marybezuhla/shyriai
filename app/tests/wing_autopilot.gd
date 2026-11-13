@@ -82,15 +82,19 @@ func land(sim: WingSim, touch: Vector3, glide: float) -> Dictionary:
 	var side := (sim.pos - touch).cross(through).y
 	_side_i = clampf(_side_i + side / 60.0, -20.0, 20.0)  # the wind pushes steadily: lean into it
 	var want_heading := atan2(-through.x, -through.z)
-	var err := wrapf(want_heading - sim.yaw, -PI, PI) + clampf(side * 0.08 + _side_i * 0.01, -0.5, 0.5)
-	var bank := clampf(-err * 1.5, -max_bank, max_bank)
+	# Close to the runway only small corrections: a steep turn when slow and low ends in a stall.
+	var lim := 0.5 if sim.altitude() > 4.0 else 0.15
+	var err := wrapf(want_heading - sim.yaw, -PI, PI) + clampf(side * 0.08 + _side_i * 0.01, -lim, lim)
 	var alt := sim.altitude()
+	var bank := clampf(-err * 1.5, -max_bank, max_bank)
 	var g_des := clampf(-glide + (line_y - sim.pos.y) * 0.05, -0.25, 0.05)
-	if alt < 2.5:
-		g_des = -0.03  # flare: level off just above the runway
+	if alt < 1.5:
+		g_des = -0.1  # flare: shallower just above the runway, still sinking
 	var s := _hold(sim, bank, g_des, 11.5)
 	if alt < 2.5:
 		s["throttle"] = -1.0
+	if alt < 1.5:
+		s["pitch"] = minf(s["pitch"], -0.4)  # the flare: nose up just before the wheels touch
 	return s
 
 
@@ -103,5 +107,8 @@ func stall(sim: WingSim, stalled_once: bool) -> Dictionary:
 		var s := _hold(sim, 0.0, -0.3, 14.0)
 		s["throttle"] = 1.0
 		s["pitch"] = maxf(s["pitch"], 0.4)
+		if sim.stalled:
+			s["yaw"] = -sim.drop  # rudder against the dropping wing stops a spin
+			s["roll"] = 0.0
 		return s
 	return _hold(sim, 0.0, 0.0, 13.0)

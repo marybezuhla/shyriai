@@ -8,12 +8,13 @@ class_name UgvSim
 extends DroneSim
 
 const UGV := {
-	# vmax m/s, turn deg/s at full opposite tracks, tau s to reach the stick's speed, tip deg.
-	"kids": {"vmax": 2.2, "turn": 70.0, "tau": 0.3, "crash": false, "bounce": 0.3, "tip": 90.0,
+	# vmax m/s, turn deg/s on the spot with the tracks full opposite (a real tracked robot
+	# turns about 60°/s on firm ground), tau s to reach the stick's speed, tip deg.
+	"kids": {"vmax": 2.2, "turn": 80.0, "tau": 0.3, "crash": false, "bounce": 0.3, "tip": 90.0,
 		"battery_s": 0.0, "wind": 0.0, "gust": 0.0},
-	"simple": {"vmax": 3.0, "turn": 80.0, "tau": 0.4, "crash": false, "bounce": 0.0, "tip": 90.0,
+	"simple": {"vmax": 3.0, "turn": 70.0, "tau": 0.4, "crash": false, "bounce": 0.0, "tip": 90.0,
 		"battery_s": 0.0, "wind": 0.0, "gust": 0.0},
-	"pro": {"vmax": 4.0, "turn": 90.0, "tau": 0.6, "crash": true, "bounce": 0.0, "tip": 32.0,
+	"pro": {"vmax": 4.0, "turn": 60.0, "tau": 0.6, "crash": true, "bounce": 0.0, "tip": 32.0,
 		"battery_s": 600.0, "wind": 0.0, "gust": 0.0, "crash_speed": 2.5},
 }
 const HALF_LEN := 0.8  # m, for reading the slope under the robot
@@ -84,7 +85,8 @@ func step(dt: float, throttle: float, yaw_in: float, pitch: float, roll: float) 
 
 	var f := float(grip.call(pos.x, pos.z))
 	var v := (tracks.x + tracks.y) * 0.5 * float(p["vmax"]) * f
-	var w := (tracks.x - tracks.y) * deg_to_rad(p["turn"]) * f  # positive turns right
+	# Positive turns right. Mud lets the tracks slip, so turns there are slower still.
+	var w := (tracks.x - tracks.y) * 0.5 * deg_to_rad(p["turn"]) * lerpf(f, 1.0, 0.15)
 	# Uphill is slower, downhill a little faster.
 	var slope := _slope_along()
 	v *= clampf(1.0 - slope * 1.6 * signf(v), 0.25, 1.3)

@@ -932,8 +932,8 @@ WING_STALL_GOAL,"High up, take the throttle off and keep pulling until the wing 
 WING_STALL_PASS,Stall | Flying again,Звалювання | Знову летить
 WING_LANDING,Landing,Посадка
 WING_LANDING_NOTE,"Little throttle, a gentle glide","Мало газу, плавне зниження"
-WING_LANDING_GOAL,"Come down through the three rings to the runway, then level off and touch down gently. The plane must stop on the runway.","Знижуйся крізь три кільця до смуги, над нею вирівняйся й м’яко торкнися. Літак має зупинитися на смузі."
-WING_LANDING_PASS,On the runway | Up to 3 m/s down,На смузі | До 3 м/с униз
+WING_LANDING_GOAL,"Come down through the three rings to the runway. Just above it, raise the nose a little (the flare) and touch down gently. The plane must stop on the runway.",Знижуйся крізь три кільця до смуги. Над самою смугою трохи підніми ніс (вирівнювання) і м’яко торкнися. Літак має зупинитися на смузі.
+WING_LANDING_PASS,On the runway | Nose up at touchdown | Up to 3 m/s down,На смузі | Ніс угору при торканні | До 3 м/с униз
 WING_KIDS_STORKS,With the storks,Політ із лелеками
 WING_KIDS_STORKS_NOTE,Follow the flock,Лети за зграєю
 WING_KIDS_STORKS_GOAL,Three storks fly ahead through the rings. Follow them!,Три лелеки летять попереду крізь кільця. Лети за ними!
@@ -962,7 +962,7 @@ HINT_WING_CLIMB,"Climb smoothly, %d m to go","Набирай висоту пла
 HINT_WING_STALL_SLOW,Throttle off and pull the stick slowly,Газ до нуля й повільно ручку на себе
 HINT_WING_STALL_NOW,Stall! Stick forward and throttle up,Звалювання! Ручку від себе й газ
 HINT_WING_GLIDE,"Through the rings: little throttle, nose a touch up","Крізь кільця: мало газу, ніс трохи вгору"
-HINT_WING_FLARE,Over the runway: level off and touch down gently,Над смугою: вирівняйся й м’яко торкнися
+HINT_WING_FLARE,"Over the runway: raise the nose a little, close the throttle","Над смугою: трохи підніми ніс, прибери газ"
 HINT_WING_ROLL,On the runway: throttle off and roll to a stop,"На смузі: газ до нуля, котись до зупинки"
 HINT_WING_GO_AROUND,"Missed it: throttle up, circle round and try again","Не вийшло: газ, коло й заходь ще раз"
 HINT_WING_SEARCH,Look for a red tarp in the valley,Шукай червоне полотно в долині
@@ -1098,3 +1098,17 @@ TIP_FAIL_JOLT_CARGO,Push the drive stick only half way: the robot is slower but 
 TIP_FAIL_JOLT_STRETCHER_KIDS,Push the stick only a little: the robot will drive gently.,Тримай стік трошки: робот поїде лагідно.
 TIP_FAIL_JOLT_KITTEN,Push the stick only a little: the robot will drive gently.,Тримай стік трошки: робот поїде лагідно.
 CRASHED_WING,The plane crashed,Літак розбився
+FAIL_WING_NO_FLARE,"The wheels touched with the nose down. Just above the runway, raise the nose a little first.",Колеса торкнулися з опущеним носом. Над самою смугою спершу трохи підніми ніс.
+TIP_FAIL_WING_NO_FLARE,"At about the height of a person, pull the stick back gently and keep it there until the wheels touch.","Десь на висоті людського зросту плавно візьми ручку на себе й тримай, доки колеса не торкнуться."
+WING_INTO_WIND,Into the wind,Назустріч вітру
+WING_INTO_WIND_NOTE,The windsock shows the way,"Рукав показує, куди"
+WING_INTO_WIND_GOAL,"The wind comes from one end of the runway; the plane waits at the other, facing into it. Take off into the wind, fly round the field through the rings, and make a low pass over the runway, again into the wind.","Вітер дме з одного кінця смуги, а літак стоїть на іншому, носом до вітру. Злітай назустріч вітру, облети поле крізь кільця й пройди низько над смугою, знову проти вітру."
+WING_INTO_WIND_PASS,Take-off into the wind | 6 rings | Low pass,Зліт проти вітру | 6 кілець | Низький проліт
+SUM_WING_INTO_WIND,Round the field into the wind in %d s.,Коло проти вітру за %d с.
+WING_PATTERN,Full circuit,Повне коло
+WING_PATTERN_NOTE,From take-off to landing,Від зльоту до посадки
+WING_PATTERN_GOAL,"Take off into the wind, fly round the field through the rings, come down the glide and land into the wind with a flare. If the approach goes wrong, go around: throttle up and climb, and the circuit goes on.","Злітай проти вітру, облети поле крізь кільця, знижуйся глісадою й сідай проти вітру з вирівнюванням. Якщо захід не вдається, йди на друге коло: газ і набір, і коло триває."
+WING_PATTERN_PASS,6 rings | Landing into the wind | A go-around is allowed,6 кілець | Посадка проти вітру | Друге коло дозволено
+SUM_WING_PATTERN,"A full circuit in %d s, landed into the wind.","Повне коло за %d с, посадка проти вітру."
+HINT_WING_WINDSOCK,"The windsock shows where the wind comes from: take off into it, full throttle","Рукав показує, звідки дме: злітай назустріч, газ до упору"
+HINT_WING_GO_AROUND_DONE,"Go-around: climb, fly round again and come back through the rings","Друге коло: набирай висоту, облети ще раз і заходь крізь кільця"

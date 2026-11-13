@@ -60,8 +60,8 @@ var airfield := false
 ## The runway: centre line at x, from z0 (near the pad) to z1 (far end), RUNWAY_W wide.
 const RUNWAY_X := 6.0
 const RUNWAY_Z0 := -6.0
-const RUNWAY_Z1 := -66.0
-const RUNWAY_W := 7.0
+const RUNWAY_Z1 := -96.0
+const RUNWAY_W := 10.0
 var pilot := Vector3(0, 1.7, 11)
 var obstacles: Array[Dictionary] = []
 ## Every house: {"pos": Vector3, "rot": float}. The roof ridge is 6 m above the ground.
@@ -135,8 +135,10 @@ func _base_height(x: float, z: float) -> float:
 	if r <= FLAT:
 		return 0.0
 	var ramp := smoothstep(FLAT, FLAT + 45.0, r)
-	if airfield and z < 40.0:
-		ramp *= smoothstep(70.0, 110.0, absf(x))  # the valley along the runway, all the way out
+	if airfield and z < 130.0:
+		# The valley along the runway, all the way out, and clear behind the pilot too: a plane
+		# landing towards the pilot comes in over it.
+		ramp *= smoothstep(70.0, 110.0, absf(x))
 	return ramp * (6.0 + 9.0 * (_noise.get_noise_2d(x, z) + 0.6))
 
 

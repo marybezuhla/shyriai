@@ -164,7 +164,9 @@ func open_flight(vehicle: String, key: String, seed_ := -1, practice := false) -
 	if seed_ >= 0:
 		flight.flight_seed = seed_
 	else:
-		flight.flight_seed = randi_range(1, 9999) if key.begins_with("MIS_") else 7
+		# The plane's wind changes every flight too.
+		var varies := key.begins_with("MIS_") or (Curriculum.machine(vehicle) == "wing" and Prefs.mode != "kids")
+		flight.flight_seed = randi_range(1, 9999) if varies else 7
 	add_child(flight)
 
 

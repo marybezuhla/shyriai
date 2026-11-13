@@ -32,7 +32,7 @@ const PAR := {
 	"WING_LEVEL": 20, "WING_TURN": 95, "WING_TAKEOFF": 40, "WING_CIRCUIT": 115, "WING_LANDING": 45,
 	"WING_KIDS_STORKS": 50, "MIS_WING_CLOUDS": 45, "MIS_WING_KITE": 55, "MIS_WING_FLOOD": 40,
 	# The test pilot stalls and recovers at once; a person first reads, then slows down with care.
-	"WING_STALL": 30,
+	"WING_STALL": 30, "WING_INTO_WIND": 120, "WING_PATTERN": 150,
 	# The test pilot knows where the lost person is; a pilot has to search the valley: four minutes.
 	"MIS_WING_SEARCH": 240,
 }

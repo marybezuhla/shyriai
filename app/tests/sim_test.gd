@@ -90,6 +90,9 @@ func _ready() -> void:
 			await test_ugv_task(key, "simple")
 		for key in ["MIS_WING_SEARCH", "MIS_WING_FLOOD"]:
 			await test_wing_task(key, "simple")
+		# The wind comes from either end: both ways round the field.
+		for key in ["WING_INTO_WIND", "WING_PATTERN"]:
+			await test_wing_task(key, "pro")
 		await test_wing_task("MIS_WING_KITE", "kids")
 	_seed = 7
 	# Every lesson and mission the app offers was flown in every mode that offers it.

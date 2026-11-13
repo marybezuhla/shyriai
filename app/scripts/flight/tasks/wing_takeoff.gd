@@ -10,6 +10,10 @@ func start_position() -> Vector3:
 	return Vector3(WorldLand.RUNWAY_X, 0, WorldLand.RUNWAY_Z0 - 3.0)
 
 
+func tune(sim: DroneSim) -> void:
+	wind_from_ahead(sim, start_heading())
+
+
 func update(_dt: float, sim: DroneSim, _sticks: Dictionary) -> void:
 	var w := sim as WingSim
 	var alt := sim.altitude()

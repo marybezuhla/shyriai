@@ -34,7 +34,30 @@ func test_wing_physics() -> void:
 	var ground := WingSim.new("simple", 3)
 	ground.place(Vector3(6, 0, -8), 0.0)
 	run(ground, 2.0, -1.0, 0.0, 0.0, 0.0)
-	check(ground.on_ground and ground.speed < 0.1, "on the runway with the throttle off it stays put")
+	check(ground.on_ground and ground.vel.length() < 0.1, "on the runway with the throttle off it stays put")
+	# Into the wind the take-off run is shorter than with the wind from behind.
+	var runs := []
+	for into in [true, false]:
+		var t := WingSim.new("pro", 3)
+		t.place(Vector3(6, 0, 0), 0.0)
+		t.set_wind_from(0.0 if into else PI, 4.0)
+		var start := t.pos
+		while t.on_ground and t.time < 20.0:
+			t.step(DT, 1.0, 0.0, -0.5 if t.speed > 9.0 else 0.0, 0.0)
+		runs.append(start.distance_to(t.pos))
+	check(runs[0] < runs[1] * 0.75, "into the wind the run is shorter (%.0f m against %.0f m)" % runs)
+	# A spin keeps the wing stalled until the rudder is pushed against it.
+	for rudder in [false, true]:
+		var s := WingSim.new("pro", 5)
+		s.place(Vector3(0, 150, 0), 0.0)
+		s.set_wind_from(0.0, 0.0)
+		for i in 240:
+			s.step(DT, -1.0, 0.0, -1.0, 0.0)
+		var y := 0.0
+		for i in 300:
+			y = -s.drop if rudder else 0.0
+			s.step(DT, 1.0, y, 1.0, 0.0)
+		check(s.stalled != rudder, "a spin %s" % ("stops with rudder against it" if rudder else "goes on with the stick forward alone"))
 
 
 func test_wing_task(key: String, mode: String) -> void:
@@ -49,6 +72,20 @@ func test_wing_task(key: String, mode: String) -> void:
 		match key:
 			"WING_TAKEOFF":
 				return ap.takeoff(sim)
+			"WING_INTO_WIND", "WING_PATTERN":
+				if sim.on_ground and task.ring_i == 0 or (task.ring_i == 0 and sim.altitude() < 10.0):
+					return ap.takeoff(sim)
+				if task.ring_i >= task.rings.size():
+					ap.through = task.along()
+					return ap.land(sim, task.touch_point(), task.GLIDE)
+				ap.target = task.rings[task.ring_i]["c"]
+				# Round the field the pilot flies at each ring; the final is lined up, and the
+				# plane comes down to the low final rings only once it is lined up on them.
+				if task.ring_i >= task.rings.size() - 2:
+					ap.through = task.rings[task.ring_i]["n"]
+					var to: Vector3 = ap.target - sim.pos
+					if to.normalized().dot(ap.through) < 0.9 or Vector2(to.x, to.z).length() > 45.0:
+						ap.target.y = maxf(ap.target.y, world.height(sim.pos.x, sim.pos.z) + 14.0)
 			"WING_STALL":
 				return ap.stall(sim, task._stalled_at >= 0.0)
 			"WING_LANDING":
@@ -137,6 +174,22 @@ func test_wing_landing_rules() -> void:
 	t3._down = 1.0
 	_fly(t3, s3, 20.0, func(_t): return {"throttle": -0.3, "yaw": 0.0, "pitch": 0.0, "roll": 0.0})
 	check(t3.failed and not t3.done, "rolling off the runway end after landing ends the try")
+	var n := _flight("WING_LANDING", "simple", "wing")
+	n[1].place(Vector3(WorldLand.RUNWAY_X, 0.5, -40), PI)
+	n[0]._touched(n[1], 1.0, deg_to_rad(-4.0))
+	check(n[0].failed and n[0].summary == "FAIL_WING_NO_FLARE", "touching down nose first, with no flare, does not count")
+	n[2].queue_free()
+	# A go-around on the full circuit: climbing away after the final rings starts the circuit again
+	# from the crosswind ring, and the try goes on.
+	var g2 := _flight("WING_PATTERN", "pro", "wing")
+	var tp: FlightTask = g2[0]
+	var sp: WingSim = g2[1]
+	tp.ring_i = tp.rings.size()
+	sp.place(tp.touch_point() + tp.along() * 20.0 + Vector3(0, 20, 0), tp.heading())
+	sp.gamma = 0.15
+	tp.step(DT, sp, {})
+	check(tp.ring_i == 1 and tp.go_arounds == 1 and not tp.failed, "a go-around starts the circuit again, the try goes on")
+	g2[2].queue_free()
 	h[2].queue_free()
 	f[2].queue_free()
 	g[2].queue_free()

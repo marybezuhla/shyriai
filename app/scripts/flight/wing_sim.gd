@@ -61,8 +61,11 @@ var kids := false
 ## Kids: a point the plane gently turns and climbs towards while the sticks are left alone
 ## (INF = no help). Set by a lesson when a child has been stuck for a while.
 var assist := Vector3.INF
+## Which wing drops in a stall: 1 the right, -1 the left. Picked when the wing stalls.
+var drop := 1.0
 var _mode := "simple"
 var _spin := 0.0
+var _rudder := 0.0
 
 
 func _init(mode := "simple", seed_ := 1) -> void:
@@ -75,6 +78,12 @@ func _init(mode := "simple", seed_ := 1) -> void:
 	kids = _mode == "kids"
 	stall_protect = _mode != "pro"
 	radius = 0.6
+
+
+## The wind blowing from a heading (the way the nose points into it), at a speed in m/s.
+func set_wind_from(heading: float, speed_: float) -> void:
+	_wind_dir = atan2(cos(heading), sin(heading))
+	p["wind"] = speed_
 
 
 ## The pitch of the nose: the path plus the angle of attack.
@@ -163,17 +172,24 @@ func _elevator(dt: float, elev: float) -> void:
 	if stall_protect:
 		want_alpha = minf(want_alpha, ALPHA_STALL - deg_to_rad(2.5))
 		if speed < V_STALL * 1.15:
-			want_alpha = minf(want_alpha, ALPHA_TRIM - deg_to_rad(2.0))  # slow: the nose is lowered for you
+			# Slow: the nose is held low for you, though not so low that a flare is impossible.
+			want_alpha = minf(want_alpha, ALPHA_TRIM + deg_to_rad(2.0))
 	alpha = lerpf(alpha, want_alpha, 1.0 - exp(-dt / ALPHA_TAU))
+	# A spin holds the wing stalled until the rudder is pushed against it.
+	if _spin > 0.6 and _rudder * drop > -0.3:
+		alpha = maxf(alpha, ALPHA_STALL + deg_to_rad(1.0))
 	var was_stalled := stalled
 	stalled = alpha > ALPHA_STALL or (not on_ground and speed < V_STALL * 0.7)
 	if stalled and not was_stalled:
+		# One wing goes first: the one already low, or either when the wings are level.
+		drop = signf(bank) if absf(bank) > deg_to_rad(5.0) else (1.0 if _rng.randf() < 0.5 else -1.0)
 		events.append({"type": "stall", "speed": speed})
 
 
 ## Ailerons set the bank. Simple and Kids: the stick sets the bank and the plane levels itself;
 ## Adult: the stick sets how fast it rolls. Far out over the hills, the plane banks towards home.
 func _ailerons(dt: float, roll: float, yaw_in: float) -> void:
+	_rudder = yaw_in
 	var home_bank := 0.0
 	var far := Vector2(pos.x, pos.z).length() > HOME_RADIUS and not on_ground
 	if far:
@@ -186,9 +202,11 @@ func _ailerons(dt: float, roll: float, yaw_in: float) -> void:
 		if far:
 			rate += (home_bank - bank) * 2.0
 		if stalled:
-			# A stalled wing drops: one wing first, turning into a spin if nothing is done.
-			_spin = clampf(_spin + dt * 1.5, 0.0, 1.0)
-			rate += deg_to_rad(120.0) * _spin * (1.0 if bank >= 0.0 else -1.0)
+			# A stalled wing drops: one wing first, turning into a spin if nothing is done. Rudder
+			# against the turn stops it.
+			var against := yaw_in * drop < -0.3
+			_spin = clampf(_spin + dt * (-2.5 if against else 1.5), 0.0, 1.0)
+			rate += deg_to_rad(120.0) * _spin * drop
 		else:
 			_spin = maxf(0.0, _spin - dt * 2.0)
 		bank = wrapf(bank + rate * dt, -PI, PI)
@@ -207,10 +225,15 @@ func _ground_roll(dt: float, lift: float) -> void:
 	gamma = 0.0
 	bank = lerpf(bank, 0.0, 1.0 - exp(-dt * 6.0))
 	alpha = minf(alpha, deg_to_rad(10.0))
-	vel = forward() * speed
+	# On the wheels, a headwind already flows over the wing: the air speed is at least the wind, and
+	# the plane rolls only as fast as the air speed beyond it. Into the wind, take-off is shorter.
+	var head := maxf(0.0, -wind().dot(forward()))
+	speed = maxf(speed, head)
+	vel = forward() * (speed - head)
 	pos += vel * dt
 	pos.y = ground.call(pos.x, pos.z)
-	if lift > G * 1.02 and speed > V_STALL:
+	# Lifting off takes the motor: a plane just landed with the throttle closed stays down.
+	if lift > G * 1.02 and speed > V_STALL and throttle01 > 0.3:
 		on_ground = false
 		events.append({"type": "took_off", "speed": 0.0})
 
@@ -270,8 +293,9 @@ func _touch_down() -> void:
 		_crash(down, "ground" if down > float(p["crash_fall"]) else "wingtip")
 		return
 	on_ground = true
+	# The nose as the wheels touch: a flare has it up, a plane flown onto the runway has it down.
+	events.append({"type": "landed", "speed": down, "pitch": pitch_angle()})
 	gamma = 0.0
-	events.append({"type": "landed", "speed": down})
 	if down > 3.0:
 		events.append({"type": "bump", "speed": down})  # felt and heard, even where it cannot crash
 
