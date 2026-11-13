@@ -8,7 +8,7 @@ extends RefCounted
 
 static func fit_top(f: Flight, top: HBoxContainer) -> void:
 	var room := f.get_viewport_rect().size.x - 2.0 * Flight.SIDE - f._ins_x()
-	var order := ["TIME", "VERT", "BATTERY", "WIND", "CLOSING", "SPEED", "HOME", "TARGET", "AIRSPEED", "ALT"]
+	var order := ["TIME", "VERT", "BATTERY", "LEAN", "WIND", "CLOSING", "SPEED", "HOME", "TARGET", "AIRSPEED", "ALT"]
 	for n in order:
 		if top.get_combined_minimum_size().x <= room:
 			return
