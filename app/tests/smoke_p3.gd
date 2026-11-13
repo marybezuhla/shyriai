@@ -14,6 +14,9 @@ func _init(smoke: Node) -> void:
 
 
 func run() -> void:
+	# A phone held sideways, wide enough for every number: without a display the window is portrait.
+	var was: Vector2i = s.get_window().size
+	s.get_window().size = Vector2i(1688, 780)
 	Prefs.set_language("uk")
 	Prefs.set_mode("pro")
 	await _flight("wing", "WING_INTO_WIND", ["AIRSPEED", "WIND"], "uk-dusk-flight-wing-into-wind")
@@ -24,7 +27,7 @@ func run() -> void:
 	main.flight.sim.pos.y = 10.0
 	main.flight._waiting = false
 	main.flight.sim.battery = 0.25
-	await s._frames(3)
+	await s._seconds(0.3)
 	assert(s._texts(main.flight).has(s.tr("HINT_BATTERY_30")), "a 30 % battery warning shows")
 	await s._shot("uk-dusk-flight-camera-battery")
 	main.close_flight()
@@ -60,11 +63,12 @@ func run() -> void:
 	main.back()
 	main.back()
 	Prefs.set_mode("simple")
+	s.get_window().size = was
 
 
 func _flight(vehicle: String, key: String, words: Array, shot: String) -> void:
 	main.start(vehicle, key)
-	await s._frames(6)
+	await s._seconds(0.2)
 	for w in words:
 		assert(main.flight._stats.has(w), "%s shows %s" % [key, w])
 	await s._shot(shot)
