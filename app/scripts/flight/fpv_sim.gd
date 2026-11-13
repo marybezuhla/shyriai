@@ -16,6 +16,10 @@ const FPV := {
 		"gust": 0.5, "ceiling": 60.0, "crash": true, "bounce": 0.0, "battery_s": 300.0,
 		"crash_speed": 4.0, "crash_fall": 4.5},
 }
+## Adult: how fast full stick turns the drone (deg/s), and two sizes of drone. The 3-inch one is
+## lighter: less thrust, and the air slows it sooner, so it drifts less.
+const RATES := {"soft": 330.0, "medium": 520.0, "sharp": 700.0}
+const QUADS := {"5in": {}, "3in": {"thrust": 2.2, "drag": 0.7, "tilt": 40.0, "battery_s": 240.0}}
 const LEVEL_GAIN := 7.0  # how fast angle mode levels the drone, 1/s
 const RATE_TAU := 0.04
 
@@ -25,13 +29,28 @@ var att := Basis.IDENTITY
 ## Body rotation rates, rad/s: x pitch (nose up), y yaw (left), z roll (right wing up).
 var omega := Vector3.ZERO
 var throttle01 := 0.0
+## Adult FPV motors start only once armed, with the throttle down, as on a real drone.
+var armed := true
+
+
+var _mode_name := "simple"
 
 
 func _init(mode := "simple", seed_ := 1) -> void:
 	super(mode, seed_)
+	_mode_name = mode
 	p = FPV.get(mode, FPV["simple"]).duplicate()
 	p["vmax"] = 12.0
 	p["landing_assist"] = false
+
+
+## Adult settings: the rates and the size of drone.
+func configure(rates: String, quad: String) -> void:
+	if _mode_name != "pro":
+		return
+	p["rate"] = RATES.get(rates, RATES["medium"])
+	for k in QUADS.get(quad, {}):
+		p[k] = QUADS[quad][k]
 
 
 func hover_throttle() -> float:
@@ -61,7 +80,7 @@ func step(dt: float, throttle: float, yaw_in: float, pitch: float, roll: float) 
 	if crashed:
 		_fall(dt)
 		return
-	throttle01 = clampf((throttle + 1.0) * 0.5, 0.0, 1.0)
+	throttle01 = clampf((throttle + 1.0) * 0.5, 0.0, 1.0) if armed else 0.0
 	if p["battery_s"] > 0.0:
 		battery = maxf(0.0, battery - dt * (0.4 + throttle01) / float(p["battery_s"]))
 		if battery <= 0.0:

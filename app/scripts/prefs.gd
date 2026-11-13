@@ -30,11 +30,27 @@ const NAME_MAX := 32
 ## Longer than any flight can last: a bigger time in a saved file is not trusted.
 const MAX_SECONDS := 3600.0
 
+## The FPV drone (Adult): how fast the sticks turn it, which size of drone, and the flight mode for
+## missions. Each is one of a few named choices.
+const CHOICES := {
+	"fpv_rates": ["medium", "soft", "sharp"],
+	"fpv_quad": ["5in", "3in"],
+	"fpv_mission_mode": ["angle", "horizon", "acro"],
+	"pad_dead": ["medium", "small", "large"],
+}
+## A radio or gamepad: which axis is each stick (and whether it is turned round), and which button
+## or switch does what. Empty means the usual gamepad layout.
+const PAD_AXES := ["throttle", "yaw", "pitch", "roll"]
+const PAD_BUTTONS := ["pause", "view", "arm"]
+const PAD_DEAD := {"small": 0.04, "medium": 0.08, "large": 0.15}
+
 ## A fresh install, and what "Erase all data" goes back to.
 const DEFAULTS := {
 	"mode": "simple", "theme": "dusk", "language": "system", "text_size": "normal",
 	"welcomed": false, "kids_lock": false, "sound": true, "stick_mode": "2", "stick_feel": "normal", "pilot_name": "",
 	"free": {"wind": "none", "time": "day", "balls": true, "fpv": "angle"},
+	"fpv_rates": "medium", "fpv_quad": "5in", "fpv_mission_mode": "angle", "pad_dead": "medium",
+	"pad_axes": {}, "pad_buttons": {},
 }
 
 var mode: String = DEFAULTS["mode"]
@@ -52,6 +68,15 @@ var stick_feel: String = DEFAULTS["stick_feel"]
 ## The name on the pilot's licence: optional, kept only on this phone.
 var pilot_name: String = DEFAULTS["pilot_name"]
 var free: Dictionary = DEFAULTS["free"].duplicate()
+var fpv_rates: String = DEFAULTS["fpv_rates"]
+var fpv_quad: String = DEFAULTS["fpv_quad"]
+var fpv_mission_mode: String = DEFAULTS["fpv_mission_mode"]
+var pad_dead: String = DEFAULTS["pad_dead"]
+## {"throttle": {"a": 2, "inv": true}, ...}: the stick's axis, and if pushing up or right reads
+## negative on it.
+var pad_axes: Dictionary = {}
+## {"pause": {"b": 6}, "arm": {"a": 4}, ...}: a button, or a switch that shows up as an axis.
+var pad_buttons: Dictionary = {}
 ## Best result per mode and task: {"simple": {"CAM_TAKEOFF": {"f": 2, "t": 14.5}}}.
 ## "f" = most sunflowers, "t" = shortest time of a pass, each kept on its own.
 var best := {}
@@ -164,6 +189,51 @@ func set_pilot_name(value: String) -> void:
 		pilot_name = clean
 		_undo = {}
 		_save()
+
+
+## One of the CHOICES settings.
+func set_choice(key: String, value: String) -> void:
+	if CHOICES.has(key) and value in CHOICES[key] and get(key) != value:
+		set(key, value)
+		_undo = {}
+		_save()
+		changed.emit()
+
+
+func set_pad_axis(stick: String, axis: int, inv: bool) -> void:
+	if stick in PAD_AXES and axis >= 0 and axis < JOY_AXIS_MAX:
+		pad_axes[stick] = {"a": axis, "inv": inv}
+		_undo = {}
+		_save()
+		changed.emit()
+
+
+func set_pad_button(action: String, what: Dictionary) -> void:
+	if action in PAD_BUTTONS and _pad_bind_ok(what):
+		pad_buttons[action] = what
+		_undo = {}
+		_save()
+		changed.emit()
+
+
+## Back to the usual gamepad layout.
+func reset_pad() -> void:
+	pad_axes = {}
+	pad_buttons = {}
+	pad_dead = DEFAULTS["pad_dead"]
+	_undo = {}
+	_save()
+	changed.emit()
+
+
+static func _pad_bind_ok(what) -> bool:
+	if not what is Dictionary or what.size() != 1:
+		return false
+	if what.has("b"):
+		return (what["b"] is float or what["b"] is int) and int(what["b"]) >= 0 and int(what["b"]) < JOY_BUTTON_MAX
+	if what.has("a"):
+		return (what["a"] is float or what["a"] is int) and int(what["a"]) >= 0 and int(what["a"]) < JOY_AXIS_MAX
+	return false
 
 
 func set_free(key: String, value) -> void:
@@ -338,6 +408,8 @@ func view_for(m: String, vehicle := "camera") -> String:
 	var fallback := "fpv" if machine == "fpv" else ("chase" if m == "kids" or machine == "wing" else ("ugv" if machine == "ugv" else "pilot"))
 	if vehicle == "survey":
 		fallback = "drone"  # a survey is flown through the camera, kids too
+	elif machine == "wing" and m == "pro":
+		fallback = "pilot"  # as a real model pilot flies: from the ground
 	return views.get(m + "/" + vehicle, fallback)
 
 
@@ -460,6 +532,24 @@ func _apply_settings(d: Dictionary) -> void:
 	var pn = d.get("pilot_name")
 	if pn is String:
 		pilot_name = _clean_name(pn)
+	var pa = d.get("pad_axes")
+	if pa is Dictionary:
+		for st in pa:
+			var bind = pa[st]
+			if st in PAD_AXES and bind is Dictionary and (bind.get("a") is float or bind.get("a") is int) and bind.get("inv") is bool:
+				var ax := int(bind["a"])
+				if ax >= 0 and ax < JOY_AXIS_MAX:
+					pad_axes[st] = {"a": ax, "inv": bind["inv"]}
+	var pb = d.get("pad_buttons")
+	if pb is Dictionary:
+		for act in pb:
+			if act in PAD_BUTTONS and _pad_bind_ok(pb[act]):
+				var what: Dictionary = pb[act]
+				pad_buttons[act] = {what.keys()[0]: int(what.values()[0])}
+	for key in CHOICES:
+		var cv = d.get(key)
+		if cv is String and cv in CHOICES[key]:
+			set(key, cv)
 	var fr = d.get("free")
 	if fr is Dictionary:
 		for key in ["wind", "time", "fpv", "balls"]:
@@ -568,6 +658,8 @@ func _data() -> Dictionary:
 		"views": views.duplicate(true), "passed": passed.duplicate(true),
 		"missions": missions.duplicate(true), "best": best.duplicate(true),
 		"licences": licences.duplicate(true), "pilot_name": pilot_name, "free": free.duplicate(),
+		"fpv_rates": fpv_rates, "fpv_quad": fpv_quad, "fpv_mission_mode": fpv_mission_mode,
+		"pad_dead": pad_dead, "pad_axes": pad_axes.duplicate(true), "pad_buttons": pad_buttons.duplicate(true),
 	}
 
 

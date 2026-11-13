@@ -39,6 +39,7 @@ func _ready() -> void:
 	await _check_title_fits()
 	await _hud_fits()
 	await preload("res://tests/smoke_steps.gd").new(self).run()
+	await preload("res://tests/smoke_p3.gd").new(self).run()
 	Prefs.set_language("system")
 	Prefs.set_theme("dusk")
 	Prefs.set_mode("simple")

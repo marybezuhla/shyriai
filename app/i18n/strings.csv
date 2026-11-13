@@ -257,7 +257,7 @@ TH_CHECKLIST_BODY,"The drone and radio batteries are charged; no updates install
 TH_CHECKLIST_KIDS,"Before a flight, a grown-up checks the drone with you.|Are the propellers whole? Is the battery charged?|No people, animals or trees nearby?|Watch the drone the whole time it flies.","Перед польотом хтось із дорослих перевіряє дрон разом з тобою.|Гвинти цілі? Батарея заряджена?|Поруч немає людей, тварин і дерев?|Дивись на дрон увесь час, поки він літає."
 TH_BATTERY_BODY,"Charge only with a matching charger, on a surface that cannot burn, and never unattended.|Never charge or use a swollen, dented or pierced battery.|If a battery will sit for a few days, put it in storage mode: about 3.7–3.8 V per cell.|Do not run it flat: land with 20–30 % left.|In the cold a battery gives less energy: keep it warm before the flight and fly shorter.|Take an old or damaged battery to a battery collection point; never throw it in the bin.|If a battery smokes or burns, step away, do not breathe the smoke, and call for help (101 in Ukraine).","Заряджай лише відповідним зарядним пристроєм, на негорючій поверхні, і не залишай без нагляду.|Не заряджай і не використовуй здуту, пом’яту чи пробиту батарею.|Якщо батарея не потрібна кілька днів, переведи її в режим зберігання: близько 3,7–3,8 В на банку.|Не розряджай до нуля: сідай, коли лишається 20–30 %.|На холоді батарея віддає менше енергії: тримай її в теплі до польоту й літай коротше.|Стару чи пошкоджену батарею здай у пункт приймання батарей, не викидай у смітник.|Якщо батарея димить або горить, відійди, не вдихай дим і клич на допомогу (101)."
 TH_BATTERY_KIDS,"Only a grown-up charges the battery.|If a battery has puffed up like a pillow, do not touch it; tell a grown-up.|Is a battery hot or smelly? Step away and call a grown-up.","Батарею заряджають тільки дорослі.|Якщо батарея надулася, як подушка, не чіпай її і скажи дорослим.|Батарея гріється чи пахне? Відійди й клич дорослих."
-TH_SIGNAL_BODY,"If the link to the radio drops, a camera drone usually hovers and then flies back to its home point by itself.|That is why the return-to-home height should be above trees and buildings.|Do not panic: let go of the sticks, move closer, or turn the radio’s antennas towards the drone.|In Ukraine GPS is often jammed. Without GPS the drone cannot hold its place and the wind carries it, as in the Hold a spot lesson.|An FPV drone without a link does what its failsafe is set to do: usually it stops the motors.|A ground robot without a link should stop where it is.","Якщо зв’язок з пультом зник, камерний дрон зазвичай зависає, а потім сам повертається до точки старту.|Тому висоту автоповернення варто ставити вище за дерева й будівлі.|Не панікуй: відпусти стіки, підійди ближче чи підніми пульт антенами до дрона.|В Україні GPS часто глушать. Без GPS дрон не тримає точку, і вітер його зносить, як в уроці «Утримати точку».|FPV-дрон без зв’язку діє так, як налаштовано на випадок втрати сигналу: зазвичай вимикає мотори.|Наземний робот без зв’язку має зупинитися на місці."
+TH_SIGNAL_BODY,"If the link to the radio drops, a camera drone usually hovers and then flies back to its home point by itself.|That is why the return-to-home height should be above trees and buildings.|Do not panic: let go of the sticks and move closer. Hold the radio with the sides of its antennas towards the drone: they send least from their tips.|In Ukraine GPS is often jammed. Without GPS the drone cannot hold its place and the wind carries it, as in the Hold a spot lesson.|Jamming can also make a drone fail to come home, or fly the wrong way: keep watching it and be ready to fly it by hand.|An FPV drone without a link does what its failsafe is set to do: usually it stops the motors.|A ground robot without a link should stop where it is.","Якщо зв’язок з пультом зник, камерний дрон зазвичай зависає, а потім сам повертається до точки старту.|Тому висоту автоповернення варто ставити вище за дерева й будівлі.|Не панікуй: відпусти стіки й підійди ближче. Тримай антени пульта боком до дрона: з кінчиків вони передають найгірше.|В Україні GPS часто глушать. Без GPS дрон не тримає точку, і вітер його зносить, як в уроці «Утримати точку».|Під глушінням дрон може й не повернутися сам або полетіти не туди: стеж за ним і будь готовий вести вручну.|FPV-дрон без зв’язку діє так, як налаштовано на випадок втрати сигналу: зазвичай вимикає мотори.|Наземний робот без зв’язку має зупинитися на місці."
 TH_SIGNAL_KIDS,"Sometimes the drone loses the radio, like a phone loses its signal.|Then a smart drone hovers and flies home by itself.|Do not worry, and let go of the sticks.","Іноді дрон «губить» пульт, як телефон губить мережу.|Тоді розумний дрон зависає і сам летить додому.|Не хвилюйся і відпусти стіки."
 TH_RULES_BODY,"While martial law is in force, launching a civilian drone without permission is forbidden, even over your own yard: once airborne, it is in the national airspace.|Permission comes from the General Staff of the Armed Forces of Ukraine, and only in exceptional cases. Some regions have their own procedure through the military administration. Drone work is also agreed with the Security Service of Ukraine.|Without permission you may fly only indoors.|Always, in peacetime too, flying is forbidden over nuclear and hydro power plants, dams, important state sites, nature reserves and hazardous plants.|Do not film or publish soldiers, equipment, fortifications or the results of strikes: this is a criminal offence.|Shyriai is a trainer. Practise here, and fly for real only with permission. Rules change: check them with your local military administration.","Поки діє воєнний стан, запускати цивільні дрони без дозволу заборонено, навіть над власним подвір’ям: дрон уже в повітряному просторі.|Дозвіл дає Генеральний штаб ЗСУ, і лише у виняткових випадках. У деяких областях є свій порядок через військову адміністрацію. Роботу з дроном також погоджують із СБУ.|Без дозволу літати можна лише в закритому приміщенні.|Завжди, і в мирний час, заборонено літати над АЕС, ГЕС, дамбами, важливими державними об’єктами, заповідниками й небезпечними підприємствами.|Не знімай і не публікуй військових, техніку, укріплення й наслідки ударів: за це є кримінальна відповідальність.|Ширяй — тренажер. Тренуйся тут, а справжні польоти — лише з дозволом. Правила змінюються: перевіряй їх у своїй військовій адміністрації."
 TH_RULES_KIDS,"Right now, real drones may fly only with permission.|A small drone can fly in a room, together with a grown-up.|And in Shyriai you can fly as much as you like!","Справжні дрони зараз можна запускати лише з дозволом.|Маленький дрон можна запускати в кімнаті, разом з дорослими.|А в Ширяї можна літати скільки завгодно!"
@@ -418,7 +418,7 @@ HINT_TERRAIN_MUD,Now through the mud: the tracks slip here,Тепер через
 HINT_TERRAIN_FINISH,"A little more, to the ball","Ще трохи, до кулі"
 SUM_UGV_TERRAIN,Hill and mud done.,Пагорб і бруд подолано.
 SUM_UGV_TERRAIN_KIDS,Over the hill and through the mud!,Гірку й бруд подолано!
-HINT_LINK_LOST,"No link: the robot has stopped. Wait, the link will come back","Немає зв’язку: робот зупинився. Зачекай, зв’язок повернеться"
+HINT_LINK_LOST,"The link is lost! Let go of the sticks: the drone will hover, then fly home","Зв’язок зник! Відпусти стіки: дрон зависне, а потім полетить додому"
 METER_PATIENT,Casualty’s comfort,Комфорт пораненого
 METER_KITTEN,Kitten’s calm,Спокій кошеняти
 METER_CARGO,Cargo condition,Цілість вантажу
@@ -826,7 +826,7 @@ Q_TH_SIGNAL_1_B,Falls straight down,Одразу падає
 Q_TH_SIGNAL_1_C,Flies on by itself,Летить далі сам
 Q_TH_SIGNAL_1_WHY,That is why the home point and the return height matter.,Тому важливі точка старту й висота автоповернення.
 Q_TH_SIGNAL_2,And what do you do?,А що робиш ти?
-Q_TH_SIGNAL_2_A,"Let go of the sticks, come closer or raise the radio with its aerials towards the drone","Відпускаєш стіки, підходиш ближче чи піднімаєш пульт антенами до дрона"
+Q_TH_SIGNAL_2_A,"Let go of the sticks, come closer, and hold the antennas side-on to the drone","Відпускаєш стіки, підходиш ближче й тримаєш антени боком до дрона"
 Q_TH_SIGNAL_2_B,Move the sticks hard,Різко рухаєш стіками
 Q_TH_SIGNAL_2_C,Switch the radio off,Вимикаєш пульт
 Q_TH_SIGNAL_2_WHY,Calm hands give the drone time to come back.,Спокійні руки дають дрону час повернутися.
@@ -932,8 +932,8 @@ WING_STALL_GOAL,"High up, take the throttle off and keep pulling until the wing 
 WING_STALL_PASS,Stall | Flying again,Звалювання | Знову летить
 WING_LANDING,Landing,Посадка
 WING_LANDING_NOTE,"Little throttle, a gentle glide","Мало газу, плавне зниження"
-WING_LANDING_GOAL,"Come down through the three rings to the runway, then level off and touch down gently. The plane must stop on the runway.","Знижуйся крізь три кільця до смуги, над нею вирівняйся й м’яко торкнися. Літак має зупинитися на смузі."
-WING_LANDING_PASS,On the runway | Up to 3 m/s down,На смузі | До 3 м/с униз
+WING_LANDING_GOAL,"Come down through the three rings to the runway. Just above it, raise the nose a little (the flare) and touch down gently. The plane must stop on the runway.",Знижуйся крізь три кільця до смуги. Над самою смугою трохи підніми ніс (вирівнювання) і м’яко торкнися. Літак має зупинитися на смузі.
+WING_LANDING_PASS,On the runway | Nose up at touchdown | Up to 3 m/s down,На смузі | Ніс угору при торканні | До 3 м/с униз
 WING_KIDS_STORKS,With the storks,Політ із лелеками
 WING_KIDS_STORKS_NOTE,Follow the flock,Лети за зграєю
 WING_KIDS_STORKS_GOAL,Three storks fly ahead through the rings. Follow them!,Три лелеки летять попереду крізь кільця. Лети за ними!
@@ -962,7 +962,7 @@ HINT_WING_CLIMB,"Climb smoothly, %d m to go","Набирай висоту пла
 HINT_WING_STALL_SLOW,Throttle off and pull the stick slowly,Газ до нуля й повільно ручку на себе
 HINT_WING_STALL_NOW,Stall! Stick forward and throttle up,Звалювання! Ручку від себе й газ
 HINT_WING_GLIDE,"Through the rings: little throttle, nose a touch up","Крізь кільця: мало газу, ніс трохи вгору"
-HINT_WING_FLARE,Over the runway: level off and touch down gently,Над смугою: вирівняйся й м’яко торкнися
+HINT_WING_FLARE,"Over the runway: raise the nose a little, close the throttle","Над смугою: трохи підніми ніс, прибери газ"
 HINT_WING_ROLL,On the runway: throttle off and roll to a stop,"На смузі: газ до нуля, котись до зупинки"
 HINT_WING_GO_AROUND,"Missed it: throttle up, circle round and try again","Не вийшло: газ, коло й заходь ще раз"
 HINT_WING_SEARCH,Look for a red tarp in the valley,Шукай червоне полотно в долині
@@ -993,13 +993,13 @@ FAIL_WING_HARD,"Touched down at %s m/s, too hard. Level off just above the runwa
 FAIL_WING_STALL_LOW,Too low after the stall. Push the stick forward sooner.,Надто низько після звалювання. Ручку від себе треба раніше.
 TH_WING,How a wing flies,Як літає крило
 TH_WING_DESC,"Speed, lift, banked turns and the stall.","Швидкість, підйомна сила, віражі й звалювання."
-TH_WING_BODY,"A wing lifts only while air flows over it: a plane must keep moving.|More speed, or the nose a little higher, gives more lift; too high and the air breaks away from the wing. That is the stall.|In a stall: stick forward, then throttle. Height lets you recover, so practise high up.|A plane turns by banking: the wing lifts sideways too. Pull a little in the turn to keep the height.|Take off and land into the wind: less speed over the ground, a shorter run.","Крило тримає, лише поки по ньому тече повітря: літак мусить рухатися.|Більше швидкості чи трохи вищий ніс дають більше підйомної сили; задирати надто високо не можна, бо повітря зривається з крила. Це звалювання.|Під час звалювання: ручку від себе, потім газ. Вийти допомагає висота, тож тренуйся високо.|Літак повертає креном: крило тягне й убік. У віражі трохи бери на себе, щоб не втрачати висоту.|Злітай і сідай проти вітру: менша швидкість над землею, коротший розбіг."
+TH_WING_BODY,"A wing lifts only while air flows over it: a plane must keep moving.|The wing stalls when the angle of attack is too large: the angle between the wing and the air coming at it. Then the air breaks away and the lift collapses. It can happen at any speed; a slow plane is simply closer to it, because it needs a bigger angle to hold itself up.|In a stall: stick forward, then throttle. If one wing drops and the plane starts to spin, rudder against the turn as well. Height lets you recover, so practise high up.|A plane turns by banking: the wing lifts sideways too. Pull a little in the turn to keep the height.|Take off and land into the wind: less speed over the ground, a shorter run.","Крило тримає, лише поки по ньому тече повітря: літак мусить рухатися.|Крило звалюється, коли кут атаки завеликий: кут між крилом і зустрічним повітрям. Тоді повітря зривається, і підйомна сила зникає. Так буває на будь-якій швидкості; повільний літак просто ближче до цього, бо йому потрібен більший кут, щоб триматися.|Під час звалювання: ручку від себе, потім газ. Якщо одне крило падає й літак крутить у штопор, ще й кермо напрямку проти обертання. Вийти допомагає висота, тож тренуйся високо.|Літак повертає креном: крило тягне й убік. У віражі трохи бери на себе, щоб не втрачати висоту.|Злітай і сідай проти вітру: менша швидкість над землею, коротший розбіг."
 TH_WING_KIDS,"A plane cannot hover like a drone: it flies only while it moves.|To turn, the plane leans to the side, like a bird.|Real planes take off and land on a runway; in the game the little plane starts up in the sky.","Літак не вміє висіти, як дрон: він тримається, лише поки летить.|Щоб повернути, літак нахиляється вбік, як пташка.|Справжні літаки злітають і сідають на смузі, а в грі літачок одразу в небі."
 Q_TH_WING_1,The plane is slow and the nose is high. What is close?,"Літак повільний, а ніс задертий. Що близько?"
 Q_TH_WING_1_A,The stall,Звалювання
 Q_TH_WING_1_B,A better climb,Кращий набір висоти
 Q_TH_WING_1_C,"Nothing, it can hover","Нічого, він може висіти"
-Q_TH_WING_1_WHY,"Slow with the nose high, the air breaks away from the wing.",Повільно з високим носом повітря зривається з крила.
+Q_TH_WING_1_WHY,"Slow with the nose high, the angle of attack is large: the air breaks away from the wing.",Повільно з високим носом кут атаки великий: повітря зривається з крила.
 Q_TH_WING_2,The plane has stalled. What first?,Літак звалився. Що спершу?
 Q_TH_WING_2_A,"Stick forward, then throttle","Ручку від себе, потім газ"
 Q_TH_WING_2_B,Pull harder,Тягнути сильніше на себе
@@ -1098,3 +1098,85 @@ TIP_FAIL_JOLT_CARGO,Push the drive stick only half way: the robot is slower but 
 TIP_FAIL_JOLT_STRETCHER_KIDS,Push the stick only a little: the robot will drive gently.,Тримай стік трошки: робот поїде лагідно.
 TIP_FAIL_JOLT_KITTEN,Push the stick only a little: the robot will drive gently.,Тримай стік трошки: робот поїде лагідно.
 CRASHED_WING,The plane crashed,Літак розбився
+FAIL_WING_NO_FLARE,"The wheels touched with the nose down. Just above the runway, raise the nose a little first.",Колеса торкнулися з опущеним носом. Над самою смугою спершу трохи підніми ніс.
+TIP_FAIL_WING_NO_FLARE,"At about the height of a person, pull the stick back gently and keep it there until the wheels touch.","Десь на висоті людського зросту плавно візьми ручку на себе й тримай, доки колеса не торкнуться."
+WING_INTO_WIND,Into the wind,Назустріч вітру
+WING_INTO_WIND_NOTE,The windsock shows the way,"Рукав показує, куди"
+WING_INTO_WIND_GOAL,"The wind comes from one end of the runway; the plane waits at the other, facing into it. Take off into the wind, fly round the field through the rings, and make a low pass over the runway, again into the wind.","Вітер дме з одного кінця смуги, а літак стоїть на іншому, носом до вітру. Злітай назустріч вітру, облети поле крізь кільця й пройди низько над смугою, знову проти вітру."
+WING_INTO_WIND_PASS,Take-off into the wind | 6 rings | Low pass,Зліт проти вітру | 6 кілець | Низький проліт
+SUM_WING_INTO_WIND,Round the field into the wind in %d s.,Коло проти вітру за %d с.
+WING_PATTERN,Full circuit,Повне коло
+WING_PATTERN_NOTE,From take-off to landing,Від зльоту до посадки
+WING_PATTERN_GOAL,"Take off into the wind, fly round the field through the rings, come down the glide and land into the wind with a flare. If the approach goes wrong, go around: throttle up and climb, and the circuit goes on.","Злітай проти вітру, облети поле крізь кільця, знижуйся глісадою й сідай проти вітру з вирівнюванням. Якщо захід не вдається, йди на друге коло: газ і набір, і коло триває."
+WING_PATTERN_PASS,6 rings | Landing into the wind | A go-around is allowed,6 кілець | Посадка проти вітру | Друге коло дозволено
+SUM_WING_PATTERN,"A full circuit in %d s, landed into the wind.","Повне коло за %d с, посадка проти вітру."
+HINT_WING_WINDSOCK,"The windsock shows where the wind comes from: take off into it, full throttle","Рукав показує, звідки дме: злітай назустріч, газ до упору"
+HINT_WING_GO_AROUND_DONE,"Go-around: climb, fly round again and come back through the rings","Друге коло: набирай висоту, облети ще раз і заходь крізь кільця"
+STAT_AIRSPEED,Air speed,Повітр. швидк.
+STAT_WIND,Wind,Вітер
+STAT_VERT,Climb,Верт.
+STAT_HOME,Home,Додому
+RTH,Home,Додому
+HINT_BATTERY_30,Battery 30 %: time to fly back,Батарея 30 %: час повертатися
+HINT_RTH,Flying home. Move a stick to take control,"Летимо додому. Рухни стіком, щоб керувати"
+HINT_RTH_BATTERY,Battery 20 %: the drone is flying home by itself,Батарея 20 %: дрон сам летить додому
+HINT_RTH_LINK,No link: the drone is flying home by itself,Немає зв’язку: дрон сам летить додому
+HINT_RTH_CANCEL,Control is back with you,Керування знову в тебе
+HINT_RTH_LANDED,Home: the drone has landed,Дрон удома
+HINT_RTH_NO_GPS,No GPS: the drone does not know where home is. Fly it back yourself,"Немає GPS: дрон не знає, де дім. Веди його сам"
+MIS_CAM_LINK,Lost link,Втрата зв’язку
+MIS_CAM_LINK_DESC,"The radio loses the drone. Wait calmly while it flies home, then land it.","Пульт губить дрон. Спокійно зачекай, поки він летить додому, і посади його."
+MIS_CAM_JAM,GPS jamming,Глушіння GPS
+MIS_CAM_JAM_DESC,The GPS is jammed and the wind carries the drone. Fly it back by hand.,"GPS заглушено, і вітер зносить дрон. Поверни його вручну."
+HINT_LINK_UP,Take off and fly to the marked spot,Злітай і лети до позначеного місця
+HINT_LINK_GO,Fly to the marked spot,Лети до позначеного місця
+HINT_LINK_HOLD,Hover over the spot: %d,Зависни над місцем: %d
+HINT_LINK_WAIT,No link. The drone is on its way home: wait,Зв’язку немає. Дрон летить додому: чекай
+HINT_LINK_BACK,The link is back. Land the drone on the pad,Зв’язок повернувся. Посади дрон на майданчик
+HINT_LINK_LAND,Land on the pad,Сідай на майданчик
+HINT_JAM,"GPS jammed! The wind carries the drone, and it cannot fly home by itself","GPS заглушено! Вітер зносить дрон, і сам він додому не долетить"
+HINT_JAM_BACK,Fly back by hand against the wind and land on the pad,Веди назад вручну проти вітру й сідай на майданчик
+SUM_MIS_CAM_LINK,"Home after a lost link, in %d:%02d.","Удома після втрати зв’язку, за %d:%02d."
+SUM_MIS_CAM_JAM,"Back by hand without GPS, in %d:%02d.","Назад уручну без GPS, за %d:%02d."
+STAT_LEAN,Lean,Нахил
+ARM,Arm,Звести
+DISARM,Disarm,Вимкнути
+HINT_ARM,"Motors off. Throttle all the way down, then Arm","Мотори вимкнені. Газ до низу, потім «Звести»"
+HINT_ARM_THROTTLE,Throttle down first: a drone is never armed with throttle up,Спершу газ до низу: з піднятим газом дрон не зводять
+HINT_ARMED,Armed: the motors are live,Зведено: мотори працюють
+SET_FPV,FPV drone (Adult),FPV-дрон (Дорослий)
+FPV_RATES,Rates: how fast full stick turns it,Рейти: як швидко обертає повний стік
+RATES_SOFT,Soft,М’які
+RATES_MEDIUM,Medium,Середні
+RATES_SHARP,Sharp,Гострі
+FPV_QUAD,Drone,Дрон
+QUAD_5IN,5-inch,5 дюймів
+QUAD_3IN,"3-inch, lighter","3 дюйми, легший"
+FPV_QUAD_DESC,"The 3-inch drone has less thrust and less momentum: it drifts less, and its battery is shorter.","У 3-дюймового менше тяги й інерції: його менше заносить, а батареї вистачає на коротше."
+FPV_MISSION_MODE,Flight mode for missions,Режим польоту в місіях
+PAD,Radio and gamepad,Пульт і геймпад
+PAD_DESC,"Which stick is which, the dead zone, buttons","Які стіки де, мертва зона, кнопки"
+PAD_NONE,"Not connected: plug in a radio or gamepad, or pair it over Bluetooth",Не підключено: під’єднай пульт чи геймпад кабелем або Bluetooth
+PAD_CONNECTED,Connected: %s,Підключено: %s
+PAD_THROTTLE,"Throttle, height","Газ, висота"
+PAD_YAW,Turn,Поворот
+PAD_PITCH,Forward and back,Уперед-назад
+PAD_ROLL,Sideways,Убік
+PAD_AXIS,Axis %d,Вісь %d
+PAD_INVERTED,reversed,обернено
+PAD_MOVE_UP,Push that stick up…,Порухай цей стік угору…
+PAD_MOVE_RIGHT,Push that stick right…,Порухай цей стік управо…
+PAD_AXES_DESC,"Tap a row and move that stick on the radio: the app learns it from the move, and which way it goes.","Торкнись рядка й порухай цей стік на пульті: застосунок запам’ятає його з руху, разом із напрямком."
+PAD_DEAD,Dead zone,Мертва зона
+PAD_DEAD_SMALL,Small,Мала
+PAD_DEAD_MEDIUM,Medium,Середня
+PAD_DEAD_LARGE,Large,Велика
+PAD_DEAD_DESC,How far a stick moves from the middle before it counts. A larger one stops a worn stick from creeping.,"Скільки стік проходить від середини, перш ніж рух зарахується. Більша зона не дає старому стіку повзти."
+PAD_PAUSE,Pause,Пауза
+PAD_VIEW,Next view,Наступний вид
+PAD_ARM,Arm (FPV),Звести (FPV)
+PAD_BUTTON,Button %d,Кнопка %d
+PAD_SWITCH,"Switch, axis %d","Перемикач, вісь %d"
+PAD_PRESS,Press it on the radio…,Натисни на пульті…
+PAD_CHECK,Check the sticks,Перевірити стіки
+PAD_RESET,Back to the usual layout,Повернути звичне розташування

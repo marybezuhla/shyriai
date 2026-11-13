@@ -172,6 +172,13 @@ func hoop_done(i: int) -> void:
 		tw.tween_callback(_hoops[i].hide)
 
 
+## A hoop passed earlier is there again, for another go.
+func hoop_reset(i: int) -> void:
+	if i < _hoops.size():
+		_hoops[i].scale = Vector3.ONE
+		_hoops[i].show()
+
+
 ## A thin pole for slalom and figure eights.
 func add_pole(at: Vector3, h := 8.0) -> void:
 	var cyl := CylinderMesh.new()

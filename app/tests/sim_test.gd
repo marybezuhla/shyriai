@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # Tests of the drone physics and of every lesson: each lesson must be passable with the sticks alone,
 # in every mode. CI fails if anything here fails. Not shipped in the APK.
-extends "res://tests/sim_wing.gd"
+extends "res://tests/sim_home.gd"
 
 
 func _ready() -> void:
@@ -67,6 +67,12 @@ func _ready() -> void:
 	await test_wing_stall_needs_slowing()
 	await test_wing_level_needs_hands()
 	await test_wing_kids_assist()
+	test_return_home()
+	test_fpv_setup()
+	test_pad_prefs()
+	for mode in ["simple", "pro"]:
+		for key in ["MIS_CAM_LINK", "MIS_CAM_JAM"]:
+			await test_link_mission(key, mode)
 	test_quiz_texts()
 	test_rating_rules()
 	test_results_are_kept()
@@ -90,6 +96,11 @@ func _ready() -> void:
 			await test_ugv_task(key, "simple")
 		for key in ["MIS_WING_SEARCH", "MIS_WING_FLOOD"]:
 			await test_wing_task(key, "simple")
+		for key in ["MIS_CAM_LINK", "MIS_CAM_JAM"]:
+			await test_link_mission(key, "simple")
+		# The wind comes from either end: both ways round the field.
+		for key in ["WING_INTO_WIND", "WING_PATTERN"]:
+			await test_wing_task(key, "pro")
 		await test_wing_task("MIS_WING_KITE", "kids")
 	_seed = 7
 	# Every lesson and mission the app offers was flown in every mode that offers it.

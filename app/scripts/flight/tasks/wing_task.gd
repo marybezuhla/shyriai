@@ -6,6 +6,8 @@ extends FlightTask
 
 ## Most flying happens at this height over the ground.
 const CRUISE_ALT := 30.0
+## The nose at touchdown below this: flown onto the runway with no flare.
+const NO_FLARE := deg_to_rad(-1.0)
 
 ## Kids: seconds with no ring passed before the plane starts to help.
 const ASSIST_AFTER := 15.0
@@ -16,6 +18,20 @@ var _stuck := 0.0
 
 func start_position() -> Vector3:
 	return Vector3(WorldLand.RUNWAY_X, CRUISE_ALT, -12.0)
+
+
+## The wind blows from ahead of a heading, give or take a little: take-off and landing are into the
+## wind, as on a real field. It is different on every flight: Simple a breeze, Adult up to a fresh
+## wind with gusts.
+func wind_from_ahead(sim: DroneSim, heading: float) -> void:
+	var w := sim as WingSim
+	if w == null or mode == "kids":
+		return
+	var r := RandomNumberGenerator.new()
+	r.seed = task_seed
+	var strength := r.randf_range(0.5, 1.5) if mode == "simple" else r.randf_range(1.5, 4.0)
+	w.set_wind_from(heading + deg_to_rad(r.randf_range(-25.0, 25.0)), strength)
+	w.p["gust"] = minf(float(w.p["gust"]), 0.35)  # gusts of a third either way, not more
 
 
 ## A point at a height over the ground, as a world position.

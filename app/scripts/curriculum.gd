@@ -34,14 +34,15 @@ const LESSONS := {
 		"INT_KIDS_BUTTERFLY",
 	],
 	"wing": [
-		"WING_LEVEL", "WING_TURN", "WING_TAKEOFF", "WING_CIRCUIT", "WING_STALL", "WING_LANDING",
+		"WING_LEVEL", "WING_TURN", "WING_TAKEOFF", "WING_INTO_WIND", "WING_CIRCUIT", "WING_STALL",
+		"WING_LANDING", "WING_PATTERN",
 		"WING_KIDS_STORKS",
 	],
 }
 
 ## Missions per vehicle and mode family: kids get their own stories.
 const MISSIONS := {
-	"camera": {"kids": ["MIS_CAM_KITTEN", "MIS_CAM_DOG"], "adult": ["MIS_CAM_SEARCH", "MIS_CAM_MEDS"]},
+	"camera": {"kids": ["MIS_CAM_KITTEN", "MIS_CAM_DOG"], "adult": ["MIS_CAM_SEARCH", "MIS_CAM_MEDS", "MIS_CAM_LINK", "MIS_CAM_JAM"]},
 	"fpv": {"kids": ["MIS_FPV_HOOPS", "MIS_FPV_BALLOONS"], "adult": ["MIS_FPV_RACE", "MIS_FPV_TREES"]},
 	"ugv": {"kids": ["MIS_UGV_VET", "MIS_UGV_PARCEL"], "adult": ["MIS_UGV_CARGO", "MIS_UGV_EVAC"]},
 	"survey": {"kids": ["MIS_SRV_ALBUM"], "adult": ["MIS_CAM_SURVEY", "MIS_SRV_FIND", "MIS_SRV_COUNT"]},
@@ -64,7 +65,7 @@ const NOT_KIDS := [
 	"SRV_TILT", "SRV_SHARP", "SRV_DETAIL", "SRV_ORBIT", "SRV_GRID",
 	"INT_CHASE", "INT_TURN", "INT_LEAD", "INT_HEADON", "INT_NIGHT",
 	# Kids' planes take off and land by themselves, and cannot stall.
-	"WING_TAKEOFF", "WING_STALL", "WING_LANDING",
+	"WING_TAKEOFF", "WING_INTO_WIND", "WING_STALL", "WING_LANDING", "WING_PATTERN",
 ]
 
 

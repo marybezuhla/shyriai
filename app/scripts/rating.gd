@@ -10,7 +10,7 @@ extends RefCounted
 const PAR := {
 	"CAM_STICKS": 20, "CAM_TAKEOFF": 20, "CAM_HOLD": 25, "CAM_NOSE_IN": 25, "CAM_SQUARE": 50,
 	"CAM_LANDING": 80, "CAM_WIND": 40, "CAM_EXAM": 65,
-	"MIS_CAM_KITTEN": 60, "MIS_CAM_SEARCH": 90,
+	"MIS_CAM_KITTEN": 60, "MIS_CAM_SEARCH": 90, "MIS_CAM_LINK": 100, "MIS_CAM_JAM": 100,
 	"FPV_THROTTLE": 25, "FPV_FORWARD": 30, "FPV_EIGHT": 70, "FPV_GATES": 60, "FPV_HORIZON": 55,
 	"FPV_ACRO": 25,
 	"MIS_FPV_HOOPS": 60, "MIS_FPV_BALLOONS": 70, "MIS_FPV_RACE": 70, "MIS_FPV_TREES": 90,
@@ -32,7 +32,7 @@ const PAR := {
 	"WING_LEVEL": 20, "WING_TURN": 95, "WING_TAKEOFF": 40, "WING_CIRCUIT": 115, "WING_LANDING": 45,
 	"WING_KIDS_STORKS": 50, "MIS_WING_CLOUDS": 45, "MIS_WING_KITE": 55, "MIS_WING_FLOOD": 40,
 	# The test pilot stalls and recovers at once; a person first reads, then slows down with care.
-	"WING_STALL": 30,
+	"WING_STALL": 30, "WING_INTO_WIND": 120, "WING_PATTERN": 150,
 	# The test pilot knows where the lost person is; a pilot has to search the valley: four minutes.
 	"MIS_WING_SEARCH": 240,
 }

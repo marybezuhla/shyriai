@@ -63,12 +63,16 @@ const FILES := {
 	"FREE_INTERCEPT": "res://scripts/flight/tasks/free_flight.gd",
 	"MIS_CAM_MEDS": "res://scripts/flight/tasks/mission_meds.gd",
 	"MIS_CAM_DOG": "res://scripts/flight/tasks/mission_dog.gd",
+	"MIS_CAM_LINK": "res://scripts/flight/tasks/mission_link.gd",
+	"MIS_CAM_JAM": "res://scripts/flight/tasks/mission_link.gd",
 	"WING_LEVEL": "res://scripts/flight/tasks/wing_rings.gd",
 	"WING_TURN": "res://scripts/flight/tasks/wing_turn.gd",
 	"WING_TAKEOFF": "res://scripts/flight/tasks/wing_takeoff.gd",
 	"WING_CIRCUIT": "res://scripts/flight/tasks/wing_rings.gd",
 	"WING_STALL": "res://scripts/flight/tasks/wing_stall.gd",
 	"WING_LANDING": "res://scripts/flight/tasks/wing_landing.gd",
+	"WING_INTO_WIND": "res://scripts/flight/tasks/wing_pattern.gd",
+	"WING_PATTERN": "res://scripts/flight/tasks/wing_pattern.gd",
 	"WING_KIDS_STORKS": "res://scripts/flight/tasks/wing_rings.gd",
 	"MIS_WING_CLOUDS": "res://scripts/flight/tasks/wing_rings.gd",
 	"MIS_WING_KITE": "res://scripts/flight/tasks/wing_find.gd",
@@ -190,6 +194,10 @@ func make_sim(vehicle_: String) -> DroneSim:
 		sim = WingSim.new(mode, 11)
 	elif vehicle_ == "fpv" and mode != "kids":
 		var f := FpvSim.new(mode, 11)
+		f.configure(Prefs.fpv_rates, Prefs.fpv_quad)
+		# Adult missions are flown in the mode the pilot picked for them.
+		if key.begins_with("MIS_FPV_") and mode == "pro":
+			flight_mode = Prefs.fpv_mission_mode
 		f.flight_mode = flight_mode
 		sim = f
 	else:
@@ -426,6 +434,7 @@ func ring_step(sim: DroneSim) -> String:
 	return res
 
 
-func restart_rings() -> void:
-	ring_i = 0
+## Back to a ring (the first by default): the rings from there count again.
+func restart_rings(from := 0) -> void:
+	ring_i = from
 	_prev = Vector3.INF

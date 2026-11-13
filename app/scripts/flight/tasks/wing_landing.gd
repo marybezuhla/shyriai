@@ -31,8 +31,9 @@ func setup_world() -> void:
 
 
 func tune(sim: DroneSim) -> void:
-	# Coming in on the glide already: the motor at a little more than idle.
+	# Coming in on the glide already: the motor at a little more than idle, into the wind.
 	(sim as WingSim).throttle01 = 0.35
+	wind_from_ahead(sim, start_heading())
 
 
 func update(_dt: float, sim: DroneSim, _sticks: Dictionary) -> void:
@@ -43,14 +44,14 @@ func update(_dt: float, sim: DroneSim, _sticks: Dictionary) -> void:
 		world.hoop_done(before)
 	for e in sim.events:
 		if e["type"] == "landed":
-			_touched(sim, float(e["speed"]))
+			_touched(sim, float(e["speed"]), float(e.get("pitch", 0.1)))
 			if failed:
 				return
 	if _down >= 0.0:
 		progress = 0.9
 		if w.on_ground and not world.on_runway(sim.pos.x, sim.pos.z):
 			fail_with("FAIL_WING_OFF_RUNWAY")  # rolled off the end: the throttle was left open
-		elif w.on_ground and w.speed < 1.5:
+		elif w.on_ground and w.vel.length() < 1.5:
 			pass_with("SUM_WING_LANDING", [FlightTask.num(_down)])
 		else:
 			say("HINT_WING_ROLL")
@@ -65,10 +66,12 @@ func update(_dt: float, sim: DroneSim, _sticks: Dictionary) -> void:
 		say("HINT_WING_FLARE" if sim.altitude() < 4.0 else "HINT_WING_GLIDE")
 
 
-func _touched(sim: DroneSim, down: float) -> void:
+func _touched(sim: DroneSim, down: float, pitch := 0.1) -> void:
 	if not world.on_runway(sim.pos.x, sim.pos.z):
 		fail_with("FAIL_WING_OFF_RUNWAY")
 	elif down > MAX_DOWN:
 		fail_with("FAIL_WING_HARD", [FlightTask.num(down)])
+	elif pitch < NO_FLARE:
+		fail_with("FAIL_WING_NO_FLARE")  # flown onto the runway nose first, with no flare
 	elif _down < 0.0:
 		_down = down

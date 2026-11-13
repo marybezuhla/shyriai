@@ -109,6 +109,11 @@ func _lesson_card(lessons: Array, done: int) -> Control:
 
 func _build_missions() -> void:
 	var list := UI.vbox(10)
+	# Adult FPV missions can be flown in any flight mode, Acro too.
+	if vehicle == "fpv" and Prefs.mode == "pro":
+		list.add_child(UI.eyebrow(tr("FPV_MISSION_MODE")))
+		list.add_child(UI.segmented([["angle", "Angle"], ["horizon", "Horizon"], ["acro", "Acro"]],
+			Prefs.fpv_mission_mode, func(v): Prefs.set_choice("fpv_mission_mode", v)))
 	for m in Curriculum.missions(vehicle, Prefs.mode):
 		var text := UI.vbox(3)
 		text.size_flags_horizontal = Control.SIZE_EXPAND_FILL

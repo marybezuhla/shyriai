@@ -129,7 +129,8 @@ func test_ugv_physics() -> void:
 	check(sim.pos.z < -6.0 and absf(sim.pos.x) < 0.1, "UGV: both tracks forward drives straight")
 	var heading := sim.yaw
 	run(sim, 1.0, 1.0, 0, -1.0, 0)
-	check(absf(wrapf(sim.yaw - heading, -PI, PI)) > deg_to_rad(45.0), "UGV: tracks in opposite directions turn on the spot")
+	var turned := rad_to_deg(absf(wrapf(sim.yaw - heading, -PI, PI)))
+	check(turned > 35.0 and turned < 75.0, "UGV: tracks in opposite directions turn on the spot, at a real robot's pace (%.0f° in 1 s)" % turned)
 	run(sim, 2.0, 0, 0, 0, 0)
 	check(sim.vel.length() < 0.05, "UGV: let go and it stops")
 	var mud := UgvSim.new("simple")
