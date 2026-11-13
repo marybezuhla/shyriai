@@ -267,7 +267,7 @@ func _touch_down() -> void:
 	var down := -vel.y
 	pos.y = g
 	if p["crash"] and (down > float(p["crash_fall"]) or absf(bank) > deg_to_rad(25.0)):
-		_crash(down)
+		_crash(down, "ground" if down > float(p["crash_fall"]) else "wingtip")
 		return
 	on_ground = true
 	gamma = 0.0

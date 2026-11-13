@@ -71,6 +71,7 @@ func _ready() -> void:
 	test_rating_rules()
 	test_results_are_kept()
 	test_saved_results_are_checked()
+	test_tips()
 	test_damaged_save_falls_back()
 	await test_free_flight()
 	# Missions change with every attempt: fly them with other layouts too.
@@ -161,6 +162,20 @@ func test_saved_results_are_checked() -> void:
 	check(Prefs.pilot_name == "" and Prefs.free["wind"] == "none" and Prefs.free["balls"] == true
 		and Prefs.free["time"] == "dusk", "odd values are ignored, good ones kept")
 	Prefs.erase_all()
+	check(not Prefs.welcomed, "a fresh start asks who will play")
+	Prefs._apply({"mode": "pro"})
+	check(Prefs.welcomed, "a file from before the question is not asked again")
+	Prefs._apply({"welcomed": "yes"})
+	check(Prefs.welcomed, "an odd value does not bring the question back")
+	Prefs.erase_all()
+
+
+## The tip after three failed tries fits the failure, with a general one for everything else.
+func test_tips() -> void:
+	check(FlightCards.tip_key("TIP_FAIL_JOLT_CARGO", "MIS_UGV_CARGO", "pro") == "TIP_FAIL_JOLT_CARGO", "a tip for the failure itself")
+	check(FlightCards.tip_key("TIP_FAIL_JOLT_STRETCHER", "UGV_STRETCHER", "kids") == "TIP_FAIL_JOLT_STRETCHER_KIDS", "kids get their own tip")
+	check(FlightCards.tip_key("TIP_NOTHING", "CAM_HOLD", "simple") == "TIP_GENERIC", "a general tip when there is no other")
+	check(FlightCards.tip_key("TIP_NOTHING", "CAM_HOLD", "kids") == "TIP_GENERIC_KIDS", "and a kids one for kids")
 
 
 func test_free_flight() -> void:
