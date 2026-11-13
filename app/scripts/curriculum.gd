@@ -42,7 +42,7 @@ const LESSONS := {
 
 ## Missions per vehicle and mode family: kids get their own stories.
 const MISSIONS := {
-	"camera": {"kids": ["MIS_CAM_KITTEN", "MIS_CAM_DOG"], "adult": ["MIS_CAM_SEARCH", "MIS_CAM_MEDS"]},
+	"camera": {"kids": ["MIS_CAM_KITTEN", "MIS_CAM_DOG"], "adult": ["MIS_CAM_SEARCH", "MIS_CAM_MEDS", "MIS_CAM_LINK", "MIS_CAM_JAM"]},
 	"fpv": {"kids": ["MIS_FPV_HOOPS", "MIS_FPV_BALLOONS"], "adult": ["MIS_FPV_RACE", "MIS_FPV_TREES"]},
 	"ugv": {"kids": ["MIS_UGV_VET", "MIS_UGV_PARCEL"], "adult": ["MIS_UGV_CARGO", "MIS_UGV_EVAC"]},
 	"survey": {"kids": ["MIS_SRV_ALBUM"], "adult": ["MIS_CAM_SURVEY", "MIS_SRV_FIND", "MIS_SRV_COUNT"]},

@@ -99,6 +99,10 @@ func _draw() -> void:
 			_ring(12, 12, 9)
 			_line([[12, 11], [12, 17]])
 			draw_circle(_p(12, 7.5), 1.2 * _k, color)
+		"home":
+			_line([[3.5, 11.5], [12, 4], [20.5, 11.5]])
+			_line([[6, 9.5], [6, 20], [18, 20], [18, 9.5]])
+			_line([[10, 20], [10, 14.5], [14, 14.5], [14, 20]])
 		"kid":
 			# A child holding up a balloon on a string.
 			_ring(10, 9, 2.6)

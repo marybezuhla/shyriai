@@ -63,6 +63,8 @@ const FILES := {
 	"FREE_INTERCEPT": "res://scripts/flight/tasks/free_flight.gd",
 	"MIS_CAM_MEDS": "res://scripts/flight/tasks/mission_meds.gd",
 	"MIS_CAM_DOG": "res://scripts/flight/tasks/mission_dog.gd",
+	"MIS_CAM_LINK": "res://scripts/flight/tasks/mission_link.gd",
+	"MIS_CAM_JAM": "res://scripts/flight/tasks/mission_link.gd",
 	"WING_LEVEL": "res://scripts/flight/tasks/wing_rings.gd",
 	"WING_TURN": "res://scripts/flight/tasks/wing_turn.gd",
 	"WING_TAKEOFF": "res://scripts/flight/tasks/wing_takeoff.gd",

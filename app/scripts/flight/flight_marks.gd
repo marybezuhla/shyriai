@@ -38,6 +38,8 @@ static func draw(f: Flight) -> void:
 			f._marks.draw_polyline(arrow, Pal.INK, 2.0, true)
 		if f.task.ring > 0.0:
 			_ground_ring(f, f.task.marker, f.task.ring)
+	if f.home != null and FlightTask.flat_distance(f.sim.pos, f.world.pad) > 12.0:
+		_home_mark(f, rect.grow_individual(-40, -40, -40, -maxf(40.0, f.stick_band())))
 	# A thin ring round the drone when it is far and tiny.
 	if f.view == "pilot" and not f.cam.is_position_behind(f.sim.pos):
 		var d := f.cam.position.distance_to(f.sim.pos)
@@ -66,3 +68,24 @@ static func _ground_ring(f: Flight, center: Vector3, radius: float) -> void:
 	var col := Pal.c("accent")
 	f._marks.draw_polyline(pts, Pal.INK, 5.0, true)
 	f._marks.draw_polyline(pts, col, 3.0, true)
+
+
+## A small house over the pad, or at the screen's edge on the side where the pad is: where home is.
+static func _home_mark(f: Flight, inner: Rect2) -> void:
+	var at: Vector3 = f.world.pad + Vector3(0, 1.0, 0)
+	var behind := f.cam.is_position_behind(at)
+	var p := f.cam.unproject_position(at)
+	if behind or not inner.has_point(p):
+		var c := inner.get_center()
+		var dir := (p - c) * (-1.0 if behind else 1.0)
+		dir = dir.normalized() if dir.length() > 1.0 else Vector2.DOWN
+		var t := minf(absf((inner.size.x / 2.0) / dir.x) if dir.x != 0.0 else INF, absf((inner.size.y / 2.0) / dir.y) if dir.y != 0.0 else INF)
+		p = c + dir * t
+	var r := 9.0
+	var house := PackedVector2Array([
+		p + Vector2(0, -r), p + Vector2(r, -r * 0.1), p + Vector2(r * 0.75, -r * 0.1), p + Vector2(r * 0.75, r),
+		p + Vector2(-r * 0.75, r), p + Vector2(-r * 0.75, -r * 0.1), p + Vector2(-r, -r * 0.1),
+	])
+	f._marks.draw_colored_polygon(house, Pal.CREAM)
+	house.append(house[0])
+	f._marks.draw_polyline(house, Pal.INK, 2.0, true)

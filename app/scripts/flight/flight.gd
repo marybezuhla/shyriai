@@ -53,6 +53,9 @@ var _bar_fill := Panel.new()
 var _bar_text: Label
 var _stats := {}
 var _counter: Label
+## The plane's speed tape and wind arrow, when shown.
+var _tape: Control
+var _wind_arrow: Control
 var _view_box := VBoxContainer.new()
 var _overlay: Control
 ## The survey camera's buttons, when the task is flown with a camera.
@@ -62,6 +65,10 @@ var _rebuild_queued := false
 var _view_compact := false
 var _view_icon := false
 var _finished := false
+var _sock: Node3D
+## The camera drone's way home (not for kids); null for other machines.
+var home: FlightHome
+var _hint_warn := false
 ## Nothing moves and no time counts until the pilot first moves a stick.
 var _waiting := true
 ## Seconds with no step forward in the task.
@@ -117,6 +124,8 @@ func _ready() -> void:
 		view = task.view_hint
 
 	sim = task.make_sim(machine)
+	if machine == "camera" and mode != "kids" and not task.is_free:
+		home = FlightHome.new()
 	if task is PhotoTask:
 		var vp := get_viewport_rect().size
 		task.aspect = vp.x / maxf(vp.y, 1.0)
@@ -130,6 +139,10 @@ func _ready() -> void:
 		drone = WingView.new()
 		world.add_child(drone)
 		drone.build(world.pal["drone"], world.pal["drone_front"])
+		# A windsock beside the runway's near end, where the pilot can see it.
+		var at := Vector3(WorldLand.RUNWAY_X + WorldLand.RUNWAY_W / 2.0 + 4.0, 0, WorldLand.RUNWAY_Z0 - 8.0)
+		at.y = world.height(at.x, at.z)
+		_sock = AirProps.add_windsock(world, at)
 	else:
 		drone = DroneView.new()
 		world.add_child(drone)
@@ -165,8 +178,14 @@ func _physics_process(_delta: float) -> void:
 	if task is PhotoTask and task.report_open:
 		return
 	_read_sticks()
+	var pilot := _sticks
 	# No radio link: the robot gets no commands and stops by itself.
 	_sticks = task.controls(_sticks)
+	if home and not _waiting:
+		home.update(sim, task, STEP)
+		home.take_back(pilot, task.link_ok)
+		if home.active:
+			_sticks = home.sticks(sim, world.pad)
 	if _waiting and not _ready_to_go():
 		task.step(0.0, sim, _sticks)  # sets the first hints; no time passes
 	else:
@@ -210,6 +229,8 @@ func kids_help() -> bool:
 
 func _process(delta: float) -> void:
 	drone.sync(sim, delta)
+	if _sock:
+		AirProps.blow_windsock(_sock, sim.wind())
 	if not _paused and not _finished:
 		_sound.motors(_motor_load(), _motors_running(), delta)
 		_sound.no_link(not task.link_ok, delta)
@@ -361,6 +382,8 @@ func _rebuild_hud() -> void:
 	_counter = null
 	_kit = null
 	_stats = {}
+	_tape = null
+	_wind_arrow = null
 	_view_box = VBoxContainer.new()
 	_left = Stick.new()
 	_right = Stick.new()
@@ -410,7 +433,7 @@ func _build_bottom(col: VBoxContainer, ins: Dictionary) -> void:
 	# switch leaves too little room (narrow phones, the largest text), it becomes one button that
 	# steps through the views.
 	var room := get_viewport_rect().size.x - 2.0 * SIDE - float(ins["left"]) - float(ins["right"]) - 24.0
-	if (task is PhotoTask and task.kit) or task.action != "":
+	if (task is PhotoTask and task.kit) or task.action != "" or _home_button():
 		room -= 96.0
 	_view_compact = (room - VIEW_FULL) / 2.0 < 104.0
 	room -= VIEW_COMPACT if _view_compact else VIEW_FULL
@@ -451,8 +474,32 @@ func _build_bottom(col: VBoxContainer, ins: Dictionary) -> void:
 		var act := ActionButton.new()
 		act.build(task, sim)
 		bottom.add_child(act)
+	elif _home_button():
+		bottom.add_child(_build_home_button())
 	bottom.add_child(_stick_with_label(_right, tr(right_label)))
 	col.add_child(bottom)
+
+
+## Adult camera drones have a "Home" button beside the right stick.
+func _home_button() -> bool:
+	return home != null and mode == "pro" and not (task is PhotoTask and task.kit)
+
+
+func _build_home_button() -> Control:
+	var box := VBoxContainer.new()
+	box.alignment = BoxContainer.ALIGNMENT_END
+	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var col := UI.vbox(2)
+	col.alignment = BoxContainer.ALIGNMENT_CENTER
+	col.custom_minimum_size = Vector2(76, 76)
+	var ic := CenterContainer.new()
+	ic.add_child(Glyph.make("home", 26, Pal.c("on_accent")))
+	col.add_child(ic)
+	var l := UI.label(tr("RTH"), UI.CAPTION, 800, "on_accent", false, false)
+	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	col.add_child(l)
+	box.add_child(UI.tappable(col, Pal.c("accent"), func(): home.start(sim), tr("RTH"), 38, 0))
+	return box
 
 
 func _stick_with_label(s: Stick, text: String) -> Control:
@@ -548,6 +595,13 @@ func _update_hud() -> void:
 	var hint_key := ready if _waiting and (task.hint == "" or practice) else task.hint
 	if kids_help():
 		hint_key = "HINT_KIDS_HELP"
+	var warn := false
+	if home and home.alert != "":
+		hint_key = home.alert
+		warn = home.alert_warn
+	if warn != _hint_warn:
+		_hint_warn = warn
+		_hint_panel.add_theme_stylebox_override("panel", UI.box(Pal.c("warn" if warn else "text"), 12, 9))
 	if hint_key != "":
 		var text := tr(hint_key)
 		if not task.hint_args.is_empty() and text.contains("%"):
@@ -566,6 +620,18 @@ func _update_hud() -> void:
 		_stats["ALT"].text = tr("UNIT_M") % FlightTask.num(maxf(0.0, sim.altitude()))
 	if _stats.has("SPEED"):
 		_stats["SPEED"].text = tr("UNIT_MS") % FlightTask.num(Vector2(sim.vel.x, sim.vel.z).length())
+	if _stats.has("AIRSPEED"):
+		_stats["AIRSPEED"].text = tr("UNIT_MS") % FlightTask.num((sim as WingSim).speed)
+		_stats["AIRSPEED"].add_theme_color_override("font_color", Pal.c("warn") if (sim as WingSim).stall_warn else Pal.c("text"))
+		_tape.queue_redraw()
+	if _stats.has("WIND"):
+		_stats["WIND"].text = tr("UNIT_MS") % FlightTask.num(Vector2(sim.wind().x, sim.wind().z).length())
+		_wind_arrow.queue_redraw()
+	if _stats.has("VERT"):
+		var vy := sim.vel.y
+		_stats["VERT"].text = ("+" if vy >= 0.05 else "") + tr("UNIT_MS") % FlightTask.num(vy)
+	if _stats.has("HOME"):
+		_stats["HOME"].text = tr("UNIT_M") % FlightTask.num(FlightTask.flat_distance(sim.pos, world.pad), 0)
 	if _stats.has("BATTERY"):
 		_stats["BATTERY"].text = "%d %%" % int(ceil(sim.battery * 100.0))
 	if _stats.has("TARGET"):

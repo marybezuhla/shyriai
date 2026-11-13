@@ -97,3 +97,38 @@ static func add_kite_tree(world: FlightWorld, at: Vector3) -> Vector3:
 	diamond.rotation.z = PI / 4.0
 	_part(kite, _box(Vector3(0.05, 2.5, 0.05)), Pal.TOY["gold"], Vector3(0, -1.8, 0))  # tail
 	return kite.position
+
+
+## A windsock on a pole beside the runway: red and white stripes, a cone that swings to point the
+## way the wind blows and stands out straighter the stronger it is.
+static func add_windsock(world: Node3D, at: Vector3) -> Node3D:
+	var root := Node3D.new()
+	root.position = at
+	world.add_child(root)
+	_part(root, _box(Vector3(0.12, 4.0, 0.12)), Pal.CREAM, Vector3(0, 2.0, 0))
+	var head := Node3D.new()
+	head.name = "head"
+	head.position = Vector3(0, 3.9, 0)
+	root.add_child(head)
+	var cone := Node3D.new()
+	cone.name = "cone"
+	head.add_child(cone)
+	for i in 4:
+		var ring := CylinderMesh.new()
+		ring.top_radius = 0.42 - i * 0.07
+		ring.bottom_radius = 0.42 - (i + 1) * 0.07
+		ring.height = 0.5
+		ring.radial_segments = 12
+		var c := Color.WHITE if i % 2 else Pal.SIGNAL_RED
+		_part(cone, ring, c, Vector3(0, 0, 0.25 + i * 0.5)).rotation.x = PI / 2.0
+	return root
+
+
+## Points the sock down the wind (horizontal, m/s). Calm: it hangs down.
+static func blow_windsock(sock: Node3D, wind: Vector3) -> void:
+	var head: Node3D = sock.get_node("head")
+	var flat := Vector2(wind.x, wind.z)
+	if flat.length() > 0.05:
+		head.rotation.y = atan2(flat.x, flat.y)  # the cone's +z goes along the wind
+	var cone: Node3D = head.get_node("cone")
+	cone.rotation.x = lerpf(1.3, 0.05, clampf(flat.length() / 6.0, 0.0, 1.0))  # droops when calm

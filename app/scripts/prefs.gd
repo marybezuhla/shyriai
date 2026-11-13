@@ -338,6 +338,8 @@ func view_for(m: String, vehicle := "camera") -> String:
 	var fallback := "fpv" if machine == "fpv" else ("chase" if m == "kids" or machine == "wing" else ("ugv" if machine == "ugv" else "pilot"))
 	if vehicle == "survey":
 		fallback = "drone"  # a survey is flown through the camera, kids too
+	elif machine == "wing" and m == "pro":
+		fallback = "pilot"  # as a real model pilot flies: from the ground
 	return views.get(m + "/" + vehicle, fallback)
 
 

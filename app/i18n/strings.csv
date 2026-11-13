@@ -418,7 +418,7 @@ HINT_TERRAIN_MUD,Now through the mud: the tracks slip here,Тепер через
 HINT_TERRAIN_FINISH,"A little more, to the ball","Ще трохи, до кулі"
 SUM_UGV_TERRAIN,Hill and mud done.,Пагорб і бруд подолано.
 SUM_UGV_TERRAIN_KIDS,Over the hill and through the mud!,Гірку й бруд подолано!
-HINT_LINK_LOST,"No link: the robot has stopped. Wait, the link will come back","Немає зв’язку: робот зупинився. Зачекай, зв’язок повернеться"
+HINT_LINK_LOST,"The link is lost! Let go of the sticks: the drone will hover, then fly home","Зв’язок зник! Відпусти стіки: дрон зависне, а потім полетить додому"
 METER_PATIENT,Casualty’s comfort,Комфорт пораненого
 METER_KITTEN,Kitten’s calm,Спокій кошеняти
 METER_CARGO,Cargo condition,Цілість вантажу
@@ -1112,3 +1112,29 @@ WING_PATTERN_PASS,6 rings | Landing into the wind | A go-around is allowed,6 к�
 SUM_WING_PATTERN,"A full circuit in %d s, landed into the wind.","Повне коло за %d с, посадка проти вітру."
 HINT_WING_WINDSOCK,"The windsock shows where the wind comes from: take off into it, full throttle","Рукав показує, звідки дме: злітай назустріч, газ до упору"
 HINT_WING_GO_AROUND_DONE,"Go-around: climb, fly round again and come back through the rings","Друге коло: набирай висоту, облети ще раз і заходь крізь кільця"
+STAT_AIRSPEED,Air speed,Повітр. швидк.
+STAT_WIND,Wind,Вітер
+STAT_VERT,Climb,Верт.
+STAT_HOME,Home,Додому
+RTH,Home,Додому
+HINT_BATTERY_30,Battery 30 %: time to fly back,Батарея 30 %: час повертатися
+HINT_RTH,Flying home. Move a stick to take control,"Летимо додому. Рухни стіком, щоб керувати"
+HINT_RTH_BATTERY,Battery 20 %: the drone is flying home by itself,Батарея 20 %: дрон сам летить додому
+HINT_RTH_LINK,No link: the drone is flying home by itself,Немає зв’язку: дрон сам летить додому
+HINT_RTH_CANCEL,Control is back with you,Керування знову в тебе
+HINT_RTH_LANDED,Home: the drone has landed,Дрон удома
+HINT_RTH_NO_GPS,No GPS: the drone does not know where home is. Fly it back yourself,"Немає GPS: дрон не знає, де дім. Веди його сам"
+MIS_CAM_LINK,Lost link,Втрата зв’язку
+MIS_CAM_LINK_DESC,"The radio loses the drone. Wait calmly while it flies home, then land it.","Пульт губить дрон. Спокійно зачекай, поки він летить додому, і посади його."
+MIS_CAM_JAM,GPS jamming,Глушіння GPS
+MIS_CAM_JAM_DESC,The GPS is jammed and the wind carries the drone. Fly it back by hand.,"GPS заглушено, і вітер зносить дрон. Поверни його вручну."
+HINT_LINK_UP,Take off and fly to the marked spot,Злітай і лети до позначеного місця
+HINT_LINK_GO,Fly to the marked spot,Лети до позначеного місця
+HINT_LINK_HOLD,Hover over the spot: %d,Зависни над місцем: %d
+HINT_LINK_WAIT,No link. The drone is on its way home: wait,Зв’язку немає. Дрон летить додому: чекай
+HINT_LINK_BACK,The link is back. Land the drone on the pad,Зв’язок повернувся. Посади дрон на майданчик
+HINT_LINK_LAND,Land on the pad,Сідай на майданчик
+HINT_JAM,"GPS jammed! The wind carries the drone, and it cannot fly home by itself","GPS заглушено! Вітер зносить дрон, і сам він додому не долетить"
+HINT_JAM_BACK,Fly back by hand against the wind and land on the pad,Веди назад вручну проти вітру й сідай на майданчик
+SUM_MIS_CAM_LINK,"Home after a lost link, in %d:%02d.","Удома після втрати зв’язку, за %d:%02d."
+SUM_MIS_CAM_JAM,"Back by hand without GPS, in %d:%02d.","Назад уручну без GPS, за %d:%02d."
