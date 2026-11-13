@@ -56,6 +56,8 @@ const QUIZ := {"adult": 3, "kids": 2}
 const PRO_ONLY := ["FPV_HORIZON", "FPV_ACRO"]
 ## The kids' own photography lessons; the grown-ups' survey lessons are not for kids.
 const KIDS_ONLY := ["SRV_KIDS_FLOWER", "SRV_KIDS_KITTEN", "SRV_KIDS_VAN", "INT_KIDS_BUTTERFLY", "WING_KIDS_STORKS"]
+## Kids start a course with these: the storks show a child where to fly before the plain rings.
+const KIDS_FIRST := ["WING_KIDS_STORKS"]
 const NOT_KIDS := [
 	"SRV_TILT", "SRV_SHARP", "SRV_DETAIL", "SRV_ORBIT", "SRV_GRID",
 	"INT_CHASE", "INT_TURN", "INT_LEAD", "INT_HEADON", "INT_NIGHT",
@@ -70,7 +72,9 @@ static func lessons(vehicle: String, mode := "") -> Array:
 	if mode == "":
 		return all
 	if mode == "kids":
-		return all.filter(func(k): return k not in PRO_ONLY and k not in NOT_KIDS)
+		var kids := all.filter(func(k): return k not in PRO_ONLY and k not in NOT_KIDS)
+		var first := kids.filter(func(k): return k in KIDS_FIRST)
+		return first + kids.filter(func(k): return k not in KIDS_FIRST)
 	return all.filter(func(k): return k not in KIDS_ONLY and (mode == "pro" or k not in PRO_ONLY))
 
 

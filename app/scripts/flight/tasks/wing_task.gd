@@ -7,7 +7,11 @@ extends FlightTask
 ## Most flying happens at this height over the ground.
 const CRUISE_ALT := 30.0
 
+## Kids: seconds with no ring passed before the plane starts to help.
+const ASSIST_AFTER := 15.0
+
 var _last_yaw := INF
+var _stuck := 0.0
 
 
 func start_position() -> Vector3:
@@ -52,4 +56,16 @@ func sky_rings(points: Array[Vector3], radius: float, color: Color) -> void:
 	var normals := normals_along(abs_points, start_position())
 	for i in points.size():
 		world.add_hoop(points[i], normals[i], color, radius)
-		rings.append({"c": abs_points[i], "n": normals[i], "r": radius})
+		rings.append({"c": abs_points[i], "n": normals[i], "r": radius, "both": mode == "kids"})
+
+
+## Kids: after a while with no ring passed, the plane is gently steered towards the next one
+## while the stick is left alone. Call every step with whether a ring was just passed.
+func kids_assist(sim: DroneSim, dt: float, passed: bool) -> void:
+	var w := sim as WingSim
+	if w == null or mode != "kids":
+		return
+	_stuck = 0.0 if passed else _stuck + dt
+	w.assist = Vector3.INF
+	if _stuck > ASSIST_AFTER and ring_i < rings.size():
+		w.assist = rings[ring_i]["c"]

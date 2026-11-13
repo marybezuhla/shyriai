@@ -33,7 +33,7 @@ static func place(f: Flight, delta: float) -> void:
 			pose = f._cam_history[f._cam_history.size() - 1 - back]
 		var b: Basis = pose[1]
 		f.cam.global_basis = b * Basis(Vector3.RIGHT, deg_to_rad(-8.0))
-		f.cam.position = pose[0] + b * Vector3(0, 1.2, -0.6)
+		f.cam.position = pose[0] + b * Vector3(0, 1.12, -0.76)  # just in front of the lens on the round head
 		f.cam.fov = 80.0
 	elif f.view == "chase":
 		# A plane is fast and wide: the chase camera hangs further back.

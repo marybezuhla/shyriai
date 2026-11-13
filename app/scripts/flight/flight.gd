@@ -6,7 +6,11 @@ extends Control
 const STEP := 1.0 / 60.0
 ## Width of the progress and meter bars.
 const BAR_W := 120.0
-const DEADZONE := 0.08
+## Side margin of the HUD: clear of Android's back-swipe edge.
+const SIDE := 28.0
+## Widths of the view switch, full and as one cycling button.
+const VIEW_FULL := 360.0
+const VIEW_COMPACT := 150.0
 
 var app: Node  # main.gd
 var vehicle := "camera"
@@ -52,8 +56,12 @@ var _overlay: Control
 ## The survey camera's buttons, when the task is flown with a camera.
 var _kit: PhotoKit
 var _paused := false
+var _rebuild_queued := false
+var _view_compact := false
+var _view_icon := false
 var _finished := false
 var _sticks := {"throttle": 0.0, "yaw": 0.0, "pitch": 0.0, "roll": 0.0}
+var _input := FlightInput.new()
 var _sound := FlightSound.new()
 ## What the task had done a physics step ago, so each new ball, gate or step gets its blip.
 var _last_progress := 0.0
@@ -218,70 +226,8 @@ func _sound_events() -> void:
 			_sound.play("thud")
 
 
-var _joy_throttle := false
-
-
 func _read_sticks() -> void:
-	if autopilot.is_valid():
-		_sticks = autopilot.call(sim, task)
-		return
-	if not _thr.spring_y:
-		# Keys move the throttle stick on screen, step by step.
-		var k := _keys(KEY_W, KEY_S)
-		if k != 0.0:
-			_thr.value.y = clampf(_thr.value.y + k * STEP * 0.9, -1.0, 1.0)
-			_thr.queue_redraw()
-	var t := _thr.value.y
-	var y := _left.value.x
-	var p := _fwd.value.y
-	var r := _right.value.x
-	# A gamepad or a radio in joystick mode. In Mode 1 its up/down axes swap like the screen sticks.
-	var thr_axis := JOY_AXIS_RIGHT_Y if _mode1 else JOY_AXIS_LEFT_Y
-	var fwd_axis := JOY_AXIS_LEFT_Y if _mode1 else JOY_AXIS_RIGHT_Y
-	for dev in Input.get_connected_joypads():
-		if _thr.spring_y:
-			t = _bigger(t, -_axis(dev, thr_axis))
-		elif not _thr.touched:
-			# A gamepad or radio drives the throttle until the screen stick is touched, but only once
-			# its stick has been moved: a self-centring gamepad would otherwise start at half throttle.
-			var a := Input.get_joy_axis(dev, thr_axis)
-			if absf(a) > 0.2:
-				_joy_throttle = true
-			if _joy_throttle:
-				t = -a
-		y = _bigger(y, _axis(dev, JOY_AXIS_LEFT_X))
-		p = _bigger(p, -_axis(dev, fwd_axis))
-		r = _bigger(r, _axis(dev, JOY_AXIS_RIGHT_X))
-	# A keyboard: W/S up and down, A/D turn, arrows move.
-	if _thr.spring_y:
-		t = _bigger(t, _keys(KEY_W, KEY_S))
-	y = _bigger(y, _keys(KEY_D, KEY_A))
-	p = _bigger(p, _keys(KEY_UP, KEY_DOWN))
-	r = _bigger(r, _keys(KEY_RIGHT, KEY_LEFT))
-	if machine != "ugv":
-		var e: float = Prefs.STICK_FEELS.get(Prefs.stick_feel, 0.0)
-		y = _soft(y, e)
-		p = _soft(p, e)
-		r = _soft(r, e)
-	_sticks = {"throttle": t, "yaw": y, "pitch": p, "roll": r}
-
-
-## Expo: the same full deflection, but gentler near the centre, for fine moves. e = 0 changes nothing.
-static func _soft(x: float, e: float) -> float:
-	return (1.0 - e) * x + e * x * x * x
-
-
-func _axis(dev: int, axis: JoyAxis) -> float:
-	var v := Input.get_joy_axis(dev, axis)
-	return 0.0 if absf(v) < DEADZONE else v
-
-
-func _keys(plus: Key, minus: Key) -> float:
-	return float(Input.is_physical_key_pressed(plus)) - float(Input.is_physical_key_pressed(minus))
-
-
-func _bigger(a: float, b: float) -> float:
-	return a if absf(a) >= absf(b) else b
+	_sticks = autopilot.call(sim, task) if autopilot.is_valid() else _input.read(self)
 
 
 # --- Camera -----------------------------------------------------------------
@@ -314,8 +260,9 @@ func _build_hud() -> void:
 	var m := MarginContainer.new()
 	m.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	m.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	m.add_theme_constant_override("margin_left", 16 + int(ins["left"]))
-	m.add_theme_constant_override("margin_right", 16 + int(ins["right"]))
+	# Wide enough at the sides that a thumb on a stick is not taken for Android's back swipe.
+	m.add_theme_constant_override("margin_left", SIDE + int(ins["left"]))
+	m.add_theme_constant_override("margin_right", SIDE + int(ins["right"]))
 	m.add_theme_constant_override("margin_top", 12 + int(ins["top"]))
 	m.add_theme_constant_override("margin_bottom", 14 + int(ins["bottom"]))
 	_hud.add_child(m)
@@ -339,6 +286,7 @@ func _build_hud() -> void:
 
 	_build_counters(top, glass)
 	col.add_child(top)
+	_fit_top(top)
 
 	_build_hint(col)
 
@@ -349,6 +297,84 @@ func _build_hud() -> void:
 
 	_build_bottom(col, ins)
 	_build_view_toggle()
+	if not get_viewport().size_changed.is_connected(_on_resize):
+		get_viewport().size_changed.connect(_on_resize)
+
+
+## The screen turned, folded or unfolded (Android may also turn it only after the flight opened):
+## build the HUD again for the new size, keeping the throttle where it was.
+func _on_resize() -> void:
+	if not _rebuild_queued:
+		_rebuild_queued = true
+		_rebuild_hud.call_deferred()
+
+
+func _rebuild_hud() -> void:
+	_rebuild_queued = false
+	if not is_inside_tree():
+		return
+	var thr_y := _thr.value.y
+	var was_enabled := _left.enabled
+	_hud.queue_free()
+	_nolink.queue_free()
+	_hud = Control.new()
+	_marks = Control.new()
+	_hint = Label.new()
+	_hint_panel = PanelContainer.new()
+	_bar_fill = Panel.new()
+	_bar_text = null
+	_meter_fill = null
+	_counter = null
+	_kit = null
+	_stats = {}
+	_view_box = VBoxContainer.new()
+	_left = Stick.new()
+	_right = Stick.new()
+	_thr = _right if _mode1 else _left
+	_fwd = _left if _mode1 else _right
+	_build_hud()
+	if not _thr.spring_y:
+		_thr.value.y = thr_y
+	_left.enabled = was_enabled
+	_right.enabled = was_enabled
+	if _overlay:
+		move_child(_overlay, -1)  # the open card stays on top
+
+
+## How tall the band of sticks along the bottom is, so marks can keep clear of it.
+func stick_band() -> float:
+	return _left.custom_minimum_size.y + 44.0
+
+
+## The top line must fit the screen: drop the least needed numbers until it does.
+func _fit_top(top: HBoxContainer) -> void:
+	var room := get_viewport_rect().size.x - 2.0 * SIDE - _ins_x()
+	var order := ["TIME", "BATTERY", "CLOSING", "SPEED", "TARGET", "ALT"]
+	for n in order:
+		if top.get_combined_minimum_size().x <= room:
+			return
+		if _stats.has(n):
+			var cell: Control = _stats[n].get_parent()
+			cell.get_parent().remove_child(cell)
+			cell.queue_free()
+			_stats.erase(n)
+	if _stats.is_empty() and top.get_child_count() > 3:
+		var panel := top.get_child(top.get_child_count() - 1)
+		top.remove_child(panel)  # nothing left in the numbers panel
+		panel.queue_free()
+	# Still too wide (an unfolded phone held upright): the lesson title gets "…".
+	var over := top.get_combined_minimum_size().x - room
+	if over > 0.0:
+		var title: Label = top.get_child(1).find_children("*", "Label", true, false)[0]
+		var w := title.get_combined_minimum_size().x
+		title.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		title.clip_text = true
+		title.custom_minimum_size.x = maxf(40.0, w - over)
+
+
+func _ins_x() -> float:
+	var ins: Dictionary = app.insets() if app else {}
+	return float(ins.get("left", 0.0)) + float(ins.get("right", 0.0))
 
 
 func _build_no_signal() -> void:
@@ -444,6 +470,8 @@ func _build_counters(top: HBoxContainer, glass: Color) -> void:
 			head.autowrap_mode = TextServer.AUTOWRAP_OFF
 			s.add_child(head)
 			var v := UI.label("–", UI.LEAD, 800, "text", false, false)
+			# As wide as a real reading from the start, so the top line is measured right.
+			v.custom_minimum_size.x = v.get_theme_font("font").get_string_size("88,8 м/с", HORIZONTAL_ALIGNMENT_LEFT, -1, v.get_theme_font_size("font_size")).x
 			_stats[n] = v
 			s.add_child(v)
 			stats.add_child(s)
@@ -470,11 +498,20 @@ func _build_bottom(col: VBoxContainer, ins: Dictionary) -> void:
 	# Sticks and the view switch at the bottom.
 	var bottom := HBoxContainer.new()
 	bottom.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	# Sticks as big as fit beside the camera switch (narrow phones in landscape get a little less).
-	var room := get_viewport_rect().size.x - 32.0 - float(ins["left"]) - float(ins["right"]) - 344.0
+	# Sticks as big as fit beside the view switch and any camera or action buttons. When the full
+	# switch leaves too little room (narrow phones, the largest text), it becomes one button that
+	# steps through the views.
+	var room := get_viewport_rect().size.x - 2.0 * SIDE - float(ins["left"]) - float(ins["right"]) - 24.0
 	if (task is PhotoTask and task.kit) or task.action != "":
-		room -= 80.0  # the camera or action buttons beside the right stick
-	var stick_px := int(clampf(room / 2.0, 104.0, 150.0 if mode == "kids" else 128.0))
+		room -= 96.0
+	_view_compact = (room - VIEW_FULL) / 2.0 < 104.0
+	room -= VIEW_COMPACT if _view_compact else VIEW_FULL
+	# A square screen (an unfolded phone held upright) is narrower still: the button shows only
+	# its icon.
+	_view_icon = _view_compact and room / 2.0 < 92.0
+	if _view_icon:
+		room += VIEW_COMPACT - 60.0
+	var stick_px := int(clampf(room / 2.0, 80.0, 150.0 if mode == "kids" else 128.0))
 	for s in [_left, _right]:
 		s.kids = mode == "kids"
 		s.custom_minimum_size = Vector2(stick_px, stick_px)
@@ -518,6 +555,11 @@ func _stick_with_label(s: Stick, text: String) -> Control:
 		# On a small glass pill, so the label reads over any part of the world.
 		var l := UI.label(text, UI.CAPTION, 700, "text", false, false)
 		l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		# Never wider than its stick: a long label would push the other stick off the screen.
+		var w := l.get_minimum_size().x
+		if w > s.custom_minimum_size.x - 16.0:
+			l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			l.custom_minimum_size.x = s.custom_minimum_size.x - 16.0
 		var glass := Pal.c("bg")
 		glass.a = 0.78
 		var pill := UI.panel(l, glass, 10, 4)
@@ -537,12 +579,36 @@ func _build_view_toggle() -> void:
 		else [["fpv", Curriculum.label("VIEW_FPV")], ["chase", Curriculum.label("VIEW_CHASE")], ["pilot", Curriculum.label("VIEW_PILOT")]] if machine == "fpv" \
 		else [["chase", Curriculum.label("VIEW_CHASE_WING")], ["pilot", Curriculum.label("VIEW_PILOT")], ["fpv", Curriculum.label("VIEW_NOSE")]] if machine == "wing" \
 		else [["pilot", Curriculum.label("VIEW_PILOT")], ["chase", Curriculum.label("VIEW_CHASE")], ["drone", Curriculum.label("VIEW_DRONE")]]
-	var seg := UI.segmented(views, view, set_view)
-	seg.custom_minimum_size = Vector2(360, 0)
 	var center := CenterContainer.new()
+	if _view_compact:
+		center.add_child(_view_cycle(views))
+		center.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_view_box.add_child(center)
+		return
+	var seg := UI.segmented(views, view, set_view)
+	seg.custom_minimum_size = Vector2(VIEW_FULL, 0)
 	center.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	center.add_child(seg)
 	_view_box.add_child(center)
+
+
+## One button showing the view now; a tap moves on to the next one.
+func _view_cycle(views: Array) -> Control:
+	var i := 0
+	for k in views.size():
+		if views[k][0] == view:
+			i = k
+	var next: String = views[(i + 1) % views.size()][0]
+	var row := UI.hbox(6)
+	row.alignment = BoxContainer.ALIGNMENT_CENTER
+	row.add_child(Glyph.make("camera", 18, Pal.c("text")))
+	if not _view_icon:
+		row.add_child(UI.label(views[i][1], UI.SMALL, 700, "text", false, false))
+	var glass := Pal.c("bg")
+	glass.a = 0.78
+	var t := UI.tappable(row, glass, func(): set_view(next), tr("A11Y_VIEW") % views[i][1], UI.RADIUS_PILL, 12)
+	t.custom_minimum_size = Vector2(52 if _view_icon else VIEW_COMPACT, 52)
+	return t
 
 
 func _update_hud() -> void:
@@ -578,8 +644,9 @@ func _update_hud() -> void:
 			_hint.text = text
 			# Short hints sit on one line; long ones wrap at a comfortable width.
 			var w := _hint.get_theme_font("font").get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, _hint.get_theme_font_size("font_size")).x
-			_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART if w > 520.0 else TextServer.AUTOWRAP_OFF
-			_hint.custom_minimum_size = Vector2(520, 0) if w > 520.0 else Vector2.ZERO
+			var wrap := minf(520.0, get_viewport_rect().size.x - 2.0 * SIDE - _ins_x() - 24.0)
+			_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART if w > wrap else TextServer.AUTOWRAP_OFF
+			_hint.custom_minimum_size = Vector2(wrap, 0) if w > wrap else Vector2.ZERO
 	_hint_panel.visible = task.hint != ""
 	if _counter:
 		_counter.text = "%d / %d" % [task.counter, task.counter_max]
@@ -599,61 +666,7 @@ func _update_hud() -> void:
 
 ## Markers drawn over the 3D view: where to fly, and where the drone is when it is small.
 func _draw_marks() -> void:
-	var rect := _marks.get_rect()
-	if task.marker != Vector3.INF:
-		var behind := cam.is_position_behind(task.marker)
-		var p := cam.unproject_position(task.marker)
-		var inner := rect.grow(-40)
-		if not behind and inner.has_point(p):
-			_diamond(p, 9.0)
-		else:
-			# An arrow at the edge of the screen, pointing towards the target.
-			var c := rect.size / 2.0
-			var dir := (p - c)
-			if behind:
-				dir = -dir
-			if dir.length() < 1.0:
-				dir = Vector2.UP
-			dir = dir.normalized()
-			var t := minf(absf((inner.size.x / 2.0) / dir.x) if dir.x != 0.0 else INF, absf((inner.size.y / 2.0) / dir.y) if dir.y != 0.0 else INF)
-			var tip := c + dir * t
-			var side := Vector2(-dir.y, dir.x)
-			var col := Pal.c("accent")
-			var arrow := PackedVector2Array([tip + dir * 12, tip - dir * 6 + side * 11, tip - dir * 6 - side * 11])
-			_marks.draw_colored_polygon(arrow, col)
-			# A dark edge keeps the gold arrow visible against a bright sky.
-			arrow.append(arrow[0])
-			_marks.draw_polyline(arrow, Pal.INK, 2.0, true)
-		if task.ring > 0.0:
-			_ground_ring(task.marker, task.ring)
-	# A thin ring round the drone when it is far and tiny.
-	if view == "pilot" and not cam.is_position_behind(sim.pos):
-		var d := cam.position.distance_to(sim.pos)
-		if d > 14.0:
-			var q := cam.unproject_position(sim.pos + Vector3(0, 0.1, 0))
-			var col2 := Pal.c("text") if look == "dusk" else Pal.VIOLET
-			col2.a = 0.7
-			_marks.draw_arc(q, 16.0, 0, TAU, 32, col2, 2.0, true)
-
-
-func _diamond(p: Vector2, r: float) -> void:
-	var col := Pal.c("accent")
-	_marks.draw_colored_polygon(PackedVector2Array([p + Vector2(0, -r), p + Vector2(r, 0), p + Vector2(0, r), p + Vector2(-r, 0)]), col)
-	_marks.draw_polyline(PackedVector2Array([p + Vector2(0, -r), p + Vector2(r, 0), p + Vector2(0, r), p + Vector2(-r, 0), p + Vector2(0, -r)]), Pal.INK, 2.0, true)
-
-
-func _ground_ring(center: Vector3, radius: float) -> void:
-	var pts := PackedVector2Array()
-	var g := sim.ground.call(center.x, center.z) as float
-	for i in 49:
-		var a := i * TAU / 48.0
-		var w := Vector3(center.x + cos(a) * radius, g + 0.05, center.z + sin(a) * radius)
-		if cam.is_position_behind(w):
-			return
-		pts.append(cam.unproject_position(w))
-	var col := Pal.c("accent")
-	_marks.draw_polyline(pts, Pal.INK, 5.0, true)
-	_marks.draw_polyline(pts, col, 3.0, true)
+	FlightMarks.draw(self)
 
 
 # --- Survey camera ----------------------------------------------------------

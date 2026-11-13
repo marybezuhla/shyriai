@@ -7,7 +7,8 @@
 extends WingTask
 
 const ROUTES := {
-	"WING_LEVEL": [Vector3(6, 30, -60), Vector3(6, 30, -110), Vector3(6, 30, -160)],
+	# A little to the side each time, so letting go of the sticks is not enough.
+	"WING_LEVEL": [Vector3(6, 30, -60), Vector3(-4, 30, -115), Vector3(10, 30, -170)],
 	"WING_CIRCUIT": [Vector3(6, 30, -60), Vector3(-30, 30, -140), Vector3(-65, 30, -80), Vector3(-40, 30, -10)],
 	"WING_KIDS_STORKS": [
 		Vector3(6, 25, -50), Vector3(-6, 28, -100), Vector3(-35, 30, -140),
@@ -27,7 +28,7 @@ func setup_world() -> void:
 	var pts: Array[Vector3] = []
 	pts.assign(ROUTES[key])
 	var clouds := key == "MIS_WING_CLOUDS"
-	sky_rings(pts, 6.0 if mode == "kids" else 5.0, Pal.TOY["blue"] if clouds else Pal.TOY["gold"])
+	sky_rings(pts, 8.0 if mode == "kids" else 5.0, Pal.TOY["blue"] if clouds else Pal.TOY["gold"])
 	if clouds:
 		for r in rings:
 			AirProps.add_cloud(world, r["c"], 6.0)
@@ -42,6 +43,7 @@ func update(dt: float, sim: DroneSim, _sticks: Dictionary) -> void:
 	var r := ring_step(sim)
 	if ring_i > before:
 		world.hoop_done(before)
+	kids_assist(sim, dt, ring_i > before)
 	progress = float(ring_i) / rings.size()
 	counter = ring_i
 	counter_max = rings.size()
@@ -66,7 +68,8 @@ func _lead_storks(dt: float) -> void:
 		var k := 1.0 - exp(-dt * 0.8)
 		var was := s.position
 		s.position = s.position.lerp(want, k)
-		var d := s.position - was
+		# Face the way it flies, kept level: a straight up or down step would leave no heading.
+		var d := Vector3(s.position.x - was.x, 0.0, s.position.z - was.z)
 		if d.length() > 0.001:
 			s.look_at(s.position + d, Vector3.UP)
 		AirProps.flap(s, _t + i * 0.4)

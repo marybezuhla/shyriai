@@ -37,6 +37,7 @@ func _ready() -> void:
 	await _fixes_0_11()
 	await _kids_0_11()
 	await _check_title_fits()
+	await _hud_fits()
 	Prefs.set_language("system")
 	Prefs.set_theme("dusk")
 	Prefs.set_mode("simple")
@@ -649,3 +650,31 @@ func _check_title_fits() -> void:
 	assert(title.get_line_count() == 1, "the settings title stays one word on one line")
 	main.back()
 	Prefs.set_text_size("normal")
+
+
+## The flight's controls stay on the screen on every phone shape, with the largest text, with the
+## camera or drop buttons, and when the screen turns or unfolds in the middle of a flight.
+func _hud_fits() -> void:
+	var was := get_window().size
+	Prefs.set_language("uk")
+	Prefs.set_mode("pro")
+	var shapes := [Vector2i(1280, 720), Vector2i(1280, 800), Vector2i(2400, 1080), Vector2i(1800, 2200), Vector2i(800, 360)]
+	for size in ["normal", "larger"]:
+		Prefs.set_text_size(size)
+		for key in [["camera", "CAM_SQUARE"], ["survey", "SRV_TILT"], ["camera", "MIS_CAM_MEDS"], ["wing", "WING_CIRCUIT"], ["ugv", "UGV_DRIVE"]]:
+			get_window().size = shapes[0]
+			main.start(key[0], key[1])
+			await _frames(3)
+			for shape in shapes:
+				get_window().size = shape  # turning or unfolding mid-flight
+				await _frames(3)
+				var screen := get_viewport().get_visible_rect().grow(1.0)
+				for c in main.flight._hud.find_children("*", "Control", true, false):
+					var ctl := c as Control
+					if ctl.is_visible_in_tree() and ctl.size != Vector2.ZERO and ctl != main.flight._marks:
+						assert(screen.encloses(ctl.get_global_rect()), "%s %s %s: %s is off the screen at %s" % [size, key[1], shape, ctl.get_class(), ctl.get_global_rect()])
+			main.close_flight()
+			await _frames(2)
+	Prefs.set_text_size("normal")
+	get_window().size = was
+	await _frames(2)

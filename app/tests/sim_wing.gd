@@ -141,3 +141,29 @@ func test_wing_landing_rules() -> void:
 	f[2].queue_free()
 	g[2].queue_free()
 	await get_tree().process_frame
+
+
+## Letting go of the sticks is not enough for the first lesson: the rings are a little to the side.
+## Kids get gentle help after a while with no ring, so they are checked before it starts.
+func test_wing_level_needs_hands() -> void:
+	for mode in ["simple", "kids"]:
+		var f := _flight("WING_LEVEL", mode, "wing")
+		var task: FlightTask = f[0]
+		var still := func(_t): return {"throttle": 0.24, "yaw": 0.0, "pitch": 0.0, "roll": 0.0}
+		_fly(task, f[1], WingTask.ASSIST_AFTER - 1.0 if mode == "kids" else 40.0, still)
+		check(not task.done, "%s WING_LEVEL is not passed with the sticks let go" % mode)
+		f[2].queue_free()
+	await get_tree().process_frame
+
+
+## A child who flies away from the rings and lets go is gently brought back through the next one.
+func test_wing_kids_assist() -> void:
+	var f := _flight("MIS_WING_CLOUDS", "kids", "wing")
+	var task: FlightTask = f[0]
+	var sim: WingSim = f[1]
+	sim.place(Vector3(WorldLand.RUNWAY_X, 30.0, -40.0), PI)  # heading away from the clouds
+	var still := func(_t): return {"throttle": 0.0, "yaw": 0.0, "pitch": 0.0, "roll": 0.0}
+	_fly(task, sim, 70.0, still)
+	check(task.ring_i >= 1 and not sim.crashed, "kids: hands off, the plane is helped through a ring (%d)" % task.ring_i)
+	f[2].queue_free()
+	await get_tree().process_frame

@@ -65,8 +65,9 @@ func _radius() -> float:
 
 
 func _hit(local: Vector2) -> bool:
-	# A generous area: a bit beyond the drawn ring still counts.
-	return local.distance_to(size / 2.0) <= _radius() * 1.35
+	# A little beyond the drawn ring still counts, but not so far that it takes taps meant for the
+	# shutter or drop button right beside it.
+	return local.distance_to(size / 2.0) <= _radius() * 1.1
 
 
 func _set_from(local: Vector2) -> void:
