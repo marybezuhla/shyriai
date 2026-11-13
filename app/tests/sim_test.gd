@@ -65,6 +65,8 @@ func _ready() -> void:
 	await test_wing_landing_rules()
 	await test_wing_obstacles()
 	await test_wing_stall_needs_slowing()
+	await test_wing_level_needs_hands()
+	await test_wing_kids_assist()
 	test_quiz_texts()
 	test_rating_rules()
 	test_results_are_kept()
@@ -176,6 +178,7 @@ func test_free_flight() -> void:
 			for b in balls:
 				sim.pos = b
 				task.step(DT, sim, {"throttle": 0.0, "yaw": 0.0, "pitch": 0.0, "roll": 0.0})
+				_kids_words(task)
 			check(task.counter == balls.size() and balls.size() == 10 and not task.done,
 				"%s %s: all ten balls collected, still flying" % [m, key])
 			world.queue_free()

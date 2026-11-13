@@ -33,6 +33,7 @@ func _shoot_at(task: PhotoTask, sim: DroneSim, ap, target: Vector3, height: floa
 		var s: Dictionary = task.controls(ap.sticks(sim))
 		sim.step(DT, s["throttle"], s["yaw"], s["pitch"], s["roll"])
 		task.step(DT, sim, s)
+		_kids_words(task)
 		if sim.crashed or task.failed:
 			return false
 		var here := FlightTask.flat_distance(sim.pos, target) < 0.4 and absf(sim.altitude() - height) < 0.4
@@ -51,6 +52,7 @@ func _land_for_report(task: PhotoTask, sim: DroneSim, world: FlightWorld, ap) ->
 		var s: Dictionary = task.controls(ap.sticks(sim))
 		sim.step(DT, s["throttle"], s["yaw"], s["pitch"], s["roll"])
 		task.step(DT, sim, s)
+		_kids_words(task)
 		if task.report_open:
 			return true
 		if sim.crashed or task.failed:
@@ -98,6 +100,7 @@ func test_survey_task(key: String, mode: String) -> void:
 					var s: Dictionary = task.controls(ap.sticks(sim))
 					sim.step(DT, s["throttle"], s["yaw"], s["pitch"], s["roll"])
 					task.step(DT, sim, s)
+					_kids_words(task)
 				if task.done:
 					break
 		"SRV_GRID":
@@ -112,6 +115,7 @@ func test_survey_task(key: String, mode: String) -> void:
 						var s: Dictionary = task.controls(ap.sticks(sim))
 						sim.step(DT, s["throttle"], s["yaw"], s["pitch"], s["roll"])
 						task.step(DT, sim, s)
+						_kids_words(task)
 						if FlightTask.flat_distance(sim.pos, ap.target) < 1.0:
 							break
 		"SRV_KIDS_FLOWER", "SRV_KIDS_KITTEN", "SRV_KIDS_VAN", "MIS_SRV_ALBUM":
@@ -133,6 +137,7 @@ func test_survey_task(key: String, mode: String) -> void:
 			_answer_all(task)
 	# One more step lets a task notice it is done.
 	task.step(DT, sim, {"throttle": 0.0, "yaw": 0.0, "pitch": 0.0, "roll": 0.0})
+	_kids_words(task)
 	check(ok and task.done, "%s: %s passes with the camera" % [mode, key])
 	if task.done:
 		_passed(task, sim)
@@ -201,6 +206,7 @@ func test_intercept_task(key: String, mode: String) -> void:
 		var s: Dictionary = task.controls(ap.sticks(sim))
 		sim.step(DT, s["throttle"], s["yaw"], s["pitch"], s["roll"])
 		task.step(DT, sim, s)
+		_kids_words(task)
 		if task.done or task.failed or sim.crashed:
 			break
 	check(task.done, "%s: %s catches the target (%s)" % [mode, key, task.summary if task.failed else ("crashed" if sim.crashed else "")])
@@ -219,6 +225,7 @@ func test_target_gets_away() -> void:
 		for i in int(80.0 / DT):
 			sim.step(DT, -1.0, 0, 0, 0)
 			task.step(DT, sim, {"throttle": -1.0, "yaw": 0.0, "pitch": 0.0, "roll": 0.0})
+			_kids_words(task)
 			if task.failed:
 				break
 		check(task.failed and task.summary == ("FAIL_INT_GONE" if key == "INT_LEAD" else "FAIL_INT_TIME"),
@@ -245,6 +252,7 @@ func test_meds(mode: String) -> void:
 			var s: Dictionary = ap.sticks(sim)
 			sim.step(DT, s["throttle"], s["yaw"], s["pitch"], s["roll"])
 			task.step(DT, sim, s)
+			_kids_words(task)
 			if task.done or task.failed or sim.crashed:
 				break
 			var here := FlightTask.flat_distance(sim.pos, aim) < 0.3 and sim.vel.length() < 0.15
@@ -278,6 +286,7 @@ func test_meds_rules() -> void:
 	task.act(sim)
 	for i in int(3.0 / DT):
 		task.step(DT, sim, {"throttle": 0.0, "yaw": 0.0, "pitch": 0.0, "roll": 0.0})
+		_kids_words(task)
 	check(task.hint_base == "HINT_MEDS_WATER" and not task.done, "a kit that falls in the river is lost")
 	f[2].queue_free()
 	await get_tree().process_frame
@@ -301,6 +310,7 @@ func test_dog() -> void:
 		var s: Dictionary = ap.sticks(sim)
 		sim.step(DT, s["throttle"], s["yaw"], s["pitch"], s["roll"])
 		task.step(DT, sim, s)
+		_kids_words(task)
 		if task.done:
 			break
 	check(task.done, "kids: the puppy is found and led home")

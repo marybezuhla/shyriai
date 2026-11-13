@@ -406,7 +406,9 @@ func ring_step(sim: DroneSim) -> String:
 		var n: Vector3 = g["n"]
 		var d0 := (_prev - c).dot(n)
 		var d1 := (sim.pos - c).dot(n)
-		if d0 < 0.0 and d1 >= 0.0:
+		# Kids' rings count from either side: a child who flies through backwards still went through.
+		var crossed := (d0 < 0.0 and d1 >= 0.0) or (bool(g.get("both", false)) and d0 > 0.0 and d1 <= 0.0)
+		if crossed:
 			var hit := _prev.lerp(sim.pos, d0 / (d0 - d1))
 			var off: Vector3 = hit - c
 			var inside := false

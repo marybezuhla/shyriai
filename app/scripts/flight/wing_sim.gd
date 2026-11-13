@@ -58,6 +58,9 @@ var stall_warn := false
 ## Simple mode keeps the wing from stalling; the stall lesson turns this off.
 var stall_protect := true
 var kids := false
+## Kids: a point the plane gently turns and climbs towards while the sticks are left alone
+## (INF = no help). Set by a lesson when a child has been stuck for a while.
+var assist := Vector3.INF
 var _mode := "simple"
 var _spin := 0.0
 
@@ -193,6 +196,10 @@ func _ailerons(dt: float, roll: float, yaw_in: float) -> void:
 		var want_bank := deg_to_rad(p["bank"]) * clampf(roll + 0.4 * yaw_in, -1.0, 1.0)
 		if far:
 			want_bank = home_bank
+		elif assist != Vector3.INF and absf(roll) < 0.2:
+			var to := assist - pos
+			var err := wrapf(atan2(-to.x, -to.z) - yaw, -PI, PI)
+			want_bank = clampf(-err * 1.2, -0.35, 0.35)
 		bank = lerpf(bank, want_bank, 1.0 - exp(-dt / ROLL_TAU))
 
 
@@ -215,6 +222,8 @@ func _air(dt: float, lift: float, elev: float) -> void:
 		# above the floor, looking a little ahead so hills do not catch it, and the wing always
 		# carries it through the turn.
 		var want_gamma := deg_to_rad(12.0) * elev
+		if assist != Vector3.INF and absf(elev) < 0.2:
+			want_gamma = clampf((assist.y - pos.y) * 0.04, -0.15, 0.15)
 		var ahead := pos + forward() * speed * 2.0
 		var g := maxf(ground.call(pos.x, pos.z) as float, ground.call(ahead.x, ahead.z) as float)
 		if pos.y - g < float(p["floor"]):

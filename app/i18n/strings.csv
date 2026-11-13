@@ -302,7 +302,7 @@ HINT_LAND_TAKEOFF_KIDS,Take off and fly to the next ball,Злітай і лет�
 HINT_LAND_GO_KIDS,Fly to the ball,Лети до кульки
 HINT_LAND_DOWN_KIDS,Now land on the pad,Тепер сідай на майданчик
 HINT_LAND_MISS_KIDS,A little off. Take off and try again!,Трішки мимо. Злітай і спробуй ще!
-HINT_LAND_GOOD_KIDS,Right on target!,Точно в ціль!
+HINT_LAND_GOOD_KIDS,Right in the circle!,Точно в коло!
 SUM_LANDING_KIDS,Three spot-on landings!,Три влучні посадки!
 HINT_WIND_UP_KIDS,Take off: the wind is blowing,Злітай: вітер уже дме
 HINT_WIND_GO_KIDS,Fly to the ball,Лети до кулі
@@ -344,10 +344,12 @@ HINT_FPV_GROUND,The drone touched the ground. The route starts again,Дрон т
 SUM_FPV_FORWARD,Three balls without touching the ground.,Три кулі без дотику до землі.
 SUM_FPV_FORWARD_KIDS,All three balls!,Усі три кулі!
 HINT_FPV_EIGHT_GO,Figure eight round the poles: %d to go,Вісімка довкола стовпів: ще %d
+HINT_FPV_EIGHT_GO_KIDS,Fly a figure eight round the poles,Літай вісімкою довкола стовпів
 HINT_FPV_EIGHT_SLOW,A minute and a half has passed. Let’s start the eights again,Півтори хвилини минули. Почнімо вісімки спочатку
 SUM_FPV_EIGHT,Two figure eights in %d s.,Дві вісімки за %d с.
 SUM_FPV_EIGHT_KIDS,Two eights round the poles!,Дві вісімки довкола стовпів!
 HINT_GATE_GO,Fly through the gold gate: %d to go,Лети в золоті ворота: ще %d
+HINT_GATE_GO_KIDS,Fly through the gold gate,Лети в золоті ворота
 HINT_GATE_BUMP,You touched a frame. Start again from the first gate,Дрон зачепив раму. Почни з перших воріт
 SUM_GATES,Six gates in %d s without a single touch.,Шість воріт за %d с без жодного дотику.
 SUM_GATES_KIDS,Every gate done!,Усі ворота пройдено!
@@ -356,10 +358,13 @@ HINT_ACRO_GO,Hold your height and fly to the ball: %d to go,Тримай вис�
 SUM_ACRO,Course flown in Acro. Now you fly like on a real FPV drone.,"Траса в Acro пройдена. Тепер ти пілотуєш, як на справжньому FPV."
 HINT_HOOPS_UP,Take off and fly to the first hoop,Злітай і лети до першого обруча
 HINT_HOOPS_GO,Through the hoops: %d to go,Крізь обручі: ще %d
+HINT_HOOPS_GO_KIDS,Through the hoops!,Крізь обручі!
 SUM_HOOPS,Every hoop done!,Усі обручі пройдено!
 HINT_BALLOONS_UP,Take off and pop the balloons,Злітай і лопай кульки
 HINT_BALLOONS_GO,Touch a balloon to pop it: %d to go,"Торкнись кульки, щоб лопнути: ще %d"
+HINT_BALLOONS_GO_KIDS,Touch a balloon to pop it,"Торкнись кульки, щоб лопнула"
 HINT_TARGET_GO,Now land in the middle of the target on the ground!,Тепер сядь у центр мішені на землі!
+HINT_TARGET_GO_KIDS,Now land in the middle of the circle on the ground!,Тепер сядь у середину кола на землі!
 SUM_TARGET_CENTRE,Right in the middle! Every balloon popped.,У самісінький центр! Усі кульки лопнули.
 SUM_TARGET_MIDDLE,"Landed on the target! Next time, closer to the middle.",Посадка на мішень! Наступного разу ближче до центру.
 SUM_TARGET_EDGE,Landed on the edge. Try for the middle!,Посадка на краю мішені. Спробуй у центр!
@@ -396,6 +401,7 @@ UGV_EVACUATION_PASS_KIDS,Gently,Плавно
 HINT_UGV_START_TANK,Both sticks forward: the robot goes straight,Обидва стіки вперед: робот їде прямо
 HINT_UGV_START_CAR,Left stick forward: off we go!,Лівий стік уперед: поїхали!
 HINT_UGV_DRIVE_GO,Drive along the road to the ball: %d to go,Їдь дорогою до кулі: ще %d
+HINT_UGV_DRIVE_GO_KIDS,Drive along the road to the ball,Їдь дорогою до кульки
 HINT_UGV_OFF,Back onto the road!,Повертайся на дорогу!
 FAIL_UGV_OFF,The robot left the road. Slow down before a bend and turn more gently.,Робот з’їхав з дороги. Перед поворотом пригальмуй і повертай плавніше.
 SUM_UGV_DRIVE,The road driven without leaving it once.,"Дорогу пройдено, жодного разу не з’їхавши."
@@ -460,6 +466,7 @@ RESET_DONE,Progress in “%s” mode is cleared.,Прогрес у режимі 
 RESET_UNDO,Undo,Повернути
 A11Y_DONE,done,пройдено
 A11Y_LOCKED,locked,ще закрито
+A11Y_VIEW,View: %s. Tap for the next one,"Вид: %s. Торкнися, щоб змінити"
 ABOUT_COPYRIGHT,© 2026 marybezuhla,© 2026 marybezuhla
 FAIL_BATTERY,The battery ran out and the drone landed by itself.,"Батарея сіла, і дрон приземлився сам."
 FAIL_TREES_AROUND,That went round the trees. The task is to fly between them.,"Це в обхід дерев. Завдання в тому, щоб пролетіти між ними."
@@ -696,9 +703,11 @@ VEH_INTERCEPT_DESC_KIDS,Catch the butterflies with the drone,Лови метел
 STAT_TARGET,Target,До мішені
 STAT_CLOSING,Closing,Зближення
 HINT_INT_UP,Take off: the target is in the air,Злітай: мішень у повітрі
+HINT_INT_UP_KIDS,Take off: the butterflies are flying,Злітай: метелики вже в повітрі
 HINT_INT_CAUGHT,Caught!,Перехоплено!
 HINT_INT_CAUGHT_KIDS,Caught it!,Впіймано!
 HINT_INT_LEAD,Aim at the yellow mark: that is where the target will be,Цілься в жовту позначку: там мішень буде за мить
+HINT_INT_LEAD_KIDS,Fly to the yellow mark: the butterfly will be there,Лети до жовтої позначки: метелик буде там
 HINT_INT_BEHIND,"The gap is growing: more speed, cut the corner","Відстань росте: швидше, зріж кут"
 FAIL_INT_GONE,"The target got away. Aim ahead of it, not at it.","Мішень утекла. Цілься перед нею, а не в неї."
 FAIL_INT_TIME,Out of time. Close in faster: aim where the target will be.,"Час вийшов. Зближуйся швидше: цілься туди, де мішень буде."
