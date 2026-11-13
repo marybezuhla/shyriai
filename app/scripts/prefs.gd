@@ -30,11 +30,20 @@ const NAME_MAX := 32
 ## Longer than any flight can last: a bigger time in a saved file is not trusted.
 const MAX_SECONDS := 3600.0
 
+## The FPV drone (Adult): how fast the sticks turn it, which size of drone, and the flight mode for
+## missions. Each is one of a few named choices.
+const CHOICES := {
+	"fpv_rates": ["medium", "soft", "sharp"],
+	"fpv_quad": ["5in", "3in"],
+	"fpv_mission_mode": ["angle", "horizon", "acro"],
+}
+
 ## A fresh install, and what "Erase all data" goes back to.
 const DEFAULTS := {
 	"mode": "simple", "theme": "dusk", "language": "system", "text_size": "normal",
 	"welcomed": false, "kids_lock": false, "sound": true, "stick_mode": "2", "stick_feel": "normal", "pilot_name": "",
 	"free": {"wind": "none", "time": "day", "balls": true, "fpv": "angle"},
+	"fpv_rates": "medium", "fpv_quad": "5in", "fpv_mission_mode": "angle",
 }
 
 var mode: String = DEFAULTS["mode"]
@@ -52,6 +61,9 @@ var stick_feel: String = DEFAULTS["stick_feel"]
 ## The name on the pilot's licence: optional, kept only on this phone.
 var pilot_name: String = DEFAULTS["pilot_name"]
 var free: Dictionary = DEFAULTS["free"].duplicate()
+var fpv_rates: String = DEFAULTS["fpv_rates"]
+var fpv_quad: String = DEFAULTS["fpv_quad"]
+var fpv_mission_mode: String = DEFAULTS["fpv_mission_mode"]
 ## Best result per mode and task: {"simple": {"CAM_TAKEOFF": {"f": 2, "t": 14.5}}}.
 ## "f" = most sunflowers, "t" = shortest time of a pass, each kept on its own.
 var best := {}
@@ -164,6 +176,15 @@ func set_pilot_name(value: String) -> void:
 		pilot_name = clean
 		_undo = {}
 		_save()
+
+
+## One of the CHOICES settings.
+func set_choice(key: String, value: String) -> void:
+	if CHOICES.has(key) and value in CHOICES[key] and get(key) != value:
+		set(key, value)
+		_undo = {}
+		_save()
+		changed.emit()
 
 
 func set_free(key: String, value) -> void:
@@ -462,6 +483,10 @@ func _apply_settings(d: Dictionary) -> void:
 	var pn = d.get("pilot_name")
 	if pn is String:
 		pilot_name = _clean_name(pn)
+	for key in CHOICES:
+		var cv = d.get(key)
+		if cv is String and cv in CHOICES[key]:
+			set(key, cv)
 	var fr = d.get("free")
 	if fr is Dictionary:
 		for key in ["wind", "time", "fpv", "balls"]:
@@ -570,6 +595,7 @@ func _data() -> Dictionary:
 		"views": views.duplicate(true), "passed": passed.duplicate(true),
 		"missions": missions.duplicate(true), "best": best.duplicate(true),
 		"licences": licences.duplicate(true), "pilot_name": pilot_name, "free": free.duplicate(),
+		"fpv_rates": fpv_rates, "fpv_quad": fpv_quad, "fpv_mission_mode": fpv_mission_mode,
 	}
 
 

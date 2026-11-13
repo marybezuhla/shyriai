@@ -194,6 +194,10 @@ func make_sim(vehicle_: String) -> DroneSim:
 		sim = WingSim.new(mode, 11)
 	elif vehicle_ == "fpv" and mode != "kids":
 		var f := FpvSim.new(mode, 11)
+		f.configure(Prefs.fpv_rates, Prefs.fpv_quad)
+		# Adult missions are flown in the mode the pilot picked for them.
+		if key.begins_with("MIS_FPV_") and mode == "pro":
+			flight_mode = Prefs.fpv_mission_mode
 		f.flight_mode = flight_mode
 		sim = f
 	else:

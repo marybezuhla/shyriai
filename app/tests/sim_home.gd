@@ -87,3 +87,22 @@ func test_link_mission(key: String, mode: String) -> void:
 	check(ok, "%s %s flown to a pass (%s)" % [mode, key, task.hint])
 	world.queue_free()
 	await get_tree().process_frame
+
+
+## Adult FPV: the motors start only once armed; rates and the smaller drone change the physics.
+func test_fpv_setup() -> void:
+	var f := FpvSim.new("pro", 3)
+	f.ground = func(_x: float, _z: float) -> float: return 0.0
+	f.place(Vector3.ZERO)
+	f.armed = false
+	run(f, 2.0, 1.0, 0.0, 0.0, 0.0)
+	check(f.on_ground and f.throttle01 == 0.0, "FPV: not armed, full throttle does nothing")
+	f.armed = true
+	run(f, 1.0, 1.0, 0.0, 0.0, 0.0)
+	check(not f.on_ground, "FPV: armed, it takes off")
+	var soft := FpvSim.new("pro", 3)
+	soft.configure("soft", "3in")
+	check(float(soft.p["rate"]) < 400.0 and float(soft.p["thrust"]) < 2.5, "FPV: soft rates and the lighter drone apply")
+	var easy := FpvSim.new("simple", 3)
+	easy.configure("sharp", "3in")
+	check(float(easy.p["rate"]) == float(FpvSim.FPV["simple"]["rate"]), "FPV: Simple mode keeps its own gentle rates")

@@ -38,6 +38,8 @@ static func draw(f: Flight) -> void:
 			f._marks.draw_polyline(arrow, Pal.INK, 2.0, true)
 		if f.task.ring > 0.0:
 			_ground_ring(f, f.task.marker, f.task.ring)
+	if f.view == "fpv" and f.sim is FpvSim and f.mode != "kids":
+		_osd(f, rect)
 	if f.home != null and FlightTask.flat_distance(f.sim.pos, f.world.pad) > 12.0:
 		_home_mark(f, rect.grow_individual(-40, -40, -40, -maxf(40.0, f.stick_band())))
 	# A thin ring round the drone when it is far and tiny.
@@ -89,3 +91,29 @@ static func _home_mark(f: Flight, inner: Rect2) -> void:
 	f._marks.draw_colored_polygon(house, Pal.CREAM)
 	house.append(house[0])
 	f._marks.draw_polyline(house, Pal.INK, 2.0, true)
+
+
+## The FPV goggles' on-screen display: a cross in the middle, the battery's voltage and the flight
+## time, and DISARMED while the motors are off.
+static func _osd(f: Flight, rect: Rect2) -> void:
+	var c := rect.get_center()
+	var col := Color(1, 1, 1, 0.85)
+	var shade := Color(0, 0, 0, 0.6)
+	for d in [Vector2(1, 0), Vector2(0, 1)]:
+		f._marks.draw_line(c - d * 14.0, c - d * 5.0, col, 2.0)
+		f._marks.draw_line(c + d * 5.0, c + d * 14.0, col, 2.0)
+	var font := Pal.font(700)
+	var size := 16
+	var sim := f.sim as FpvSim
+	# A 4-cell pack: 16.8 V full, about 13.2 V empty, and it sags under throttle.
+	var volts := 13.2 + 3.6 * sim.battery - 0.6 * sim.throttle01
+	var line := FlightTask.num(volts) + " V   " + FlightTask.clock(sim.time)
+	var at := Vector2(c.x - 70.0, c.y + 64.0)
+	f._marks.draw_string(font, at + Vector2(1, 1), line, HORIZONTAL_ALIGNMENT_CENTER, 140.0, size, shade)
+	f._marks.draw_string(font, at, line, HORIZONTAL_ALIGNMENT_CENTER, 140.0, size, col)
+	if not sim.armed:
+		var big := 28
+		var w := 260.0
+		var p := Vector2(c.x - w / 2.0, c.y - 30.0)
+		f._marks.draw_string(font, p + Vector2(2, 2), "DISARMED", HORIZONTAL_ALIGNMENT_CENTER, w, big, shade)
+		f._marks.draw_string(font, p, "DISARMED", HORIZONTAL_ALIGNMENT_CENTER, w, big, Pal.SIGNAL_RED)

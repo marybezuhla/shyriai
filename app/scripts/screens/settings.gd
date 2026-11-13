@@ -49,6 +49,17 @@ func build() -> void:
 		], Prefs.stick_feel, func(v): Prefs.set_stick_feel(v)))
 		sticks.add_child(UI.label(tr("STICKS_FEEL_DESC"), UI.SMALL, 500, "muted"))
 		add_child(sticks)
+		var fpv := UI.vbox(10)
+		fpv.add_child(UI.eyebrow(tr("SET_FPV")))
+		fpv.add_child(UI.label(tr("FPV_RATES"), UI.TEXT, 700))
+		fpv.add_child(UI.segmented([
+			["soft", tr("RATES_SOFT")], ["medium", tr("RATES_MEDIUM")], ["sharp", tr("RATES_SHARP")],
+		], Prefs.fpv_rates, func(v): Prefs.set_choice("fpv_rates", v)))
+		fpv.add_child(UI.label(tr("FPV_QUAD"), UI.TEXT, 700))
+		fpv.add_child(UI.segmented([["5in", tr("QUAD_5IN")], ["3in", tr("QUAD_3IN")]], Prefs.fpv_quad,
+			func(v): Prefs.set_choice("fpv_quad", v)))
+		fpv.add_child(UI.label(tr("FPV_QUAD_DESC"), UI.SMALL, 500, "muted"))
+		add_child(fpv)
 
 	var kids := UI.vbox(10)
 	kids.add_child(UI.eyebrow(tr("SET_KIDS")))

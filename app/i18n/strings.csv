@@ -1138,3 +1138,19 @@ HINT_JAM,"GPS jammed! The wind carries the drone, and it cannot fly home by itse
 HINT_JAM_BACK,Fly back by hand against the wind and land on the pad,Веди назад вручну проти вітру й сідай на майданчик
 SUM_MIS_CAM_LINK,"Home after a lost link, in %d:%02d.","Удома після втрати зв’язку, за %d:%02d."
 SUM_MIS_CAM_JAM,"Back by hand without GPS, in %d:%02d.","Назад уручну без GPS, за %d:%02d."
+STAT_LEAN,Lean,Нахил
+ARM,Arm,Звести
+DISARM,Disarm,Вимкнути
+HINT_ARM,"Motors off. Throttle all the way down, then Arm","Мотори вимкнені. Газ до низу, потім «Звести»"
+HINT_ARM_THROTTLE,Throttle down first: a drone is never armed with throttle up,Спершу газ до низу: з піднятим газом дрон не зводять
+HINT_ARMED,Armed: the motors are live,Зведено: мотори працюють
+SET_FPV,FPV drone (Adult),FPV-дрон (Дорослий)
+FPV_RATES,Rates: how fast full stick turns it,Рейти: як швидко обертає повний стік
+RATES_SOFT,Soft,М’які
+RATES_MEDIUM,Medium,Середні
+RATES_SHARP,Sharp,Гострі
+FPV_QUAD,Drone,Дрон
+QUAD_5IN,5-inch,5 дюймів
+QUAD_3IN,"3-inch, lighter","3 дюйми, легший"
+FPV_QUAD_DESC,"The 3-inch drone has less thrust and less momentum: it drifts less, and its battery is shorter.","У 3-дюймового менше тяги й інерції: його менше заносить, а батареї вистачає на коротше."
+FPV_MISSION_MODE,Flight mode for missions,Режим польоту в місіях

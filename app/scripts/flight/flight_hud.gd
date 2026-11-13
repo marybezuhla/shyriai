@@ -104,7 +104,7 @@ static func stat_names(f: Flight) -> Array:
 		return ["TARGET", "CLOSING", "SPEED", "TIME"] if pro else ["TARGET", "CLOSING", "TIME"]
 	match f.machine:
 		"ugv":
-			return ["SPEED", "BATTERY", "TIME"] if pro else ["SPEED", "TIME"]
+			return ["SPEED", "LEAN", "BATTERY", "TIME"] if pro else ["SPEED", "LEAN", "TIME"]
 		"wing":
 			return ["ALT", "AIRSPEED", "WIND", "BATTERY", "TIME"] if pro else ["ALT", "AIRSPEED", "WIND", "TIME"]
 		"fpv":
@@ -125,6 +125,33 @@ static func _draw_tape(f: Flight) -> void:
 	t.draw_rect(Rect2(warn, 1, w - warn, 4), Pal.c("ok"))
 	var x := clampf(float((f.sim as WingSim).speed) / top, 0.0, 1.0) * w
 	t.draw_rect(Rect2(x - 1.5, -1, 3, 8), Pal.c("text"))
+
+
+## The robot's lean: how far from upright, and the colour of the danger when it can tip over.
+static func lean_color(f: Flight) -> Color:
+	var tip := float(f.sim.p.get("tip", 90.0))
+	var lean := lean_deg(f)
+	if tip >= 90.0:
+		return Pal.c("text")
+	return Pal.c("bad") if lean > tip * 0.85 else (Pal.c("warn") if lean > tip * 0.65 else Pal.c("text"))
+
+
+static func lean_deg(f: Flight) -> float:
+	var u := f.sim as UgvSim
+	return rad_to_deg(acos(clampf(u.att.y.y, -1.0, 1.0))) if u else 0.0
+
+
+static func _draw_lean(f: Flight) -> void:
+	var g: Control = f._lean_gauge
+	var c := g.size / 2.0
+	var r := g.size.x / 2.0 - 1.0
+	var col := lean_color(f)
+	g.draw_arc(c, r, 0, TAU, 24, col, 1.5, true)
+	var roll := f.sim.tilt.y
+	var pitch := clampf(f.sim.tilt.x, -0.6, 0.6)
+	var d := Vector2(cos(roll), sin(roll)) * (r - 2.0)
+	var off := Vector2(0, -pitch / 0.6 * r * 0.5)
+	g.draw_line(c + off - d, c + off + d, col, 2.0, true)
 
 
 static func _draw_wind_arrow(f: Flight) -> void:
@@ -168,7 +195,17 @@ static func build_counters(f: Flight, top: HBoxContainer, glass: Color) -> void:
 			# As wide as a real reading from the start, so the top line is measured right.
 			v.custom_minimum_size.x = v.get_theme_font("font").get_string_size("88,8 м/с", HORIZONTAL_ALIGNMENT_LEFT, -1, v.get_theme_font_size("font_size")).x
 			f._stats[n] = v
-			if n == "WIND":
+			if n == "LEAN":
+				# A little horizon beside the number: the robot's tilt, as on a real inclinometer.
+				var lrow := UI.hbox(5)
+				f._lean_gauge = Control.new()
+				f._lean_gauge.custom_minimum_size = Vector2(22, 22)
+				f._lean_gauge.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+				f._lean_gauge.draw.connect(func(): _draw_lean(f))
+				lrow.add_child(f._lean_gauge)
+				lrow.add_child(v)
+				s.add_child(lrow)
+			elif n == "WIND":
 				# An arrow beside the number: which way the wind blows, seen from above the plane,
 				# nose up. A headwind points down at the plane.
 				var row := UI.hbox(4)

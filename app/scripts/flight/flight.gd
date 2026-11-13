@@ -56,6 +56,7 @@ var _counter: Label
 ## The plane's speed tape and wind arrow, when shown.
 var _tape: Control
 var _wind_arrow: Control
+var _lean_gauge: Control
 var _view_box := VBoxContainer.new()
 var _overlay: Control
 ## The survey camera's buttons, when the task is flown with a camera.
@@ -69,6 +70,11 @@ var _sock: Node3D
 ## The camera drone's way home (not for kids); null for other machines.
 var home: FlightHome
 var _hint_warn := false
+## A short message of the flight itself (a translation key), how long it stays, and if it warns.
+var _alert := ""
+var _alert_t := 0.0
+var _alert_warn := false
+var _arm_label: Label
 ## Nothing moves and no time counts until the pilot first moves a stick.
 var _waiting := true
 ## Seconds with no step forward in the task.
@@ -126,6 +132,8 @@ func _ready() -> void:
 	sim = task.make_sim(machine)
 	if machine == "camera" and mode != "kids" and not task.is_free:
 		home = FlightHome.new()
+	if sim is FpvSim and mode == "pro":
+		sim.armed = false  # armed with a button, throttle down, as on a real drone
 	if task is PhotoTask:
 		var vp := get_viewport_rect().size
 		task.aspect = vp.x / maxf(vp.y, 1.0)
@@ -178,6 +186,9 @@ func _physics_process(_delta: float) -> void:
 	if task is PhotoTask and task.report_open:
 		return
 	_read_sticks()
+	if autopilot.is_valid() and sim is FpvSim:
+		sim.armed = true
+	_alert_t = maxf(0.0, _alert_t - STEP)
 	var pilot := _sticks
 	# No radio link: the robot gets no commands and stops by itself.
 	_sticks = task.controls(_sticks)
@@ -383,7 +394,9 @@ func _rebuild_hud() -> void:
 	_kit = null
 	_stats = {}
 	_tape = null
+	_arm_label = null
 	_wind_arrow = null
+	_lean_gauge = null
 	_view_box = VBoxContainer.new()
 	_left = Stick.new()
 	_right = Stick.new()
@@ -433,7 +446,7 @@ func _build_bottom(col: VBoxContainer, ins: Dictionary) -> void:
 	# switch leaves too little room (narrow phones, the largest text), it becomes one button that
 	# steps through the views.
 	var room := get_viewport_rect().size.x - 2.0 * SIDE - float(ins["left"]) - float(ins["right"]) - 24.0
-	if (task is PhotoTask and task.kit) or task.action != "" or _home_button():
+	if (task is PhotoTask and task.kit) or task.action != "" or _home_button() or _arm_button():
 		room -= 96.0
 	_view_compact = (room - VIEW_FULL) / 2.0 < 104.0
 	room -= VIEW_COMPACT if _view_compact else VIEW_FULL
@@ -475,7 +488,11 @@ func _build_bottom(col: VBoxContainer, ins: Dictionary) -> void:
 		act.build(task, sim)
 		bottom.add_child(act)
 	elif _home_button():
-		bottom.add_child(_build_home_button())
+		bottom.add_child(_round_button("home", "RTH", func(): home.start(sim)))
+	elif _arm_button():
+		var b := _round_button("power", "ARM", _toggle_arm)
+		_arm_label = b.find_children("*", "Label", true, false)[0]
+		bottom.add_child(b)
 	bottom.add_child(_stick_with_label(_right, tr(right_label)))
 	col.add_child(bottom)
 
@@ -485,7 +502,32 @@ func _home_button() -> bool:
 	return home != null and mode == "pro" and not (task is PhotoTask and task.kit)
 
 
-func _build_home_button() -> Control:
+## Adult FPV drones are armed with a button beside the right stick.
+func _arm_button() -> bool:
+	return sim is FpvSim and mode == "pro" and task.action == ""
+
+
+func _toggle_arm() -> void:
+	var f := sim as FpvSim
+	if f.armed:
+		if f.on_ground:
+			f.armed = false
+		return
+	if _thr.value.y > -0.9:
+		alert("HINT_ARM_THROTTLE", true)
+		return
+	f.armed = true
+	alert("HINT_ARMED", false)
+
+
+func alert(key: String, warn: bool, seconds := 3.0) -> void:
+	_alert = key
+	_alert_t = seconds
+	_alert_warn = warn
+
+
+## A round button beside the right stick: an icon and a word.
+func _round_button(icon: String, key: String, on_press: Callable) -> Control:
 	var box := VBoxContainer.new()
 	box.alignment = BoxContainer.ALIGNMENT_END
 	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -493,12 +535,12 @@ func _build_home_button() -> Control:
 	col.alignment = BoxContainer.ALIGNMENT_CENTER
 	col.custom_minimum_size = Vector2(76, 76)
 	var ic := CenterContainer.new()
-	ic.add_child(Glyph.make("home", 26, Pal.c("on_accent")))
+	ic.add_child(Glyph.make(icon, 26, Pal.c("on_accent")))
 	col.add_child(ic)
-	var l := UI.label(tr("RTH"), UI.CAPTION, 800, "on_accent", false, false)
+	var l := UI.label(tr(key), UI.CAPTION, 800, "on_accent", false, false)
 	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	col.add_child(l)
-	box.add_child(UI.tappable(col, Pal.c("accent"), func(): home.start(sim), tr("RTH"), 38, 0))
+	box.add_child(UI.tappable(col, Pal.c("accent"), on_press, tr(key), 38, 0))
 	return box
 
 
@@ -596,9 +638,17 @@ func _update_hud() -> void:
 	if kids_help():
 		hint_key = "HINT_KIDS_HELP"
 	var warn := false
+	if sim is FpvSim and not sim.armed:
+		hint_key = "HINT_ARM"
 	if home and home.alert != "":
 		hint_key = home.alert
 		warn = home.alert_warn
+	if _alert_t > 0.0:
+		hint_key = _alert
+		warn = _alert_warn
+	if _arm_label:
+		_arm_label.get_parent().get_parent().visible = not sim.armed or sim.on_ground
+		_arm_label.text = tr("DISARM" if sim.armed else "ARM")
 	if warn != _hint_warn:
 		_hint_warn = warn
 		_hint_panel.add_theme_stylebox_override("panel", UI.box(Pal.c("warn" if warn else "text"), 12, 9))
@@ -627,6 +677,12 @@ func _update_hud() -> void:
 	if _stats.has("WIND"):
 		_stats["WIND"].text = tr("UNIT_MS") % FlightTask.num(Vector2(sim.wind().x, sim.wind().z).length())
 		_wind_arrow.queue_redraw()
+	if _stats.has("LEAN"):
+		var lean := FlightHud.lean_deg(self)
+		var tip := float(sim.p.get("tip", 90.0))
+		_stats["LEAN"].text = "%d°" % roundi(lean) + (" / %d°" % roundi(tip) if tip < 90.0 else "")
+		_stats["LEAN"].add_theme_color_override("font_color", FlightHud.lean_color(self))
+		_lean_gauge.queue_redraw()
 	if _stats.has("VERT"):
 		var vy := sim.vel.y
 		_stats["VERT"].text = ("+" if vy >= 0.05 else "") + tr("UNIT_MS") % FlightTask.num(vy)
