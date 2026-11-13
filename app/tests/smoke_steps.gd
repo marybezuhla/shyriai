@@ -136,9 +136,9 @@ func _kids_help() -> void:
 	Prefs.set_mode("simple")
 
 
-## The plane's sticks are named for what they do on a plane, in every mode.
+## The plane's sticks are named for what they do on a plane (kids' sticks carry no words).
 func _plane_sticks() -> void:
-	for m in [["simple", "STICK_RIGHT_WING"], ["kids", "STICK_RIGHT_WING_KIDS"]]:
+	for m in [["simple", "STICK_RIGHT_WING"]]:
 		Prefs.set_mode(m[0])
 		main.start("wing", Curriculum.lessons("wing", m[0])[0])
 		await s._frames(3)

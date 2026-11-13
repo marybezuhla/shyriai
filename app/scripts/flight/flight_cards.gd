@@ -82,7 +82,7 @@ static func crashed(f, streak := 0) -> Control:
 		var speed: float = f.sim.crash_speed
 		col.add_child(UI.label(why % (FlightTask.num(speed, 0) if tipped else FlightTask.num(speed)), UI.BODY, 500, "muted"))
 	else:
-		col.add_child(UI.label(f.tr("CRASHED"), UI.TITLE_L, 600, "text", true))
+		col.add_child(UI.label(f.tr("CRASHED_WING" if f.sim is WingSim else "CRASHED"), UI.TITLE_L, 600, "text", true))
 		col.add_child(UI.label(f.tr("CRASHED_TEXT") % FlightTask.num(f.sim.crash_speed), UI.BODY, 500, "muted"))
 		col.add_child(_tip_box(safe_speed(f)))
 	_retry_buttons(f, col, streak, "TIP_CRASH")

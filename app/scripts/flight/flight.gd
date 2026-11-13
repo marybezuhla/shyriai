@@ -439,7 +439,7 @@ func _build_bottom(col: VBoxContainer, ins: Dictionary) -> void:
 	if sim is UgvSim:
 		left_label = "STICK_TRACK_L" if sim.tank else "STICK_DRIVE"
 		right_label = "STICK_TRACK_R" if sim.tank else "STICK_TURN"
-	bottom.add_child(_stick_with_label(_left, tr(Curriculum.text_key(left_label, mode))))
+	bottom.add_child(_stick_with_label(_left, tr(left_label)))
 	_view_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_view_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	bottom.add_child(_view_box)
@@ -451,7 +451,7 @@ func _build_bottom(col: VBoxContainer, ins: Dictionary) -> void:
 		var act := ActionButton.new()
 		act.build(task, sim)
 		bottom.add_child(act)
-	bottom.add_child(_stick_with_label(_right, tr(Curriculum.text_key(right_label, mode))))
+	bottom.add_child(_stick_with_label(_right, tr(right_label)))
 	col.add_child(bottom)
 
 

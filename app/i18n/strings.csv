@@ -1061,8 +1061,6 @@ CRASHED_SAFE_GROUND,"Touching the ground is safe up to %s m/s. Before landing, l
 CRASHED_SAFE_GROUND_WING,"A safe touchdown is up to %s m/s down. Just above the runway, raise the nose a little and close the throttle.",Безпечне торкання до %s м/с униз. Над самою смугою трохи підніми ніс і прибери газ.
 CRASHED_SAFE_WINGTIP,A wing touched the ground. Keep the wings level when landing.,Крило зачепило землю. На посадці тримай крила рівно.
 CRASHED_SAFE_HIT,"An obstacle can be touched without harm up to %s m/s. Near trees and walls, slow down first.",Перешкоду можна зачепити без шкоди до %s м/с. Біля дерев і стін спершу пригальмуй.
-STICK_LEFT_WING_KIDS,Turn,Поворот
-STICK_RIGHT_WING_KIDS,"Up, down, turn","Угору, униз, поворот"
 HINT_KIDS_HELP,Fly to the gold mark: it shows where to go,"Лети до золотої позначки: вона показує, куди"
 WING_TURN_KIDS,Round the tower,Довкола вежі
 GLOSSARY,Glossary,Словничок
@@ -1099,3 +1097,4 @@ TIP_FAIL_JOLT_STRETCHER,Push the drive stick only half way: the robot is slower 
 TIP_FAIL_JOLT_CARGO,Push the drive stick only half way: the robot is slower but much smoother.,"Тримай стік ходу лише до половини: робот їде повільніше, зате набагато плавніше."
 TIP_FAIL_JOLT_STRETCHER_KIDS,Push the stick only a little: the robot will drive gently.,Тримай стік трошки: робот поїде лагідно.
 TIP_FAIL_JOLT_KITTEN,Push the stick only a little: the robot will drive gently.,Тримай стік трошки: робот поїде лагідно.
+CRASHED_WING,The plane crashed,Літак розбився

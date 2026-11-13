@@ -83,6 +83,15 @@ func _set_from(local: Vector2) -> void:
 	queue_redraw()
 
 
+## How far through one glide of the ghost knob, 0..1; it glides again every 1.6 s.
+func _phase() -> float:
+	return fmod(Time.get_ticks_msec() / 1000.0, 1.6) / 1.6
+
+
+func _ghost_at(c: Vector2, travel: float, phase: float) -> Vector2:
+	return c + Vector2(hint.x, -hint.y).normalized() * travel * ease(minf(phase * 1.4, 1.0), 0.5)
+
+
 ## A drawn thumb resting on the ghost knob, coming from below like a real one, so it is clear the
 ## knob is to be pushed with a finger.
 func _thumb(at: Vector2, alpha: float) -> void:
@@ -134,13 +143,12 @@ func _draw() -> void:
 	var travel := r - _knob_radius()
 	if hint != Vector2.ZERO and _finger == -1:
 		# A ghost knob glides from the middle the way to push, again and again.
-		var phase := fmod(Time.get_ticks_msec() / 1000.0, 1.6) / 1.6
-		var g := c + Vector2(hint.x, -hint.y).normalized() * travel * ease(minf(phase * 1.4, 1.0), 0.5)
+		var phase := _phase()
+		var g := _ghost_at(c, travel, phase)
 		var ghost := Pal.c("accent")
 		ghost.a = 0.55 * (1.0 - phase)
 		draw_circle(g, _knob_radius(), ghost, true, -1.0, true)
 		draw_arc(g, _knob_radius(), 0, TAU, 40, Color(Pal.INK, 0.6 * (1.0 - phase)), 2.0, true)
-		_thumb(g, 1.0 - phase * 0.7)
 	var k := c + Vector2(value.x, -value.y) * travel
 	var halo := Pal.c("accent")
 	halo.a = 0.2
@@ -149,3 +157,6 @@ func _draw() -> void:
 	draw_arc(k, _knob_radius(), 0, TAU, 40, Pal.INK, 2.0, true)
 	if kids:
 		draw_arc(k, _knob_radius() - 1.5, 0, TAU, 40, Pal.c("on_accent"), 3.0, true)
+	if hint != Vector2.ZERO and _finger == -1:
+		# The thumb goes over everything, as a real one would.
+		_thumb(_ghost_at(c, travel, _phase()), 1.0 - _phase() * 0.7)

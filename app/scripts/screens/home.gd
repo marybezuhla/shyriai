@@ -120,6 +120,7 @@ func _vehicle_card(v: String) -> Control:
 	ic.custom_minimum_size = Vector2(52, 52)
 	ic.add_child(Glyph.make(Curriculum.ICONS[v], 30, Pal.c("accent_text")))
 	icon_bg.add_child(ic)
+	icon_bg.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 
 	var text := UI.vbox(3)
 	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -133,7 +134,7 @@ func _vehicle_card(v: String) -> Control:
 	# A hint, never a lock: some courses go better after another one.
 	var after: String = Curriculum.AFTER.get(v, "")
 	if after != "" and done == 0 and Prefs.passed_count(after) < 2:
-		var tag := UI.label(tr("HOME_AFTER") % Curriculum.label("VEH_" + after.to_upper()), UI.CAPTION, 700, "muted")
+		var tag := UI.label(tr("HOME_AFTER") % Curriculum.label("VEH_" + after.to_upper()), UI.CAPTION, 700, "muted", false, false)
 		var tp := UI.panel(tag, Pal.c("surface2"), 8, 6)
 		tp.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 		text.add_child(tp)
