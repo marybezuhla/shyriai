@@ -134,6 +134,11 @@ static func tappable(content: Control, bg: Color, on_press: Callable, a11y_name 
 	b.pressed.connect(on_press)
 	p.add_child(b)
 	p.mouse_filter = Control.MOUSE_FILTER_PASS
+	# The panel fits the button inside its padding; stretch it over the whole card afterwards, so a
+	# finger on the card's edge counts too.
+	p.sort_children.connect(func():
+		b.position = Vector2.ZERO
+		b.size = p.size)
 	return p
 
 
@@ -158,7 +163,7 @@ static func segmented(options: Array, selected: String, on_pick: Callable) -> Pa
 		var c := CenterContainer.new()
 		c.custom_minimum_size = Vector2(0, 52)
 		var l := label(opt[1], 14, 700 if on else 600, "on_accent" if on else "text", false, false)
-		if not stacked:
+		if not stacked and options.size() > 2:
 			l.add_theme_font_size_override("font_size", roundi(14 * minf(Pal.text_scale(), 1.15)))
 		c.add_child(l)
 		var id: String = opt[0]

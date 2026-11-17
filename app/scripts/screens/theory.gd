@@ -11,7 +11,7 @@ func build() -> void:
 		list.add_child(_card(tr("GLOSSARY"), tr("GLOSSARY_DESC"), func(): app.open_glossary()))
 	for t in Curriculum.THEORY:
 		var card: String = t
-		list.add_child(_card(tr(t), tr(t + "_DESC"), func(): app.open_theory(card)))
+		list.add_child(_card(Curriculum.label(t), Curriculum.label(t + "_DESC"), func(): app.open_theory(card)))
 	add_child(list)
 
 

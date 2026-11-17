@@ -69,8 +69,10 @@ func _ready() -> void:
 	await test_wing_kids_assist()
 	test_return_home()
 	test_fpv_setup()
+	test_pilot_findings()
 	test_pad_prefs()
 	test_kid_pilots()
+	test_kids_texts()
 	for mode in ["simple", "pro"]:
 		for key in ["MIS_CAM_LINK", "MIS_CAM_JAM"]:
 			await test_link_mission(key, mode)

@@ -86,9 +86,22 @@ static func remove(i: int) -> void:
 	Prefs.kid_pilots.remove_at(i)
 	if Prefs.kid_pilot > i:
 		Prefs.kid_pilot -= 1
-	if Prefs.kid_pilots.size() == 1:
-		Prefs.kid_pilots.clear()  # one pilot again: no one to ask
+	Prefs.pilots_changed()  # one pilot left is kept as it is: no one is asked (see ask())
+
+
+## A removed pilot back in their place, with their progress, not flying.
+static func restore(at: int, pilot: Dictionary) -> void:
+	if Prefs.kid_pilots.size() >= MAX:
+		return
+	if Prefs.kid_pilots.is_empty():
+		var a: String = ANIMALS.filter(func(x): return x != pilot["animal"])[0]
+		var c: String = COLORS.filter(func(x): return x != pilot["color"])[0]
+		Prefs.kid_pilots.append({"animal": a, "color": c, "slice": {}})
 		Prefs.kid_pilot = 0
+	var i := clampi(at, 0, Prefs.kid_pilots.size())
+	Prefs.kid_pilots.insert(i, pilot)
+	if i <= Prefs.kid_pilot:
+		Prefs.kid_pilot += 1
 	Prefs.pilots_changed()
 
 

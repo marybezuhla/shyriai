@@ -105,12 +105,18 @@ static func _osd(f: Flight, rect: Rect2) -> void:
 	var font := Pal.font(700)
 	var size := 16
 	var sim := f.sim as FpvSim
-	# A 4-cell pack: 16.8 V full, about 13.2 V empty, and it sags under throttle.
-	var volts := 13.2 + 3.6 * sim.battery - 0.6 * sim.throttle01
+	# A 4-cell pack: 16.8 V full, 13.2 V empty, and it sags under throttle.
+	var volts := FlightBattery.volts(sim)
 	var line := FlightTask.num(volts) + " V   " + FlightTask.clock(sim.time)
 	var at := Vector2(c.x - 70.0, c.y + 64.0)
+	var low: bool = volts < FlightBattery.CELL_WARN * FlightBattery.CELLS and sim.p["battery_s"] > 0.0
 	f._marks.draw_string(font, at + Vector2(1, 1), line, HORIZONTAL_ALIGNMENT_CENTER, 140.0, size, shade)
-	f._marks.draw_string(font, at, line, HORIZONTAL_ALIGNMENT_CENTER, 140.0, size, col)
+	f._marks.draw_string(font, at, line, HORIZONTAL_ALIGNMENT_CENTER, 140.0, size, Pal.SIGNAL_RED if low else col)
+	if low and sim.armed:
+		var warn := "LAND NOW" if volts < FlightBattery.CELL_LAND * FlightBattery.CELLS else "LOW BATTERY"
+		var p := Vector2(c.x - 130.0, c.y + 90.0)
+		f._marks.draw_string(font, p + Vector2(1, 1), warn, HORIZONTAL_ALIGNMENT_CENTER, 260.0, size + 2, shade)
+		f._marks.draw_string(font, p, warn, HORIZONTAL_ALIGNMENT_CENTER, 260.0, size + 2, Pal.SIGNAL_RED)
 	if not sim.armed:
 		var big := 28
 		var w := 260.0

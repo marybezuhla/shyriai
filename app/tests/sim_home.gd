@@ -108,6 +108,49 @@ func test_fpv_setup() -> void:
 	check(float(easy.p["rate"]) == float(FpvSim.FPV["simple"]["rate"]), "FPV: Simple mode keeps its own gentle rates")
 
 
+## What an experienced pilot asked for: home at the height the drone has, a stop when GPS goes,
+## a LiPo's voltage, and one tilt limit in every direction, and a robot
+## that goes over sooner sideways than along a slope.
+func test_pilot_findings() -> void:
+	var sim := DroneSim.new("pro", 3)
+	sim.ground = func(_x: float, _z: float) -> float: return 0.0
+	sim.place(Vector3(60, 30, 0))
+	sim.on_ground = false
+	var h := FlightHome.new()
+	h.start(sim)
+	var low := 99.0
+	for i in int(4.0 / DT):
+		var s := h.sticks(sim, Vector3.ZERO)
+		sim.step(DT, s["throttle"], s["yaw"], s["pitch"], s["roll"])
+		low = minf(low, sim.altitude())
+	check(low > 27.0, "home keeps the height it has (lowest %.1f m)" % low)
+	sim.gps = false
+	h.update(sim, FlightTask.new(), DT)
+	check(not h.active and h.alert == "HINT_RTH_GPS_LOST", "GPS lost on the way home: it stops")
+	var f := FpvSim.new("pro", 3)
+	f.battery = 1.0
+	check(absf(FlightBattery.volts(f) - 16.8) < 0.01, "a full 4S pack reads 16.8 V")
+	f.battery = 0.0
+	check(absf(FlightBattery.volts(f) - 13.2) < 0.01, "an empty one 13.2 V")
+	f.battery = 0.25
+	var rest := FlightBattery.volts(f)
+	f.throttle01 = 1.0
+	check(FlightBattery.volts(f) < rest - 1.0, "and it sags under full throttle")
+	var a := FpvSim.new("pro", 3)
+	a.ground = sim.ground
+	a.place(Vector3(0, 20, 0))
+	a.on_ground = false
+	a.armed = true
+	run(a, 1.5, 0.3, 0.0, 1.0, 1.0)
+	var tilt := rad_to_deg(acos(clampf(a.att.y.y, -1.0, 1.0)))
+	check(tilt < float(a.p["tilt"]) + 5.0, "Angle: a stick corner tilts no more than a side (%.0f°)" % tilt)
+	var u := UgvSim.new("pro", 3)
+	u.tilt = Vector2(deg_to_rad(38.0), 0.0)
+	check(u.tip_share() < 1.0, "the robot does not go over at 38° nose up")
+	u.tilt = Vector2(0.0, deg_to_rad(34.0))
+	check(u.tip_share() > 1.0, "but does at 34° sideways")
+
+
 ## Radio and gamepad settings are checked like everything else read from the saved file.
 func test_pad_prefs() -> void:
 	Prefs._apply({"pad_axes": {"throttle": {"a": 2, "inv": true}, "roll": {"a": 99, "inv": false}, "nope": {"a": 1, "inv": false}},
@@ -147,8 +190,28 @@ func test_kid_pilots() -> void:
 	Prefs._apply(saved)
 	KidPilots.remove(1)
 	check(not KidPilots.ask() and Prefs.passed_count("camera") == 2, "removing a pilot leaves the other one flying")
+	KidPilots.restore(1, {"animal": "owl", "color": "blue", "slice": {"passed": {"camera": 1}}})
+	KidPilots.select(1)
+	check(KidPilots.ask() and Prefs.passed_count("camera") == 1, "a removed pilot comes back with their progress")
+	KidPilots.select(0)
+	KidPilots.remove(1)
 	for i in KidPilots.MAX + 2:
 		KidPilots.add()
 	check(Prefs.kid_pilots.size() == KidPilots.MAX, "no more than six")
 	Prefs.erase_all()
 	check(Prefs.kid_pilots.is_empty(), "erasing all data removes the pilots too")
+
+
+## Words a child can meet outside the lesson hints: no numbers, no aiming words.
+func test_kids_texts() -> void:
+	var rx := RegEx.create_from_string("\\d|мішен|(^|[^а-яіїєґ])ціл(ь|і|ься)([^а-яіїєґ]|$)|target|(^|[^a-z])aim")
+	var keys := ["SUM_TARGET_MIDDLE", "SUM_TARGET_EDGE", "HINT_TARGET_MISS", "HINT_READY", "BREAK_TITLE",
+		"BREAK_TEXT", "BREAK_REST", "BREAK_MORE", "PILOTS_WHO", "HOME_HELLO_TEXT"]
+	for t in Curriculum.THEORY:
+		keys.append(t + "_DESC")
+	for lang in ["uk", "en"]:
+		TranslationServer.set_locale(lang)
+		for k in keys:
+			var text := String(TranslationServer.translate(Curriculum.text_key(k, "kids")))
+			check(rx.search(text) == null, "kids text %s (%s) has no numbers or aiming words: %s" % [k, lang, text])
+	TranslationServer.set_locale("en")

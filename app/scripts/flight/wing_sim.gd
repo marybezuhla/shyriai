@@ -116,8 +116,13 @@ func place(at: Vector3, heading := 0.0) -> void:
 func lift_coefficient() -> float:
 	if alpha <= ALPHA_STALL:
 		return LIFT_SLOPE * alpha
-	# Past the stall the lift drops off quickly.
-	return maxf(0.3, CL_MAX - (alpha - ALPHA_STALL) * 3.0)
+	# Past the stall the lift falls away fast: the air has broken away from the wing.
+	return maxf(0.5, CL_MAX - (alpha - ALPHA_STALL) * 15.0)
+
+
+## A developed spin: the plane turns round, nose well down, sinking fast at about the stall speed.
+func spinning() -> bool:
+	return _spin > 0.5
 
 
 func step(dt: float, throttle: float, yaw_in: float, pitch: float, roll: float) -> void:
@@ -141,6 +146,8 @@ func step(dt: float, throttle: float, yaw_in: float, pitch: float, roll: float) 
 	if on_ground:
 		# Wheels, and brakes once the throttle is nearly closed.
 		drag += 0.6 + (2.5 if throttle01 < 0.15 else 0.0)
+	if spinning() and not kids:
+		drag += maxf(0.0, -G * sin(gamma))  # a spinning wing is mostly drag: it does not speed up nose down
 	speed = maxf(0.0, speed + (thrust - drag - G * sin(gamma)) * dt)
 
 	var flying := not on_ground
@@ -196,7 +203,8 @@ func _ailerons(dt: float, roll: float, yaw_in: float) -> void:
 		var home := atan2(pos.x, pos.z)  # the heading that points at the centre
 		home_bank = clampf(wrapf(yaw - home, -PI, PI) * 1.2, -0.5, 0.5)
 	if p["roll_rate"] > 0.0:
-		var rate := deg_to_rad(p["roll_rate"]) * roll
+		# At the stall the ailerons have little air to work with.
+		var rate := deg_to_rad(p["roll_rate"]) * roll * (0.3 if stalled else 1.0)
 		rate += deg_to_rad(25.0) * yaw_in  # the rudder rolls a high-wing trainer too
 		rate -= bank * 0.25  # dihedral: a little self-levelling
 		if far:
@@ -205,8 +213,9 @@ func _ailerons(dt: float, roll: float, yaw_in: float) -> void:
 			# A stalled wing drops: one wing first, turning into a spin if nothing is done. Rudder
 			# against the turn stops it.
 			var against := yaw_in * drop < -0.3
-			_spin = clampf(_spin + dt * (-2.5 if against else 1.5), 0.0, 1.0)
-			rate += deg_to_rad(120.0) * _spin * drop
+			_spin = clampf(_spin + dt * (-2.5 if against else 0.6), 0.0, 1.0)
+			if not spinning():
+				rate += deg_to_rad(120.0) * _spin * drop  # the wing drops; in the spin itself _air turns it
 		else:
 			_spin = maxf(0.0, _spin - dt * 2.0)
 		bank = wrapf(bank + rate * dt, -PI, PI)
@@ -254,6 +263,15 @@ func _air(dt: float, lift: float, elev: float) -> void:
 		gamma = lerpf(gamma, want_gamma, 1.0 - exp(-dt * 1.5))
 		lift = G * cos(gamma) / maxf(cos(bank), 0.5)
 		speed = maxf(speed, 10.0)
+	elif spinning():
+		# A trainer's spin: banked over, nose well down, about the stall speed, turning round
+		# once every two seconds or so, sinking about 10 m/s. The wing carries no more than its weight.
+		bank = lerpf(bank, drop * deg_to_rad(55.0), 1.0 - exp(-dt * 3.0))
+		gamma = lerpf(gamma, deg_to_rad(-50.0), 1.0 - exp(-dt * 2.0))
+		speed = lerpf(speed, V_STALL * 1.05, 1.0 - exp(-dt * 1.5))
+		yaw -= deg_to_rad(180.0) * _spin * drop * dt
+		lift = minf(lift, G * 0.3)
+		v = maxf(speed, 1.0)
 	else:
 		gamma += (lift * cos(bank) - G * cos(gamma)) / v * dt
 		gamma = clampf(gamma, -1.3, 1.3)

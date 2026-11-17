@@ -138,9 +138,9 @@ func _vehicle_card(v: String) -> Control:
 	# A hint, never a lock: some courses go better after another one.
 	var after: String = Curriculum.AFTER.get(v, "")
 	if after != "" and done == 0 and Prefs.passed_count(after) < 2:
-		var tag := UI.label(tr("HOME_AFTER") % Curriculum.label("VEH_" + after.to_upper()), UI.CAPTION, 700, "muted", false, false)
+		# It wraps with larger text, so it never pushes the card past the screen's edge.
+		var tag := UI.label(tr("HOME_AFTER") % Curriculum.label("VEH_" + after.to_upper()), UI.CAPTION, 700, "muted")
 		var tp := UI.panel(tag, Pal.c("surface2"), 8, 6)
-		tp.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 		text.add_child(tp)
 	var row := UI.hbox(14)
 	row.add_child(icon_bg)

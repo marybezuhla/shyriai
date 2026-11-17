@@ -52,7 +52,7 @@ var _hint_panel := PanelContainer.new()
 var _bar_fill := Panel.new()
 var _bar_text: Label
 var _stats := {}
-var _counter: Label
+var _counter: Control
 ## The plane's speed tape and wind arrow, when shown.
 var _tape: Control
 var _wind_arrow: Control
@@ -69,6 +69,8 @@ var _finished := false
 var _sock: Node3D
 ## The camera drone's way home (not for kids); null for other machines.
 var home: FlightHome
+## FPV and plane battery warnings (Adult mode).
+var battery: FlightBattery
 var _hint_warn := false
 ## A short message of the flight itself (a translation key), how long it stays, and if it warns.
 var _alert := ""
@@ -134,6 +136,8 @@ func _ready() -> void:
 	sim = task.make_sim(machine)
 	if machine == "camera" and mode != "kids" and not task.is_free:
 		home = FlightHome.new()
+	elif mode == "pro":
+		battery = FlightBattery.new()
 	if sim is FpvSim and mode == "pro":
 		sim.armed = false  # armed with a button, throttle down, as on a real drone
 	if task is PhotoTask:
@@ -153,6 +157,10 @@ func _ready() -> void:
 		var at := Vector3(WorldLand.RUNWAY_X + WorldLand.RUNWAY_W / 2.0 + 4.0, 0, WorldLand.RUNWAY_Z0 - 8.0)
 		at.y = world.height(at.x, at.z)
 		_sock = AirProps.add_windsock(world, at)
+		# As at a real field, the pilot stands beside the runway, about its middle, and the circuit
+		# is flown on the far side: never behind the pilot or over their head.
+		var me := Vector3(WorldLand.RUNWAY_X + 16.0, 0, (WorldLand.RUNWAY_Z0 + WorldLand.RUNWAY_Z1) / 2.0 - 5.0)
+		world.pilot = me + Vector3(0, world.height(me.x, me.z) + 1.7, 0)
 	else:
 		drone = DroneView.new()
 		world.add_child(drone)
@@ -193,7 +201,7 @@ func _physics_process(_delta: float) -> void:
 	elif FlightBottom.arm_button(self):
 		var sw := _pad.arm_switch()
 		if sw != 0 and (sw > 0) != sim.armed:
-			_toggle_arm()
+			_toggle_arm(true)
 	_alert_t = maxf(0.0, _alert_t - STEP)
 	var pilot := _sticks
 	# No radio link: the robot gets no commands and stops by itself.
@@ -203,6 +211,8 @@ func _physics_process(_delta: float) -> void:
 		home.take_back(pilot, task.link_ok)
 		if home.active:
 			_sticks = home.sticks(sim, world.pad)
+	if battery and not _waiting:
+		battery.update(self)
 	if _waiting and not _ready_to_go():
 		task.step(0.0, sim, _sticks)  # sets the first hints; no time passes
 	else:
@@ -220,7 +230,7 @@ func _physics_process(_delta: float) -> void:
 		_crashed()
 	elif sim.p.get("battery_s", 0.0) > 0.0 and sim.battery <= 0.0 and (sim.on_ground or sim is UgvSim):
 		# The battery ran out and the drone has come down (or the robot has stopped): say so.
-		task.fail_with("FAIL_BATTERY_UGV" if sim is UgvSim else "FAIL_BATTERY")
+		task.fail_with(FlightBattery.fail_key(sim))
 		_not_this_time()
 
 
@@ -444,13 +454,16 @@ func _build_hint(col: VBoxContainer) -> void:
 	col.add_child(hint_row)
 
 
-func _toggle_arm() -> void:
+## Arms or disarms the FPV drone. Arming needs the throttle the drone really gets (screen, radio or
+## gamepad) all the way down, as Betaflight does. Disarming works on the ground, and in the air
+## from the radio's switch or button too: real pilots cut the motors in a crash.
+func _toggle_arm(from_radio := false) -> void:
 	var f := sim as FpvSim
 	if f.armed:
-		if f.on_ground:
+		if f.on_ground or from_radio:
 			f.armed = false
 		return
-	if _thr.value.y > -0.9:
+	if float(_pad.read(self)["throttle"]) > -0.9:
 		alert("HINT_ARM_THROTTLE", true)
 		return
 	f.armed = true
@@ -472,7 +485,7 @@ func _input(event: InputEvent) -> void:
 				FlightBottom.next_view(self)
 		"arm":
 			if FlightBottom.arm_button(self) and not _paused:
-				_toggle_arm()
+				_toggle_arm(true)
 
 
 ## Reads a hint with the phone's own voice in the app's language, if it has one. Nothing leaves the
@@ -518,6 +531,12 @@ func _update_hud() -> void:
 		_bar_fill.size = Vector2(BAR_W * task.progress, 6)
 	if _bar_text:
 		_bar_text.text = "%d %%" % int(round(task.progress * 100.0))
+	_update_hint()
+	FlightHud.update_stats(self)
+
+
+## The line of words over the view: the task's hint, or a more urgent message, maybe read aloud.
+func _update_hint() -> void:
 	var ready := "HINT_PRACTICE" if practice else Curriculum.text_key("HINT_READY", mode)
 	var hint_key := ready if _waiting and (task.hint == "" or practice) else task.hint
 	if kids_help():
@@ -552,38 +571,6 @@ func _update_hud() -> void:
 			_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART if w > wrap else TextServer.AUTOWRAP_OFF
 			_hint.custom_minimum_size = Vector2(wrap, 0) if w > wrap else Vector2.ZERO
 	_hint_panel.visible = hint_key != ""
-	if _counter:
-		_counter.text = "%d / %d" % [task.counter, task.counter_max]
-	if _stats.has("ALT"):
-		_stats["ALT"].text = tr("UNIT_M") % FlightTask.num(maxf(0.0, sim.altitude()))
-	if _stats.has("SPEED"):
-		_stats["SPEED"].text = tr("UNIT_MS") % FlightTask.num(Vector2(sim.vel.x, sim.vel.z).length())
-	if _stats.has("AIRSPEED"):
-		_stats["AIRSPEED"].text = tr("UNIT_MS") % FlightTask.num((sim as WingSim).speed)
-		_stats["AIRSPEED"].add_theme_color_override("font_color", Pal.c("warn") if (sim as WingSim).stall_warn else Pal.c("text"))
-		_tape.queue_redraw()
-	if _stats.has("WIND"):
-		_stats["WIND"].text = tr("UNIT_MS") % FlightTask.num(Vector2(sim.wind().x, sim.wind().z).length())
-		_wind_arrow.queue_redraw()
-	if _stats.has("LEAN"):
-		var lean := FlightHud.lean_deg(self)
-		var tip := float(sim.p.get("tip", 90.0))
-		_stats["LEAN"].text = "%d°" % roundi(lean) + (" / %d°" % roundi(tip) if tip < 90.0 else "")
-		_stats["LEAN"].add_theme_color_override("font_color", FlightHud.lean_color(self))
-		_lean_gauge.queue_redraw()
-	if _stats.has("VERT"):
-		var vy := sim.vel.y
-		_stats["VERT"].text = ("+" if vy >= 0.05 else "") + tr("UNIT_MS") % FlightTask.num(vy)
-	if _stats.has("HOME"):
-		_stats["HOME"].text = tr("UNIT_M") % FlightTask.num(FlightTask.flat_distance(sim.pos, world.pad), 0)
-	if _stats.has("BATTERY"):
-		_stats["BATTERY"].text = "%d %%" % int(ceil(sim.battery * 100.0))
-	if _stats.has("TARGET"):
-		_stats["TARGET"].text = tr("UNIT_M") % FlightTask.num(task.target_dist, 0)
-		_stats["CLOSING"].text = ("+" if task.closing >= 0.0 else "") + tr("UNIT_MS") % FlightTask.num(task.closing)
-	if _stats.has("TIME"):
-		var t := int(sim.time)
-		_stats["TIME"].text = FlightTask.clock(t)
 
 
 ## Markers drawn over the 3D view: where to fly, and where the drone is when it is small.

@@ -13,6 +13,7 @@ const NO_FLARE := deg_to_rad(-1.0)
 const ASSIST_AFTER := 15.0
 
 var _last_yaw := INF
+var _spin_hint := false
 var _stuck := 0.0
 
 
@@ -42,12 +43,23 @@ func over_ground(x: float, alt: float, z: float) -> Vector3:
 ## Says what the wing needs when it is slow or stalled. True if it said something.
 func air_warnings(sim: DroneSim) -> bool:
 	var w := sim as WingSim
+	if _spin_hint:
+		stick_hint = {}
+		_spin_hint = false
 	if w == null or mode == "kids" or w.on_ground:
 		return false
+	if w.spinning():
+		# Throttle off and rudder against the turn (left stick), stick forward (right stick).
+		say("HINT_WING_SPIN")
+		stick_hint = {"left": Vector2(-w.drop, -1.0).normalized(), "right": Vector2.UP}
+		_spin_hint = true
+		return true
 	if w.stalled:
 		say("HINT_WING_STALL")
 		return true
-	if w.stall_warn:
+	# Close over the runway a slow plane is landing, not stalling: a warning would ask for the nose
+	# to go down in the flare.
+	if w.stall_warn and w.altitude() > 4.0:
 		say("HINT_WING_SLOW")
 		return true
 	return false

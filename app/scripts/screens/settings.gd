@@ -6,8 +6,6 @@ func build() -> void:
 	add_child(header(tr("SETTINGS")))
 
 	add_child(_looks())
-	if Prefs.mode == "kids":
-		add_child(_kids_box())
 
 	var lang := UI.vbox(10)
 	lang.add_child(UI.eyebrow(tr("SET_LANGUAGE")))
@@ -52,22 +50,26 @@ func build() -> void:
 		pad.add_child(Glyph.make("chevron", 20, Pal.c("muted")))
 		sticks.add_child(UI.tappable(pad, Pal.c("surface"), func(): app.open_pad(), tr("PAD")))
 		add_child(sticks)
-		var fpv := UI.vbox(10)
-		fpv.add_child(UI.eyebrow(tr("SET_FPV")))
-		fpv.add_child(UI.label(tr("FPV_RATES"), UI.TEXT, 700))
-		fpv.add_child(UI.segmented([
-			["soft", tr("RATES_SOFT")], ["medium", tr("RATES_MEDIUM")], ["sharp", tr("RATES_SHARP")],
-		], Prefs.fpv_rates, func(v): Prefs.set_choice("fpv_rates", v)))
-		fpv.add_child(UI.label(tr("FPV_QUAD"), UI.TEXT, 700))
-		fpv.add_child(UI.segmented([["5in", tr("QUAD_5IN")], ["3in", tr("QUAD_3IN")]], Prefs.fpv_quad,
-			func(v): Prefs.set_choice("fpv_quad", v)))
-		fpv.add_child(UI.label(tr("FPV_QUAD_DESC"), UI.SMALL, 500, "muted"))
-		add_child(fpv)
+		# FPV rates and drone size matter only in Adult mode, where they apply.
+		if Prefs.mode == "pro":
+			var fpv := UI.vbox(10)
+			fpv.add_child(UI.eyebrow(tr("SET_FPV")))
+			fpv.add_child(UI.label(tr("FPV_RATES"), UI.TEXT, 700))
+			fpv.add_child(UI.segmented([
+				["soft", tr("RATES_SOFT")], ["medium", tr("RATES_MEDIUM")], ["sharp", tr("RATES_SHARP")],
+			], Prefs.fpv_rates, func(v): Prefs.set_choice("fpv_rates", v)))
+			fpv.add_child(UI.label(tr("FPV_QUAD"), UI.TEXT, 700))
+			fpv.add_child(UI.segmented([["5in", tr("QUAD_5IN")], ["3in", tr("QUAD_3IN")]], Prefs.fpv_quad,
+				func(v): Prefs.set_choice("fpv_quad", v)))
+			fpv.add_child(UI.label(tr("FPV_QUAD_DESC"), UI.SMALL, 500, "muted"))
+			add_child(fpv)
 
 	var kids := UI.vbox(10)
 	kids.add_child(UI.eyebrow(tr("SET_KIDS")))
 	kids.add_child(UI.switch_row(tr("KIDS_LOCK"), tr("KIDS_LOCK_DESC"), Prefs.kids_lock,
 		func(on): Prefs.set_kids_lock(on)))
+	if Prefs.mode == "kids":
+		_kids_rows(kids)
 	add_child(kids)
 
 	_progress_section()
@@ -168,9 +170,9 @@ func _looks() -> Control:
 func _look_tile(t: String, on: bool) -> Control:
 	var th: Dictionary = Pal.THEMES[Pal.KIDS_LOOK.get(t, t) if Prefs.mode == "kids" else t]
 	var col := UI.vbox(6)
-	var name_ := UI.label(tr("THEME_" + t.to_upper()), UI.SMALL, 700, "text", false, false)
+	# Two-word names ("Starry night") wrap onto a second line with larger text rather than being cut.
+	var name_ := UI.label(tr("THEME_" + t.to_upper()), UI.SMALL, 700, "text")
 	name_.add_theme_color_override("font_color", th["text"])
-	name_.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	col.add_child(name_)
 	var sw := UI.hbox(4)
 	for k in ["accent_text", "accent"]:
@@ -194,9 +196,7 @@ func _pair_for(t: String) -> String:
 
 ## Kids mode, for grown-ups (settings are behind the lock): the children on this phone, and the
 ## reminder to take a break.
-func _kids_box() -> Control:
-	var box := UI.vbox(10)
-	box.add_child(UI.eyebrow(tr("SET_KIDS")))
+func _kids_rows(box: VBoxContainer) -> void:
 	var row := UI.hbox(12)
 	var t := UI.vbox(2)
 	t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -204,7 +204,6 @@ func _kids_box() -> Control:
 	t.add_child(UI.label(tr("PILOTS_DESC"), UI.SMALL, 500, "muted"))
 	row.add_child(t)
 	row.add_child(Glyph.make("chevron", 20, Pal.c("muted")))
-	box.add_child(UI.tappable(row, Pal.c("surface"), func(): app.open_pilots(), tr("PILOTS")))
+	box.add_child(UI.tappable(row, Pal.c("surface"), func(): app.open_pilots(true), tr("PILOTS")))
 	box.add_child(UI.switch_row(tr("BREAK_ON"), tr("BREAK_DESC"), Prefs.break_reminder,
 		func(on): Prefs.set_break_reminder(on)))
-	return box

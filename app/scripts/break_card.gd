@@ -10,6 +10,11 @@ const MORE := 300.0
 
 var on_rest: Callable
 var on_more: Callable
+var _col: VBoxContainer
+
+
+func _fit() -> void:
+	_col.custom_minimum_size = Vector2(minf(get_viewport_rect().size.x - 48.0, 360.0), 0)
 
 
 func _ready() -> void:
@@ -22,7 +27,10 @@ func _ready() -> void:
 	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(center)
 	var col := UI.vbox(12)
-	col.custom_minimum_size = Vector2(minf(get_viewport_rect().size.x - 48.0, 360.0), 0)
+	_col = col
+	# The screen may still be turning from sideways to upright: fit the width again when it does.
+	_fit()
+	get_viewport().size_changed.connect(_fit)
 	var sun := CenterContainer.new()
 	sun.add_child(Glyph.make("sunflower", 56, Pal.c("accent_text")))
 	col.add_child(sun)
@@ -35,6 +43,11 @@ func _ready() -> void:
 	col.add_child(UI.primary(tr("BREAK_REST"), func(): _go(on_rest)))
 	col.add_child(UI.secondary(tr("BREAK_MORE"), func(): _go(on_more)))
 	center.add_child(UI.panel(col, Pal.c("surface"), 24, 20))
+
+
+## Back on the phone: the same as "Rest".
+func rest() -> void:
+	_go(on_rest)
 
 
 func _go(action: Callable) -> void:

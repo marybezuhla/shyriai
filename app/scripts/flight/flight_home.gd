@@ -1,8 +1,9 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-# Return to home for the camera drone, as on a real one: it climbs to a safe height, flies back over
-# the pad and lands. It starts by itself on a low battery (20 %, after a warning at 30 %) or when the
+# Return to home for the camera drone, as on a real one: it climbs to a safe height (or keeps the
+# height it has, if higher), flies back over the pad and only there comes down to land. It starts by itself on a low battery (20 %, after a warning at 30 %) or when the
 # radio link has been lost for 2 s, and on the "Home" button. Moving a stick takes control back,
-# unless the link is down. Without GPS the drone does not know where home is, so it cannot return.
+# unless the link is down. Without GPS the drone does not know where home is, so it cannot return;
+# if GPS is lost on the way, it stops and hovers, and the pilot flies it back by hand.
 class_name FlightHome
 extends RefCounted
 
@@ -21,6 +22,8 @@ var alert_warn := false
 var _warned := false
 var _auto := false
 var _no_link := 0.0
+## The height to fly home at.
+var _cruise := SAFE_ALT
 
 
 ## Battery and link checks, once per physics step.
@@ -35,6 +38,9 @@ func update(sim: DroneSim, task: FlightTask, dt: float) -> void:
 		if sim.battery <= AUTO and not _auto:
 			_auto = true
 			start(sim, "HINT_RTH_BATTERY")
+	if active and not sim.gps:
+		active = false
+		_say("HINT_RTH_GPS_LOST", true)
 	_no_link = 0.0 if task.link_ok else _no_link + dt
 	if _no_link >= LINK_WAIT and not active and not sim.on_ground:
 		start(sim, "HINT_RTH_LINK")
@@ -48,6 +54,7 @@ func start(sim: DroneSim, why := "HINT_RTH") -> bool:
 	if sim.on_ground:
 		return false
 	active = true
+	_cruise = maxf(SAFE_ALT, sim.altitude())
 	_say(why, why != "HINT_RTH")
 	return true
 
@@ -72,9 +79,9 @@ func sticks(sim: DroneSim, home: Vector3) -> Dictionary:
 	var want := Vector3.ZERO
 	var throttle := 0.0
 	if d > 1.0:
-		# Up to a safe height first, then home at that height.
-		throttle = clampf((SAFE_ALT - alt) * 0.4, -0.5, 1.0)
-		if alt > SAFE_ALT - 3.0 or d < 6.0:
+		# Up to a safe height first, then home at that height; never down before the pad.
+		throttle = clampf((_cruise - alt) * 0.4, 0.0, 1.0)
+		if alt > _cruise - 3.0 or d < 6.0:
 			want = to.normalized() * minf(vmax * 0.8, d * 0.6)
 	else:
 		# Over the pad: down, slowly near the ground.
