@@ -138,6 +138,12 @@ func step(dt: float, throttle: float, yaw_in: float, pitch: float, roll: float) 
 func _level_rates(pitch: float, roll: float) -> Vector3:
 	var max_tilt := deg_to_rad(p["tilt"])
 	var now := tilt_angles()
+	# A corner of the stick is no steeper than a side: the tilt has one limit in every direction.
+	var s := Vector2(pitch, roll)
+	if s.length() > 1.0:
+		s = s.normalized()
+	pitch = s.x
+	roll = s.y
 	# Positive x rate lifts the nose; positive z rate lifts the right wing.
 	return Vector3(
 		-(pitch * max_tilt - now.x) * LEVEL_GAIN,

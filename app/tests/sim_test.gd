@@ -69,6 +69,7 @@ func _ready() -> void:
 	await test_wing_kids_assist()
 	test_return_home()
 	test_fpv_setup()
+	test_pilot_findings()
 	test_pad_prefs()
 	test_kid_pilots()
 	test_kids_texts()

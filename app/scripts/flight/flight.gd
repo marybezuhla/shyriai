@@ -69,6 +69,8 @@ var _finished := false
 var _sock: Node3D
 ## The camera drone's way home (not for kids); null for other machines.
 var home: FlightHome
+## FPV and plane battery warnings (Adult mode).
+var battery: FlightBattery
 var _hint_warn := false
 ## A short message of the flight itself (a translation key), how long it stays, and if it warns.
 var _alert := ""
@@ -134,6 +136,8 @@ func _ready() -> void:
 	sim = task.make_sim(machine)
 	if machine == "camera" and mode != "kids" and not task.is_free:
 		home = FlightHome.new()
+	elif mode == "pro":
+		battery = FlightBattery.new()
 	if sim is FpvSim and mode == "pro":
 		sim.armed = false  # armed with a button, throttle down, as on a real drone
 	if task is PhotoTask:
@@ -153,6 +157,10 @@ func _ready() -> void:
 		var at := Vector3(WorldLand.RUNWAY_X + WorldLand.RUNWAY_W / 2.0 + 4.0, 0, WorldLand.RUNWAY_Z0 - 8.0)
 		at.y = world.height(at.x, at.z)
 		_sock = AirProps.add_windsock(world, at)
+		# As at a real field, the pilot stands beside the runway, about its middle, and the circuit
+		# is flown on the far side: never behind the pilot or over their head.
+		var me := Vector3(WorldLand.RUNWAY_X + 16.0, 0, (WorldLand.RUNWAY_Z0 + WorldLand.RUNWAY_Z1) / 2.0 - 5.0)
+		world.pilot = me + Vector3(0, world.height(me.x, me.z) + 1.7, 0)
 	else:
 		drone = DroneView.new()
 		world.add_child(drone)
@@ -203,6 +211,8 @@ func _physics_process(_delta: float) -> void:
 		home.take_back(pilot, task.link_ok)
 		if home.active:
 			_sticks = home.sticks(sim, world.pad)
+	if battery and not _waiting:
+		battery.update(self)
 	if _waiting and not _ready_to_go():
 		task.step(0.0, sim, _sticks)  # sets the first hints; no time passes
 	else:
@@ -220,7 +230,7 @@ func _physics_process(_delta: float) -> void:
 		_crashed()
 	elif sim.p.get("battery_s", 0.0) > 0.0 and sim.battery <= 0.0 and (sim.on_ground or sim is UgvSim):
 		# The battery ran out and the drone has come down (or the robot has stopped): say so.
-		task.fail_with("FAIL_BATTERY_UGV" if sim is UgvSim else "FAIL_BATTERY")
+		task.fail_with(FlightBattery.fail_key(sim))
 		_not_this_time()
 
 

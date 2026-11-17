@@ -1229,3 +1229,32 @@ HINT_WING_SPIN,"Spin! Throttle off, rudder against the turn, stick forward","Ш�
 PILOTS_REMOVE_SURE,Tap again: removed with all progress,Ще раз: стерти з усім прогресом
 CRASHED_UGV_TIPPED,The robot tipped over,Робот перекинувся
 PRACTICE_TAG,practice,тренування
+UNIT_V,%s V,%s В
+HINT_FPV_LOW_V,Battery low: 3.5 V a cell. Time to land,"Батарея сідає: 3,5 В на банку. Час сідати"
+HINT_FPV_LAND_NOW,LAND NOW: the battery is almost empty,СІДАЙ ЗАРАЗ: батарея майже порожня
+HINT_WING_BATTERY,Battery 25 %: time to land,Батарея 25 %: час сідати
+FAIL_BATTERY_FPV,The battery ran out: the motors lost power and the drone came down.,"Батарея сіла: мотори втратили потужність, і дрон опустився."
+FAIL_BATTERY_WING,The battery ran out: the motor stopped and the plane glided down.,"Батарея сіла: мотор зупинився, і літак спланував донизу."
+HINT_RTH_GPS_LOST,GPS lost: the drone stopped flying home. Fly it back by hand,GPS зник: дрон більше не летить додому. Веди його вручну
+GL_HOVER_T,Hover,Висіння
+GL_HOVER,Staying in one place in the air. A GPS drone does it by itself with the sticks in the middle.,"Коли дрон стоїть на місці в повітрі. Дрон із GPS робить це сам, коли стіки по центру."
+GL_GIMBAL_T,Gimbal,Підвіс (гімбал)
+GL_GIMBAL,The holder that keeps the camera steady while the drone tilts. It also tilts the camera down for photos from above.,"Тримач, що тримає камеру рівно, поки дрон нахиляється. Він же опускає камеру вниз для знімків згори."
+GL_LIPO_T,LiPo battery,LiPo-батарея
+GL_LIPO,The light battery of drones and models. A cell is full at 4.2 V and must not go below about 3.3 V; it is stored at about 3.8 V and charged only under watch.,"Легка батарея дронів і моделей. Банка повна на 4,2 В, і нижче приблизно 3,3 В її не можна розряджати; зберігають її на 3,8 В, а заряджають лише під наглядом."
+GL_ARM_T,Arming,Зведення (arm)
+GL_ARM,"Switching the motors on, with the throttle down. Until then an FPV drone does not react to the throttle at all.","Увімкнення моторів, коли газ унизу. До того FPV-дрон на газ узагалі не реагує."
+GL_FAILSAFE_T,Failsafe,Failsafe (аварійний режим)
+GL_FAILSAFE,"What the craft does by itself when the radio link is lost: a camera drone flies home, a robot stops, an FPV drone cuts the motors.","Що апарат робить сам, коли зникає радіозв’язок: камерний дрон летить додому, робот зупиняється, FPV-дрон вимикає мотори."
+GL_FLARE_T,Flare,Вирівнювання перед посадкою
+GL_FLARE,"Just above the runway the nose comes gently up, so the plane stops sinking and touches down softly.","Над самою смугою ніс плавно йде вгору, літак перестає знижуватися й м’яко торкається колесами."
+GL_GOAROUND_T,Go-around,Відхід на друге коло
+GL_GOAROUND,"Breaking off a bad landing: full throttle, climb, and fly the circuit again. It is the safe choice, not a failure.","Відмова від невдалої посадки: повний газ, набір висоти й ще одне коло. Це безпечне рішення, а не провал."
+GL_SPIN_T,Spin,Штопор
+GL_SPIN,"A stall where one wing drops and the plane turns round, nose down. Out of it: throttle off, rudder against the turn, stick forward.","Звалювання, коли одне крило падає й літак обертається носом униз. Вихід: газ прибрати, кермо напрямку проти обертання, ручку від себе."
+GL_WINDSOCK_T,Windsock,Вітровказ (рукав)
+GL_WINDSOCK,"The striped sleeve by the runway. It points where the wind blows to; the stiffer it stands, the stronger the wind.","Смугастий рукав біля смуги. Він показує, куди дме вітер; що рівніше стоїть, то вітер сильніший."
+GL_STICKMODE_T,"Mode 1, Mode 2","Mode 1, Mode 2"
+GL_STICKMODE,"Which stick does what. Mode 2: throttle and turn on the left, the tilts on the right. Mode 1 swaps throttle and pitch.","Який стік що робить. Mode 2: газ і поворот ліворуч, нахили праворуч. Mode 1 міняє місцями газ і тангаж."
+GL_DEADZONE_T,Dead zone,Мертва зона
+GL_DEADZONE,"A small range round the stick's middle that counts as zero, so a worn radio does not drift the craft.","Невеликий простір довкола середини стіка, що рахується як нуль, щоб потертий пульт не зносив апарат."

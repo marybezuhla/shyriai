@@ -69,7 +69,11 @@ static func default_axis(stick_name: String, mode1: bool) -> Dictionary:
 static func stick(dev: int, stick_name: String, mode1 := false, dead := true) -> float:
 	var m: Dictionary = Prefs.pad_axes.get(stick_name, default_axis(stick_name, mode1))
 	var v := Input.get_joy_axis(dev, int(m["a"]) as JoyAxis) * (-1.0 if m["inv"] else 1.0)
-	return 0.0 if dead and absf(v) < float(Prefs.PAD_DEAD.get(Prefs.pad_dead, 0.08)) else v
+	if not dead:
+		return v
+	# Past the dead zone the stick starts from zero again, so it still reaches full at its end.
+	var dz := float(Prefs.PAD_DEAD.get(Prefs.pad_dead, 0.08))
+	return 0.0 if absf(v) < dz else signf(v) * (absf(v) - dz) / (1.0 - dz)
 
 
 func _keys(plus: Key, minus: Key) -> float:

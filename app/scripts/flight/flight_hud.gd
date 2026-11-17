@@ -138,11 +138,11 @@ static func _draw_tape(f: Flight) -> void:
 
 ## The robot's lean: how far from upright, and the colour of the danger when it can tip over.
 static func lean_color(f: Flight) -> Color:
-	var tip := float(f.sim.p.get("tip", 90.0))
-	var lean := lean_deg(f)
-	if tip >= 90.0:
+	var u := f.sim as UgvSim
+	if u == null or float(u.p.get("tip", 90.0)) >= 90.0:
 		return Pal.c("text")
-	return Pal.c("bad") if lean > tip * 0.85 else (Pal.c("warn") if lean > tip * 0.65 else Pal.c("text"))
+	var share := u.tip_share()
+	return Pal.c("bad") if share > 0.85 else (Pal.c("warn") if share > 0.65 else Pal.c("text"))
 
 
 static func lean_deg(f: Flight) -> float:
@@ -280,7 +280,7 @@ static func update_stats(f: Flight) -> void:
 		f._wind_arrow.queue_redraw()
 	if f._stats.has("LEAN"):
 		var lean := lean_deg(f)
-		var tip := float(f.sim.p.get("tip", 90.0))
+		var tip: float = (f.sim as UgvSim).tip_limit() if f.sim is UgvSim else 90.0
 		f._stats["LEAN"].text = "%d°" % roundi(lean) + (" / %d°" % roundi(tip) if tip < 90.0 else "")
 		f._stats["LEAN"].add_theme_color_override("font_color", lean_color(f))
 		f._lean_gauge.queue_redraw()
@@ -290,7 +290,7 @@ static func update_stats(f: Flight) -> void:
 	if f._stats.has("HOME"):
 		f._stats["HOME"].text = f.tr("UNIT_M") % FlightTask.num(FlightTask.flat_distance(f.sim.pos, f.world.pad), 0)
 	if f._stats.has("BATTERY"):
-		f._stats["BATTERY"].text = "%d %%" % int(ceil(f.sim.battery * 100.0))
+		f._stats["BATTERY"].text = FlightBattery.text(f)
 	if f._stats.has("TARGET"):
 		f._stats["TARGET"].text = f.tr("UNIT_M") % FlightTask.num(f.task.target_dist, 0)
 		f._stats["CLOSING"].text = ("+" if f.task.closing >= 0.0 else "") + f.tr("UNIT_MS") % FlightTask.num(f.task.closing)
