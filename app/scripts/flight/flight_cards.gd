@@ -23,7 +23,9 @@ static func passed(f, got: int, before: Dictionary, next: String) -> Control:
 	if f.task is PhotoTask and not f.task.wrong.is_empty():
 		col.add_child(Report.mistakes(f, f.task))
 	if next != "":
-		col.add_child(UI.primary(f.tr("NEXT_LESSON"), func(): f.app.open_flight(f.vehicle, next), "play"))
+		# Straight on to the next lesson, named, so it is clear where the button leads.
+		var go: String = f.tr("NEXT_TO") % Curriculum.label(next)
+		col.add_child(UI.primary(go, func(): f.app.open_flight(f.vehicle, next), "play"))
 	else:
 		col.add_child(UI.primary(f.tr("DONE"), f.leave, "check"))
 	# Side by side, so the card fits a phone held sideways.
@@ -153,10 +155,7 @@ static func summary(f) -> String:
 
 
 static func secondary(text: String, on_press: Callable) -> Control:
-	var c := CenterContainer.new()
-	c.custom_minimum_size = Vector2(0, 48)
-	c.add_child(UI.label(text, UI.TEXT, 700, "text", false, false))
-	return UI.tappable(c, Pal.c("surface2"), on_press, text, 16, 0)
+	return UI.secondary(text, on_press)
 
 
 ## The dimmed layer with the card in the middle, scrollable when the card is taller than the screen

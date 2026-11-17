@@ -89,6 +89,13 @@ static func build_chip(f: Flight) -> Control:
 		f._meter_fill.add_theme_stylebox_override("panel", UI.box(Pal.c("ok"), 3, 0))
 		f._meter_fill.size = Vector2(Flight.BAR_W, 6)
 		mbar.add_child(f._meter_fill)
+		# Ticks at quarters, so a drop reads at a glance: "a quarter gone".
+		for q in [0.25, 0.5, 0.75]:
+			var tick := ColorRect.new()
+			tick.color = Pal.c("bg")
+			tick.position = Vector2(Flight.BAR_W * q - 1.0, 0)
+			tick.size = Vector2(2, 6)
+			mbar.add_child(tick)
 		mrow.add_child(mbar)
 		var meter_text := UI.label(f.tr(Curriculum.text_key(f.task.meter_label, f.mode)), UI.CAPTION, 700, "muted", false, false)
 		mrow.add_child(meter_text)

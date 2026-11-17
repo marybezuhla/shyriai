@@ -20,6 +20,8 @@ var _insets := {"top": 0.0, "bottom": 0.0, "left": 0.0, "right": 0.0}
 var flight: Control = null
 var _gate: Control = null
 var _welcoming := false
+## Kids mode: seconds flown since the last break, for the break reminder.
+var flown := 0.0
 ## Tries in a row that did not pass, per task, since the app started: the third brings a tip and
 ## the offer to practise.
 var fails := {}
@@ -45,10 +47,13 @@ func _ready() -> void:
 
 	Pal.changed.connect(_restyle)
 	Prefs.changed.connect(_restyle)
+	_fit_tablet()
 	get_viewport().size_changed.connect(_apply_insets)
 	_apply_insets()
 	if Prefs.welcomed:
 		open_tab("learn")
+		if Prefs.mode == "kids" and KidPilots.ask():
+			open_pilots()  # several children on this phone: who's flying?
 	else:
 		_open_welcome()
 
@@ -68,12 +73,19 @@ func welcome(child: bool) -> void:
 	open_tab("learn")
 
 
+func _process(delta: float) -> void:
+	if flight and not flight._paused and not flight._finished:
+		flown += delta
+
+
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_WM_GO_BACK_REQUEST:
 		back()
 	elif what == NOTIFICATION_APPLICATION_FOCUS_OUT and flight:
 		# A call or a notification came in: stop the drone rather than let it fly on.
 		flight.pause()
+	elif what == NOTIFICATION_APPLICATION_FOCUS_IN and Prefs.theme_system:
+		Prefs.refresh_theme()  # the phone may have gone light or dark meanwhile
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -115,6 +127,10 @@ func open_pilot_cards() -> void:
 	_push(_make("res://scripts/screens/pilot_cards.gd"))
 
 
+func open_pilots() -> void:
+	_push(_make("res://scripts/screens/pilots.gd"))
+
+
 func open_pad() -> void:
 	_push(_make("res://scripts/screens/pad.gd"))
 
@@ -154,11 +170,23 @@ func start(vehicle: String, key: String) -> void:
 
 
 func open_flight(vehicle: String, key: String, seed_ := -1, practice := false) -> void:
+	# Kids mode, a long while in the air: a break first, between flights rather than in one.
+	if Prefs.mode == "kids" and Prefs.break_reminder and flown >= BreakCard.AFTER:
+		var card := BreakCard.new()
+		card.on_rest = func():
+			flown = 0.0
+			close_flight()
+		card.on_more = func():
+			flown = BreakCard.AFTER - BreakCard.MORE
+			open_flight(vehicle, key, seed_, practice)
+		add_child(card)
+		return
 	if flight:
 		flight.queue_free()
 		remove_child(flight)
 	_set_landscape(true)
 	OS.low_processor_usage_mode = false  # the flight draws every frame
+	Engine.max_fps = 60  # smooth enough, and a 120 Hz phone does not burn its battery twice as fast
 	_bg.visible = false
 	_frame.visible = false
 	flight = load("res://scripts/flight/flight.gd").new()
@@ -181,6 +209,7 @@ func close_flight() -> void:
 		flight = null
 	_set_landscape(false)
 	OS.low_processor_usage_mode = true
+	Engine.max_fps = 0
 	_bg.visible = true
 	_frame.visible = true
 	_restyle()
@@ -276,6 +305,21 @@ func _build_nav() -> void:
 
 
 # --- Phone cut-outs and system bars -----------------------------------------
+
+## On a tablet the layout, scaled to the screen's short side, would come out twice a phone's size
+## in the hand. It is held to about a phone's size instead, which gives more room. Phones and
+## computers are left as they are.
+func _fit_tablet() -> void:
+	if not OS.has_feature("mobile"):
+		return
+	var win := Vector2(DisplayServer.window_get_size())
+	var dpi := float(DisplayServer.screen_get_dpi())
+	if win.x <= 0.0 or dpi < 100.0:
+		return  # an odd answer from the phone: better to change nothing
+	var scale := minf(win.x, win.y) / 390.0
+	var most := dpi / 140.0  # one layout point at most about 1/140 inch, as on a phone
+	get_window().content_scale_factor = clampf(most / scale, 0.6, 1.0)
+
 
 func _apply_insets() -> void:
 	var top := 16.0

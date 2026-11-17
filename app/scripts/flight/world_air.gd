@@ -72,6 +72,9 @@ static func add_cloud(world: Node3D, center: Vector3, radius: float) -> void:
 static func add_tarp(world: FlightWorld, at: Vector3) -> void:
 	var y := world.height(at.x, at.z)
 	_part(world, _box(Vector3(4.0, 0.05, 4.0)), Pal.SIGNAL_RED, Vector3(at.x + 2.5, y + 0.03, at.z))
+	# Two white stripes across it, as on a real signal panel: nothing in a field looks like that.
+	for dz in [-0.9, 0.9]:
+		_part(world, _box(Vector3(4.0, 0.06, 0.45)), Color.WHITE, Vector3(at.x + 2.5, y + 0.035, at.z + dz))
 	world.add_person(at)
 
 

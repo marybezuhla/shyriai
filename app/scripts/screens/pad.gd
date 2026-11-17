@@ -25,10 +25,7 @@ func build() -> void:
 	add_child(UI.panel(dz, Pal.c("surface"), 18, 14))
 	add_child(_buttons_card())
 	add_child(_check_card())
-	var reset := CenterContainer.new()
-	reset.custom_minimum_size = Vector2(0, 48)
-	reset.add_child(UI.label(tr("PAD_RESET"), UI.TEXT, 700, "text", false, false))
-	add_child(UI.tappable(reset, Pal.c("surface2"), func(): _learning = ""; Prefs.reset_pad(), tr("PAD_RESET"), 16, 0))
+	add_child(UI.secondary(tr("PAD_RESET"), func(): _learning = ""; Prefs.reset_pad()))
 
 
 func _device() -> String:

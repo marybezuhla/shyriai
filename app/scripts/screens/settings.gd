@@ -5,16 +5,9 @@ extends Screen
 func build() -> void:
 	add_child(header(tr("SETTINGS")))
 
-	var look := UI.vbox(10)
-	look.add_child(UI.eyebrow(tr("SET_THEME")))
+	add_child(_looks())
 	if Prefs.mode == "kids":
-		# Kids mode has its own light look; the grown-up's choice comes back after Kids mode.
-		look.add_child(UI.panel(UI.label(tr("THEME_KIDS_NOTE"), UI.BODY, 600), Pal.c("surface"), 18, 14))
-	else:
-		look.add_child(UI.segmented([
-			["dusk", tr("THEME_DUSK")], ["day", tr("THEME_DAY")], ["system", tr("THEME_SYSTEM")],
-		], Prefs.theme, func(t): Prefs.set_theme(t)))
-	add_child(look)
+		add_child(_kids_box())
 
 	var lang := UI.vbox(10)
 	lang.add_child(UI.eyebrow(tr("SET_LANGUAGE")))
@@ -34,6 +27,8 @@ func build() -> void:
 	sound.add_child(UI.eyebrow(tr("SET_SOUND")))
 	sound.add_child(UI.switch_row(tr("SOUND_ON"), tr("SOUND_DESC"), Prefs.sound,
 		func(on): Prefs.set_sound(on)))
+	sound.add_child(UI.switch_row(tr("SPEAK_ON"), tr("SPEAK_DESC"), Prefs.speak_hints,
+		func(on): Prefs.set_speak_hints(on)))
 	add_child(sound)
 
 	# Kids fly with the simple layout always, so the stick choices are for grown-ups only.
@@ -147,3 +142,69 @@ func _action_row(text: String, active: bool, kind: String) -> Control:
 	if not active:
 		return UI.panel(row, Pal.c("surface"), 18, 14)
 	return UI.tappable(row, Pal.c("surface"), func(): _confirm = kind; rebuild(), text)
+
+
+## The six looks: light ones above, their dark pairs below, each shown in its own colours. Kids
+## choose among the light ones; "Follow the system" switches within the pair.
+func _looks() -> Control:
+	var look := UI.vbox(10)
+	look.add_child(UI.eyebrow(tr("SET_THEME")))
+	var kids := Prefs.mode == "kids"
+	var rows := [["day", "sky", "mallow"]] if kids else [["day", "sky", "mallow"], ["dusk", "starry", "seanight"]]
+	var chosen := Pal.light_of(Prefs.theme) if kids else Prefs.theme
+	for row in rows:
+		var line := UI.hbox(8)
+		for t in row:
+			line.add_child(_look_tile(t, t == chosen or (kids and Pal.light_of(Prefs.theme) == t)))
+		look.add_child(line)
+	if kids:
+		look.add_child(UI.label(tr("THEME_KIDS_NOTE"), UI.SMALL, 500, "muted"))
+	else:
+		look.add_child(UI.switch_row(tr("THEME_SYSTEM"), tr("THEME_SYSTEM_DESC"), Prefs.theme_system,
+			func(on): Prefs.set_theme_system(on)))
+	return look
+
+
+func _look_tile(t: String, on: bool) -> Control:
+	var th: Dictionary = Pal.THEMES[Pal.KIDS_LOOK.get(t, t) if Prefs.mode == "kids" else t]
+	var col := UI.vbox(6)
+	var name_ := UI.label(tr("THEME_" + t.to_upper()), UI.SMALL, 700, "text", false, false)
+	name_.add_theme_color_override("font_color", th["text"])
+	name_.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	col.add_child(name_)
+	var sw := UI.hbox(4)
+	for k in ["accent_text", "accent"]:
+		var dot := Panel.new()
+		dot.custom_minimum_size = Vector2(16, 16)
+		dot.add_theme_stylebox_override("panel", UI.box(th[k], 8, 0))
+		sw.add_child(dot)
+	col.add_child(sw)
+	var tile := UI.tappable(col, th["bg"], func(): Prefs.set_theme(_pair_for(t)), tr("THEME_" + t.to_upper()), 14, 10,
+		false, Pal.c("focus") if on else th["line"])
+	tile.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	return tile
+
+
+## Kids pick a light look; the grown-up's dark choice of the same pair stays theirs.
+func _pair_for(t: String) -> String:
+	if Prefs.mode == "kids" and Pal.light_of(Prefs.theme) == t:
+		return Prefs.theme
+	return t
+
+
+## Kids mode, for grown-ups (settings are behind the lock): the children on this phone, and the
+## reminder to take a break.
+func _kids_box() -> Control:
+	var box := UI.vbox(10)
+	box.add_child(UI.eyebrow(tr("SET_KIDS")))
+	var row := UI.hbox(12)
+	var t := UI.vbox(2)
+	t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	t.add_child(UI.label(tr("PILOTS"), UI.LEAD, 700))
+	t.add_child(UI.label(tr("PILOTS_DESC"), UI.SMALL, 500, "muted"))
+	row.add_child(t)
+	row.add_child(Glyph.make("chevron", 20, Pal.c("muted")))
+	box.add_child(UI.tappable(row, Pal.c("surface"), func(): app.open_pilots(), tr("PILOTS")))
+	box.add_child(UI.switch_row(tr("BREAK_ON"), tr("BREAK_DESC"), Prefs.break_reminder,
+		func(on): Prefs.set_break_reminder(on)))
+	return box
