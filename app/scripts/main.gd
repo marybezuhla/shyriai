@@ -20,6 +20,8 @@ var _insets := {"top": 0.0, "bottom": 0.0, "left": 0.0, "right": 0.0}
 var flight: Control = null
 var _gate: Control = null
 var _welcoming := false
+## Kids mode: seconds flown since the last break, for the break reminder.
+var flown := 0.0
 ## Tries in a row that did not pass, per task, since the app started: the third brings a tip and
 ## the offer to practise.
 var fails := {}
@@ -68,6 +70,11 @@ func _open_welcome() -> void:
 func welcome(child: bool) -> void:
 	Prefs.welcome(child)
 	open_tab("learn")
+
+
+func _process(delta: float) -> void:
+	if flight and not flight._paused and not flight._finished:
+		flown += delta
 
 
 func _notification(what: int) -> void:
@@ -162,6 +169,17 @@ func start(vehicle: String, key: String) -> void:
 
 
 func open_flight(vehicle: String, key: String, seed_ := -1, practice := false) -> void:
+	# Kids mode, a long while in the air: a break first, between flights rather than in one.
+	if Prefs.mode == "kids" and Prefs.break_reminder and flown >= BreakCard.AFTER:
+		var card := BreakCard.new()
+		card.on_rest = func():
+			flown = 0.0
+			close_flight()
+		card.on_more = func():
+			flown = BreakCard.AFTER - BreakCard.MORE
+			open_flight(vehicle, key, seed_, practice)
+		add_child(card)
+		return
 	if flight:
 		flight.queue_free()
 		remove_child(flight)

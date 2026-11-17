@@ -26,10 +26,7 @@ func build() -> void:
 	add_child(note)
 	if KidPilots.ask():
 		var key := "PILOTS_REMOVE_DONE" if _removing else "PILOTS_REMOVE"
-		var c := CenterContainer.new()
-		c.custom_minimum_size = Vector2(0, 48)
-		c.add_child(UI.label(tr(key), UI.TEXT, 700, "text", false, false))
-		add_child(UI.tappable(c, Pal.c("surface2"), func(): app.guard(_toggle_remove), tr(key), 16, 0))
+		add_child(UI.secondary(tr(key), func(): app.guard(_toggle_remove)))
 
 
 func _tile(i: int) -> Control:

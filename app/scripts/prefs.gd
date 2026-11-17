@@ -47,7 +47,7 @@ const PAD_DEAD := {"small": 0.04, "medium": 0.08, "large": 0.15}
 ## A fresh install, and what "Erase all data" goes back to.
 const DEFAULTS := {
 	"mode": "simple", "theme": "dusk", "theme_system": false, "language": "system", "text_size": "normal",
-	"welcomed": false, "kids_lock": false, "break_reminder": true, "sound": true, "stick_mode": "2", "stick_feel": "normal", "pilot_name": "",
+	"welcomed": false, "kids_lock": false, "break_reminder": true, "speak_hints": false, "sound": true, "stick_mode": "2", "stick_feel": "normal", "pilot_name": "",
 	"free": {"wind": "none", "time": "day", "balls": true, "fpv": "angle"},
 	"fpv_rates": "medium", "fpv_quad": "5in", "fpv_mission_mode": "angle", "pad_dead": "medium",
 	"pad_axes": {}, "pad_buttons": {},
@@ -66,6 +66,8 @@ var welcomed: bool = DEFAULTS["welcomed"]
 var kids_lock: bool = DEFAULTS["kids_lock"]
 ## Kids mode: after 20 minutes of flying, between lessons, a reminder to rest the eyes.
 var break_reminder: bool = DEFAULTS["break_reminder"]
+## Flight hints read aloud with the phone's own voice.
+var speak_hints: bool = DEFAULTS["speak_hints"]
 var sound: bool = DEFAULTS["sound"]
 var stick_mode: String = DEFAULTS["stick_mode"]
 var stick_feel: String = DEFAULTS["stick_feel"]
@@ -178,6 +180,14 @@ func set_kids_lock(on: bool) -> void:
 func set_break_reminder(on: bool) -> void:
 	if on != break_reminder:
 		break_reminder = on
+		_undo = {}
+		_save()
+		changed.emit()
+
+
+func set_speak_hints(on: bool) -> void:
+	if on != speak_hints:
+		speak_hints = on
 		_undo = {}
 		_save()
 		changed.emit()
@@ -567,6 +577,9 @@ func _apply_settings(d: Dictionary) -> void:
 	var k = d.get("kids_lock")
 	if k is bool:
 		kids_lock = k
+	var sh = d.get("speak_hints")
+	if sh is bool:
+		speak_hints = sh
 	var br = d.get("break_reminder")
 	if br is bool:
 		break_reminder = br
@@ -704,7 +717,7 @@ func _read_missions(list: Array) -> Array:
 func _data() -> Dictionary:
 	return {
 		"version": 1, "mode": mode, "theme": theme, "theme_system": theme_system, "language": language, "text_size": text_size,
-		"welcomed": welcomed, "kids_lock": kids_lock, "break_reminder": break_reminder, "sound": sound, "stick_mode": stick_mode, "stick_feel": stick_feel,
+		"welcomed": welcomed, "kids_lock": kids_lock, "break_reminder": break_reminder, "speak_hints": speak_hints, "sound": sound, "stick_mode": stick_mode, "stick_feel": stick_feel,
 		"views": views.duplicate(true), "passed": passed.duplicate(true),
 		"missions": missions.duplicate(true), "best": best.duplicate(true),
 		"licences": licences.duplicate(true), "pilot_name": pilot_name, "free": free.duplicate(),

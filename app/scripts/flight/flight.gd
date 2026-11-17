@@ -75,6 +75,8 @@ var _alert := ""
 var _alert_t := 0.0
 var _alert_warn := false
 var _arm_label: Label
+## The hint last read aloud: a new one is read, a changing count in the same one is not.
+var _spoken := ""
 ## Nothing moves and no time counts until the pilot first moves a stick.
 var _waiting := true
 ## Seconds with no step forward in the task.
@@ -473,6 +475,18 @@ func _input(event: InputEvent) -> void:
 				_toggle_arm()
 
 
+## Reads a hint with the phone's own voice in the app's language, if it has one. Nothing leaves the
+## phone through the app; with no voice for the language, nothing is said.
+static func say_aloud(text: String) -> void:
+	if not DisplayServer.has_feature(DisplayServer.FEATURE_TEXT_TO_SPEECH):
+		return
+	var voices := DisplayServer.tts_get_voices_for_language(TranslationServer.get_locale().substr(0, 2))
+	if voices.is_empty():
+		return
+	DisplayServer.tts_stop()
+	DisplayServer.tts_speak(text, voices[0])
+
+
 func alert(key: String, warn: bool, seconds := 3.0) -> void:
 	_alert = key
 	_alert_t = seconds
@@ -527,6 +541,9 @@ func _update_hud() -> void:
 		var text := tr(hint_key)
 		if not task.hint_args.is_empty() and text.contains("%"):
 			text = text % task.hint_args
+		if hint_key != _spoken and Prefs.speak_hints:
+			_spoken = hint_key
+			say_aloud(text)
 		if text != _hint.text:
 			_hint.text = text
 			# Short hints sit on one line; long ones wrap at a comfortable width.
@@ -643,6 +660,7 @@ func _finish() -> void:
 	var got := Rating.sunflowers(task_key, mode, sim.time, _touches)
 	var before := Prefs.record(task_key, got, sim.time)
 	_show_overlay(FlightCards.passed(self, got, before, _next_task()))
+	add_child(Confetti.new())
 
 
 func _crashed() -> void:

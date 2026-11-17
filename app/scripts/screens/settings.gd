@@ -27,6 +27,8 @@ func build() -> void:
 	sound.add_child(UI.eyebrow(tr("SET_SOUND")))
 	sound.add_child(UI.switch_row(tr("SOUND_ON"), tr("SOUND_DESC"), Prefs.sound,
 		func(on): Prefs.set_sound(on)))
+	sound.add_child(UI.switch_row(tr("SPEAK_ON"), tr("SPEAK_DESC"), Prefs.speak_hints,
+		func(on): Prefs.set_speak_hints(on)))
 	add_child(sound)
 
 	# Kids fly with the simple layout always, so the stick choices are for grown-ups only.

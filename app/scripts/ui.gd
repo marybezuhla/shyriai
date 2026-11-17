@@ -184,6 +184,14 @@ static func primary(text: String, on_press: Callable, icon := "") -> PanelContai
 	return tappable(c, Pal.c("accent"), on_press, text, 16, 0)
 
 
+## A quieter full-width button: the second choice beside a primary one.
+static func secondary(text: String, on_press: Callable) -> PanelContainer:
+	var c := CenterContainer.new()
+	c.custom_minimum_size = Vector2(0, 48)
+	c.add_child(label(text, TEXT, 700, "text", false, false))
+	return tappable(c, Pal.c("surface2"), on_press, text, 16, 0)
+
+
 static func _ignore_mouse(n: Node) -> void:
 	if n is Control:
 		(n as Control).mouse_filter = Control.MOUSE_FILTER_IGNORE

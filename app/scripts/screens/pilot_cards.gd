@@ -17,7 +17,78 @@ func build() -> void:
 	for v in Curriculum.VEHICLES:
 		var date := Prefs.licence_date(v)
 		if date != "":
-			add_child(_card(v, date, kids))
+			var card := _card(v, date, kids)
+			add_child(card)
+			add_child(UI.secondary(tr("CARD_BIG"), func(): _show_big(v, date, kids)))
+
+	add_child(UI.eyebrow(tr("RECORDS")))
+	var any := false
+	for v in Curriculum.VEHICLES:
+		var r := _records(v, kids)
+		if r:
+			add_child(r)
+			any = true
+	if not any:
+		add_child(UI.label(tr("RECORDS_NONE"), UI.BODY, 500, "muted"))
+
+
+## The best result of every lesson and mission of a vehicle in this mode: sunflowers, and for
+## grown-ups the time. Null if nothing is flown yet.
+func _records(v: String, kids: bool) -> Control:
+	var keys: Array = Curriculum.lessons(v, Prefs.mode) + Curriculum.missions(v, Prefs.mode)
+	if keys.all(func(k): return Prefs.best_of(k).is_empty()):
+		return null
+	var col := UI.vbox(8)
+	col.add_child(UI.label(Curriculum.label("VEH_" + v.to_upper()), UI.LEAD, 700))
+	for k in keys:
+		var b := Prefs.best_of(k)
+		var row := UI.hbox(6)
+		var name_ := UI.label(Curriculum.label(k), UI.SMALL, 600, "text" if not b.is_empty() else "faint")
+		name_.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(name_)
+		if b.is_empty():
+			row.add_child(UI.label(tr("RECORDS_NOT_YET"), UI.SMALL, 500, "faint", false, false))
+		else:
+			for i in int(b["f"]):
+				row.add_child(Glyph.make("sunflower", 16, Pal.c("accent")))
+			if not kids:
+				row.add_child(UI.label(FlightTask.clock(float(b["t"])), UI.SMALL, 700, "text", false, false))
+		col.add_child(row)
+	return UI.panel(col, Pal.c("surface"), 18, 14)
+
+
+## The card on the whole screen, big, for a screenshot with the phone's own buttons. Nothing is
+## saved or shared by the app. A tap anywhere closes it.
+func _show_big(v: String, date: String, kids: bool) -> void:
+	var cover := Control.new()
+	cover.set_anchors_preset(Control.PRESET_FULL_RECT)
+	var bg := ColorRect.new()
+	bg.color = Pal.c("bg")
+	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
+	cover.add_child(bg)
+	var center := CenterContainer.new()
+	center.set_anchors_preset(Control.PRESET_FULL_RECT)
+	var col := UI.vbox(14)
+	var card := _card(v, date, kids)
+	card.custom_minimum_size = Vector2(minf(get_viewport_rect().size.x - 40.0, 520.0), 0)
+	col.add_child(card)
+	var hint := UI.label(tr("CARD_BIG_HINT"), UI.SMALL, 500, "muted")
+	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	hint.custom_minimum_size = card.custom_minimum_size
+	col.add_child(hint)
+	center.add_child(col)
+	cover.add_child(center)
+	var close := Button.new()
+	close.flat = true
+	close.set_anchors_preset(Control.PRESET_FULL_RECT)
+	close.set("accessibility_name", tr("CLOSE"))
+	cover.add_child(close)
+	# Over everything, and gone with this screen.
+	var layer := CanvasLayer.new()
+	layer.layer = 50
+	layer.add_child(cover)
+	close.pressed.connect(layer.queue_free)
+	add_child(layer)
 
 
 func _name_field() -> LineEdit:
