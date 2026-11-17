@@ -49,6 +49,8 @@ func _ready() -> void:
 	_apply_insets()
 	if Prefs.welcomed:
 		open_tab("learn")
+		if Prefs.mode == "kids" and KidPilots.ask():
+			open_pilots()  # several children on this phone: who's flying?
 	else:
 		_open_welcome()
 
@@ -74,6 +76,8 @@ func _notification(what: int) -> void:
 	elif what == NOTIFICATION_APPLICATION_FOCUS_OUT and flight:
 		# A call or a notification came in: stop the drone rather than let it fly on.
 		flight.pause()
+	elif what == NOTIFICATION_APPLICATION_FOCUS_IN and Prefs.theme_system:
+		Prefs.refresh_theme()  # the phone may have gone light or dark meanwhile
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -113,6 +117,10 @@ func open_about() -> void:
 
 func open_pilot_cards() -> void:
 	_push(_make("res://scripts/screens/pilot_cards.gd"))
+
+
+func open_pilots() -> void:
+	_push(_make("res://scripts/screens/pilots.gd"))
 
 
 func open_pad() -> void:

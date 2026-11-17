@@ -11,6 +11,10 @@ func build() -> void:
 	app_name.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	app_name.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	top.add_child(app_name)
+	# Kids: who is flying now; a tap asks again.
+	if Prefs.mode == "kids" and KidPilots.ask():
+		top.add_child(UI.icon_button(KidPilots.animal(Prefs.kid_pilot), func(): app.open_pilots(), tr("PILOTS_WHO"),
+			KidPilots.color(Prefs.kid_pilot).lerp(Pal.c("surface"), 0.55)))
 	top.add_child(UI.icon_button("gear", func(): app.guard(app.open_settings), tr("SETTINGS"), Pal.c("surface")))
 	add_child(top)
 
@@ -18,7 +22,7 @@ func build() -> void:
 	var mode_box := UI.vbox(12)
 	# The same size in every look: Kids' larger text would wrap this title onto a second line, and the
 	# mode switch below it would jump under the finger each time the mode changes.
-	mode_box.add_child(UI.label(tr("HOME_WHO"), roundi(24.0 / Pal.TEXT_SCALE.get(Pal.current, 1.0)), 600, "text", true))
+	mode_box.add_child(UI.label(tr("HOME_WHO"), roundi(24.0 / (Pal.KIDS_TEXT if Pal.kids else 1.0)), 600, "text", true))
 	mode_box.add_child(UI.segmented([
 		["kids", tr("MODE_KIDS")], ["simple", tr("MODE_SIMPLE")], ["pro", tr("MODE_PRO")],
 	], Prefs.mode, _pick_mode))

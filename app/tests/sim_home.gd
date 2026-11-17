@@ -122,3 +122,33 @@ func test_pad_prefs() -> void:
 	check(int(FlightInput.default_axis("throttle", false)["a"]) == JOY_AXIS_LEFT_Y and int(FlightInput.default_axis("throttle", true)["a"]) == JOY_AXIS_RIGHT_Y,
 		"the usual layout follows Mode 2 and Mode 1")
 	Prefs.erase_all()
+
+
+## Several children on one phone: each keeps their own Kids mode progress; nothing else changes.
+func test_kid_pilots() -> void:
+	Prefs.erase_all()
+	Prefs.set_mode("kids")
+	Prefs.mark_passed("camera", 0)
+	Prefs.mark_passed("camera", 1)
+	check(not KidPilots.ask() and KidPilots.count() == 1, "one child: no one is asked")
+	check(KidPilots.add(), "a second pilot can be added")
+	check(KidPilots.ask() and Prefs.kid_pilot == 1 and Prefs.passed_count("camera") == 0, "the new pilot starts from the beginning")
+	Prefs.mark_passed("camera", 0)
+	KidPilots.select(0)
+	check(Prefs.passed_count("camera") == 2, "the first pilot keeps their progress")
+	KidPilots.select(1)
+	check(Prefs.passed_count("camera") == 1, "and so does the second")
+	check(KidPilots.flowers(0) >= 1 and KidPilots.animal(1) != KidPilots.animal(0), "own animal, flowers without numbers")
+	var saved := Prefs._data()
+	Prefs._apply(saved)
+	check(Prefs.kid_pilots.size() == 2 and Prefs.kid_pilot == 1 and Prefs.passed_count("camera") == 1, "pilots come back from the file")
+	KidPilots.read([{"animal": "dragon", "color": "gold"}, {"animal": "fox", "color": "gold", "slice": {"passed": {"camera": 99}}}], 7)
+	check(Prefs.kid_pilots.is_empty(), "odd pilots in the file are dropped")
+	Prefs._apply(saved)
+	KidPilots.remove(1)
+	check(not KidPilots.ask() and Prefs.passed_count("camera") == 2, "removing a pilot leaves the other one flying")
+	for i in KidPilots.MAX + 2:
+		KidPilots.add()
+	check(Prefs.kid_pilots.size() == KidPilots.MAX, "no more than six")
+	Prefs.erase_all()
+	check(Prefs.kid_pilots.is_empty(), "erasing all data removes the pilots too")

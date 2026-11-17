@@ -96,12 +96,16 @@ static func panel(content: Control, bg: Color, radius := RADIUS_CARD, pad := 14)
 
 ## A whole card that can be tapped. The card is drawn by a panel; an invisible button on top
 ## takes the touch, keyboard focus and the screen-reader name.
-static func tappable(content: Control, bg: Color, on_press: Callable, a11y_name := "", radius := RADIUS_CARD, pad := 14, outline := false) -> PanelContainer:
+static func tappable(content: Control, bg: Color, on_press: Callable, a11y_name := "", radius := RADIUS_CARD, pad := 14, outline := false, edge_color := Color.TRANSPARENT) -> PanelContainer:
 	var p := PanelContainer.new()
 	# An outline marks the chosen option, so it stands out even where gold is pale on white.
 	var edge := Pal.c("on_accent") if outline else Color.TRANSPARENT
-	var normal := box(bg, radius, pad, edge, 2 if outline else 0)
-	var pressed := box(bg.lerp(Pal.c("text"), 0.08), radius, pad, edge, 2 if outline else 0)
+	var edge_w := 2 if outline else 0
+	if edge_color.a > 0.0:
+		edge = edge_color
+		edge_w = 3
+	var normal := box(bg, radius, pad, edge, edge_w)
+	var pressed := box(bg.lerp(Pal.c("text"), 0.08), radius, pad, edge, edge_w)
 	p.add_theme_stylebox_override("panel", normal)
 	p.add_child(content)
 	_ignore_mouse(content)

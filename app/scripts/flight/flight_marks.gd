@@ -47,7 +47,7 @@ static func draw(f: Flight) -> void:
 		var d := f.cam.position.distance_to(f.sim.pos)
 		if d > 14.0:
 			var q := f.cam.unproject_position(f.sim.pos + Vector3(0, 0.1, 0))
-			var col2 := Pal.c("text") if f.look == "dusk" else Pal.VIOLET
+			var col2 := Pal.CREAM if f.look == "dusk" else Pal.VIOLET
 			col2.a = 0.7
 			f._marks.draw_arc(q, 16.0, 0, TAU, 32, col2, 2.0, true)
 

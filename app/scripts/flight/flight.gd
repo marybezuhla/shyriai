@@ -100,7 +100,7 @@ func setup(app_: Node, vehicle_: String, task_key_: String) -> void:
 	mode = Prefs.mode
 	# Kids always fly on a clear day; otherwise the world follows the app's look, or the time of day
 	# chosen for free flight.
-	look = "day" if mode == "kids" or Pal.current != "dusk" else "dusk"
+	look = "dusk" if Pal.is_dark(Pal.current) else "day"
 	if task_key.begins_with("FREE_"):
 		var t: String = Prefs.free["time"]
 		if mode != "kids" or t in Prefs.FREE_TIMES_KIDS:

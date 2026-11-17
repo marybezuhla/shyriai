@@ -137,7 +137,7 @@ TH_RULES_DESC,Where and how civilian drones may fly.,Де і як можна л�
 SET_THEME,Look,Вигляд
 THEME_DUSK,Dusk,Сутінки
 THEME_DAY,Day,День
-THEME_SYSTEM,System,Як у системі
+THEME_SYSTEM,Follow the system,Як у системі
 SET_LANGUAGE,Language,Мова
 LANG_SYSTEM,System,Як у системі
 ABOUT,About,Про застосунок
@@ -193,7 +193,7 @@ HINT_KITTEN_FIND,Fly to the kitten!,Лети до кошеняти!
 HINT_KITTEN_BACK,Kitten found! Fly back to the rescuers,Кошеня знайдено! Лети назад до рятувальників
 SUM_KITTEN_KIDS,The kitten is saved!,Кошеня врятовано!
 SUM_KITTEN,The kitten is saved. Sunflowers: %d of %d.,Кошеня врятовано. Соняшників: %d з %d.
-THEME_KIDS_NOTE,Kids mode uses the light Morning look. Your choice comes back when you leave Kids mode.,"У дитячому режимі світла тема «Ранок». Твій вибір повернеться, коли вийдеш з дитячого режиму."
+THEME_KIDS_NOTE,Kids mode uses the light looks. A dark one chosen by a grown-up comes back after Kids mode.,"У дитячому режимі світлі теми. Темна, обрана дорослими, повернеться після дитячого режиму."
 SET_KIDS,Kids mode,Дитячий режим
 KIDS_LOCK,Grown-ups’ lock,Батьківський замок
 KIDS_LOCK_DESC,"To leave Kids mode or open settings, a sum must be solved.","Щоб вийти з дитячого режиму чи відкрити налаштування, треба розв’язати приклад."
@@ -1180,3 +1180,24 @@ PAD_SWITCH,"Switch, axis %d","Перемикач, вісь %d"
 PAD_PRESS,Press it on the radio…,Натисни на пульті…
 PAD_CHECK,Check the sticks,Перевірити стіки
 PAD_RESET,Back to the usual layout,Повернути звичне розташування
+THEME_SKY,Sky,Небо
+THEME_STARRY,Starry night,Зоряна ніч
+THEME_MALLOW,Mallow,Мальва
+THEME_SEANIGHT,Sea night,Морська ніч
+THEME_SYSTEM_DESC,"Light when the phone is light, dark when it is dark: within the chosen pair.","Світла, коли телефон світлий, темна, коли темний: у межах обраної пари."
+PILOTS_WHO,Who's flying?,Хто летить?
+PILOTS_NOTE,Up to six pilots on one phone. No names: just an animal and a colour.,До шести пілотів на одному телефоні. Без імен: лише тваринка й колір.
+PILOTS_NEW,New pilot,Новий пілот
+PILOTS_REMOVE,Remove a pilot…,Стерти пілота…
+PILOTS_REMOVE_DONE,Done,Готово
+PILOTS_REMOVE_ONE,Tap to remove,"Торкнись, щоб стерти"
+PILOTS,Pilots,Пілоти
+PILOTS_DESC,"Several children on one phone, each with their own progress","Кілька дітей на одному телефоні, у кожного свій прогрес"
+BREAK_ON,Break reminder,Нагадування про перерву
+BREAK_DESC,"After 20 minutes of flying, between lessons: time to rest the eyes.","Після 20 хвилин польотів, між уроками: час дати очам відпочити."
+ANIMAL_FOX,Fox,Лисичка
+ANIMAL_OWL,Owl,Сова
+ANIMAL_HEDGEHOG,Hedgehog,Їжачок
+ANIMAL_HARE,Hare,Зайчик
+ANIMAL_STORK,Stork,Лелека
+ANIMAL_BEE,Bee,Бджілка
