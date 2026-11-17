@@ -193,7 +193,7 @@ func _physics_process(_delta: float) -> void:
 	elif FlightBottom.arm_button(self):
 		var sw := _pad.arm_switch()
 		if sw != 0 and (sw > 0) != sim.armed:
-			_toggle_arm()
+			_toggle_arm(true)
 	_alert_t = maxf(0.0, _alert_t - STEP)
 	var pilot := _sticks
 	# No radio link: the robot gets no commands and stops by itself.
@@ -444,13 +444,16 @@ func _build_hint(col: VBoxContainer) -> void:
 	col.add_child(hint_row)
 
 
-func _toggle_arm() -> void:
+## Arms or disarms the FPV drone. Arming needs the throttle the drone really gets (screen, radio or
+## gamepad) all the way down, as Betaflight does. Disarming works on the ground, and in the air
+## from the radio's switch or button too: real pilots cut the motors in a crash.
+func _toggle_arm(from_radio := false) -> void:
 	var f := sim as FpvSim
 	if f.armed:
-		if f.on_ground:
+		if f.on_ground or from_radio:
 			f.armed = false
 		return
-	if _thr.value.y > -0.9:
+	if float(_pad.read(self)["throttle"]) > -0.9:
 		alert("HINT_ARM_THROTTLE", true)
 		return
 	f.armed = true
@@ -472,7 +475,7 @@ func _input(event: InputEvent) -> void:
 				FlightBottom.next_view(self)
 		"arm":
 			if FlightBottom.arm_button(self) and not _paused:
-				_toggle_arm()
+				_toggle_arm(true)
 
 
 ## Reads a hint with the phone's own voice in the app's language, if it has one. Nothing leaves the
