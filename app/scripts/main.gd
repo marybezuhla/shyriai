@@ -47,6 +47,7 @@ func _ready() -> void:
 
 	Pal.changed.connect(_restyle)
 	Prefs.changed.connect(_restyle)
+	_fit_tablet()
 	get_viewport().size_changed.connect(_apply_insets)
 	_apply_insets()
 	if Prefs.welcomed:
@@ -185,6 +186,7 @@ func open_flight(vehicle: String, key: String, seed_ := -1, practice := false) -
 		remove_child(flight)
 	_set_landscape(true)
 	OS.low_processor_usage_mode = false  # the flight draws every frame
+	Engine.max_fps = 60  # smooth enough, and a 120 Hz phone does not burn its battery twice as fast
 	_bg.visible = false
 	_frame.visible = false
 	flight = load("res://scripts/flight/flight.gd").new()
@@ -207,6 +209,7 @@ func close_flight() -> void:
 		flight = null
 	_set_landscape(false)
 	OS.low_processor_usage_mode = true
+	Engine.max_fps = 0
 	_bg.visible = true
 	_frame.visible = true
 	_restyle()
@@ -302,6 +305,21 @@ func _build_nav() -> void:
 
 
 # --- Phone cut-outs and system bars -----------------------------------------
+
+## On a tablet the layout, scaled to the screen's short side, would come out twice a phone's size
+## in the hand. It is held to about a phone's size instead, which gives more room. Phones and
+## computers are left as they are.
+func _fit_tablet() -> void:
+	if not OS.has_feature("mobile"):
+		return
+	var win := Vector2(DisplayServer.window_get_size())
+	var dpi := float(DisplayServer.screen_get_dpi())
+	if win.x <= 0.0 or dpi < 100.0:
+		return  # an odd answer from the phone: better to change nothing
+	var scale := minf(win.x, win.y) / 390.0
+	var most := dpi / 140.0  # one layout point at most about 1/140 inch, as on a phone
+	get_window().content_scale_factor = clampf(most / scale, 0.6, 1.0)
+
 
 func _apply_insets() -> void:
 	var top := 16.0

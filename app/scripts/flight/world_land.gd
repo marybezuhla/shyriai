@@ -76,9 +76,14 @@ var _hills: Array[Dictionary] = []
 ## Potholes: x, z = centre, y = radius.
 var _dips: Array[Vector3] = []
 var _muds: Array[Vector3] = []
+## True while build_land runs: what is made then never moves, and may be batched.
+var _building := false
+## Boxes of the same size are one mesh, so they can be batched.
+var _boxes := {}
 
 
 func build_land(look: String, seed_ := 7) -> void:
+	_building = true
 	pal = PALETTES.get(look, PALETTES["day"])
 	_noise.seed = seed_
 	_noise.frequency = 0.012
@@ -92,6 +97,38 @@ func build_land(look: String, seed_ := 7) -> void:
 	for h in HOUSE_SPOTS:
 		_house(h, atan2(h.x, h.z) + PI)  # front door towards the pad
 	_decor_sunflowers(Vector3(-12, 0, -18))
+	_building = false
+	_batch_statics()
+
+
+## Parts of the land that never move, and come many times with the same shape and colour (runway
+## dashes, poplars, house walls), are drawn together in one go: far fewer draw calls on a phone.
+func _batch_statics() -> void:
+	var groups := {}
+	for n in get_children():
+		if n is MeshInstance3D and n.has_meta("static"):
+			var key := "%d/%d" % [n.mesh.get_instance_id(), n.material_override.get_instance_id()]
+			if not groups.has(key):
+				groups[key] = []
+			groups[key].append(n)
+	for key in groups:
+		var list: Array = groups[key]
+		if list.size() < 3:
+			continue
+		var mm := MultiMesh.new()
+		mm.transform_format = MultiMesh.TRANSFORM_3D
+		mm.mesh = list[0].mesh
+		mm.instance_count = list.size()
+		for i in list.size():
+			mm.set_instance_transform(i, list[i].transform)
+		var mmi := MultiMeshInstance3D.new()
+		mmi.multimesh = mm
+		mmi.material_override = list[0].material_override
+		mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		add_child(mmi)
+		for n in list:
+			remove_child(n)
+			n.queue_free()
 
 
 func _hill_height(h: Dictionary, x: float, z: float) -> float:
@@ -173,14 +210,18 @@ func _mesh(mesh: Mesh, c: Color, at: Vector3, rot_y := 0.0) -> MeshInstance3D:
 	mi.position = at
 	mi.rotation.y = rot_y
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	if _building:
+		mi.set_meta("static", true)
 	add_child(mi)
 	return mi
 
 
 func _box(size: Vector3) -> BoxMesh:
-	var b := BoxMesh.new()
-	b.size = size
-	return b
+	if not _boxes.has(size):
+		var b := BoxMesh.new()
+		b.size = size
+		_boxes[size] = b
+	return _boxes[size]
 
 
 func _environment() -> void:

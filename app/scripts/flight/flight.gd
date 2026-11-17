@@ -618,12 +618,14 @@ func pause() -> void:
 	_paused = true
 	_sound.hush(true)
 	_show_overlay(FlightCards.pause(self))
+	OS.low_processor_usage_mode = true  # a still picture: no need to draw it sixty times a second
 
 
 func resume() -> void:
 	_paused = false
 	_sound.hush(false)
 	_hide_overlay()
+	OS.low_processor_usage_mode = false
 
 
 ## "Start over" keeps the same layout (the same house, the same field); "Again" after a result too.
