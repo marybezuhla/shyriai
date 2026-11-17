@@ -518,6 +518,12 @@ func _update_hud() -> void:
 		_bar_fill.size = Vector2(BAR_W * task.progress, 6)
 	if _bar_text:
 		_bar_text.text = "%d %%" % int(round(task.progress * 100.0))
+	_update_hint()
+	FlightHud.update_stats(self)
+
+
+## The line of words over the view: the task's hint, or a more urgent message, maybe read aloud.
+func _update_hint() -> void:
 	var ready := "HINT_PRACTICE" if practice else Curriculum.text_key("HINT_READY", mode)
 	var hint_key := ready if _waiting and (task.hint == "" or practice) else task.hint
 	if kids_help():
@@ -552,38 +558,6 @@ func _update_hud() -> void:
 			_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART if w > wrap else TextServer.AUTOWRAP_OFF
 			_hint.custom_minimum_size = Vector2(wrap, 0) if w > wrap else Vector2.ZERO
 	_hint_panel.visible = hint_key != ""
-	if _counter:
-		_counter.text = "%d / %d" % [task.counter, task.counter_max]
-	if _stats.has("ALT"):
-		_stats["ALT"].text = tr("UNIT_M") % FlightTask.num(maxf(0.0, sim.altitude()))
-	if _stats.has("SPEED"):
-		_stats["SPEED"].text = tr("UNIT_MS") % FlightTask.num(Vector2(sim.vel.x, sim.vel.z).length())
-	if _stats.has("AIRSPEED"):
-		_stats["AIRSPEED"].text = tr("UNIT_MS") % FlightTask.num((sim as WingSim).speed)
-		_stats["AIRSPEED"].add_theme_color_override("font_color", Pal.c("warn") if (sim as WingSim).stall_warn else Pal.c("text"))
-		_tape.queue_redraw()
-	if _stats.has("WIND"):
-		_stats["WIND"].text = tr("UNIT_MS") % FlightTask.num(Vector2(sim.wind().x, sim.wind().z).length())
-		_wind_arrow.queue_redraw()
-	if _stats.has("LEAN"):
-		var lean := FlightHud.lean_deg(self)
-		var tip := float(sim.p.get("tip", 90.0))
-		_stats["LEAN"].text = "%d°" % roundi(lean) + (" / %d°" % roundi(tip) if tip < 90.0 else "")
-		_stats["LEAN"].add_theme_color_override("font_color", FlightHud.lean_color(self))
-		_lean_gauge.queue_redraw()
-	if _stats.has("VERT"):
-		var vy := sim.vel.y
-		_stats["VERT"].text = ("+" if vy >= 0.05 else "") + tr("UNIT_MS") % FlightTask.num(vy)
-	if _stats.has("HOME"):
-		_stats["HOME"].text = tr("UNIT_M") % FlightTask.num(FlightTask.flat_distance(sim.pos, world.pad), 0)
-	if _stats.has("BATTERY"):
-		_stats["BATTERY"].text = "%d %%" % int(ceil(sim.battery * 100.0))
-	if _stats.has("TARGET"):
-		_stats["TARGET"].text = tr("UNIT_M") % FlightTask.num(task.target_dist, 0)
-		_stats["CLOSING"].text = ("+" if task.closing >= 0.0 else "") + tr("UNIT_MS") % FlightTask.num(task.closing)
-	if _stats.has("TIME"):
-		var t := int(sim.time)
-		_stats["TIME"].text = FlightTask.clock(t)
 
 
 ## Markers drawn over the 3D view: where to fly, and where the drone is when it is small.

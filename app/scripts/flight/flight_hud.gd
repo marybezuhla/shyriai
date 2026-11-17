@@ -233,3 +233,39 @@ static func build_counters(f: Flight, top: HBoxContainer, glass: Color) -> void:
 				s.add_child(f._tape)
 			stats.add_child(s)
 		top.add_child(UI.panel(stats, glass, 16, 10))
+
+
+## The flight numbers, once a frame.
+static func update_stats(f: Flight) -> void:
+	if f._counter:
+		f._counter.text = "%d / %d" % [f.task.counter, f.task.counter_max]
+	if f._stats.has("ALT"):
+		f._stats["ALT"].text = f.tr("UNIT_M") % FlightTask.num(maxf(0.0, f.sim.altitude()))
+	if f._stats.has("SPEED"):
+		f._stats["SPEED"].text = f.tr("UNIT_MS") % FlightTask.num(Vector2(f.sim.vel.x, f.sim.vel.z).length())
+	if f._stats.has("AIRSPEED"):
+		f._stats["AIRSPEED"].text = f.tr("UNIT_MS") % FlightTask.num((f.sim as WingSim).speed)
+		f._stats["AIRSPEED"].add_theme_color_override("font_color", Pal.c("warn") if (f.sim as WingSim).stall_warn else Pal.c("text"))
+		f._tape.queue_redraw()
+	if f._stats.has("WIND"):
+		f._stats["WIND"].text = f.tr("UNIT_MS") % FlightTask.num(Vector2(f.sim.wind().x, f.sim.wind().z).length())
+		f._wind_arrow.queue_redraw()
+	if f._stats.has("LEAN"):
+		var lean := lean_deg(f)
+		var tip := float(f.sim.p.get("tip", 90.0))
+		f._stats["LEAN"].text = "%d°" % roundi(lean) + (" / %d°" % roundi(tip) if tip < 90.0 else "")
+		f._stats["LEAN"].add_theme_color_override("font_color", lean_color(f))
+		f._lean_gauge.queue_redraw()
+	if f._stats.has("VERT"):
+		var vy := f.sim.vel.y
+		f._stats["VERT"].text = ("+" if vy >= 0.05 else "") + f.tr("UNIT_MS") % FlightTask.num(vy)
+	if f._stats.has("HOME"):
+		f._stats["HOME"].text = f.tr("UNIT_M") % FlightTask.num(FlightTask.flat_distance(f.sim.pos, f.world.pad), 0)
+	if f._stats.has("BATTERY"):
+		f._stats["BATTERY"].text = "%d %%" % int(ceil(f.sim.battery * 100.0))
+	if f._stats.has("TARGET"):
+		f._stats["TARGET"].text = f.tr("UNIT_M") % FlightTask.num(f.task.target_dist, 0)
+		f._stats["CLOSING"].text = ("+" if f.task.closing >= 0.0 else "") + f.tr("UNIT_MS") % FlightTask.num(f.task.closing)
+	if f._stats.has("TIME"):
+		var t := int(f.sim.time)
+		f._stats["TIME"].text = FlightTask.clock(t)
