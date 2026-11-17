@@ -147,8 +147,28 @@ func test_kid_pilots() -> void:
 	Prefs._apply(saved)
 	KidPilots.remove(1)
 	check(not KidPilots.ask() and Prefs.passed_count("camera") == 2, "removing a pilot leaves the other one flying")
+	KidPilots.restore(1, {"animal": "owl", "color": "blue", "slice": {"passed": {"camera": 1}}})
+	KidPilots.select(1)
+	check(KidPilots.ask() and Prefs.passed_count("camera") == 1, "a removed pilot comes back with their progress")
+	KidPilots.select(0)
+	KidPilots.remove(1)
 	for i in KidPilots.MAX + 2:
 		KidPilots.add()
 	check(Prefs.kid_pilots.size() == KidPilots.MAX, "no more than six")
 	Prefs.erase_all()
 	check(Prefs.kid_pilots.is_empty(), "erasing all data removes the pilots too")
+
+
+## Words a child can meet outside the lesson hints: no numbers, no aiming words.
+func test_kids_texts() -> void:
+	var rx := RegEx.create_from_string("\\d|мішен|(^|[^а-яіїєґ])ціл(ь|і|ься)([^а-яіїєґ]|$)|target|(^|[^a-z])aim")
+	var keys := ["SUM_TARGET_MIDDLE", "SUM_TARGET_EDGE", "HINT_TARGET_MISS", "HINT_READY", "BREAK_TITLE",
+		"BREAK_TEXT", "BREAK_REST", "BREAK_MORE", "PILOTS_WHO", "HOME_HELLO_TEXT"]
+	for t in Curriculum.THEORY:
+		keys.append(t + "_DESC")
+	for lang in ["uk", "en"]:
+		TranslationServer.set_locale(lang)
+		for k in keys:
+			var text := String(TranslationServer.translate(Curriculum.text_key(k, "kids")))
+			check(rx.search(text) == null, "kids text %s (%s) has no numbers or aiming words: %s" % [k, lang, text])
+	TranslationServer.set_locale("en")

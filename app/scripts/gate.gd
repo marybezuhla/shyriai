@@ -65,7 +65,7 @@ func _ready() -> void:
 	col.add_child(grid)
 
 	var cancel := CenterContainer.new()
-	cancel.custom_minimum_size = Vector2(0, 44)
+	cancel.custom_minimum_size = Vector2(0, 52)
 	cancel.add_child(UI.label(tr("CANCEL"), UI.TEXT, 700, "muted", false, false))
 	col.add_child(UI.tappable(cancel, Color(0, 0, 0, 0), close, tr("CANCEL"), 14, 0))
 	center.add_child(col)

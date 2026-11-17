@@ -9,6 +9,8 @@ var selected := -1
 var _seen_done := -1
 
 
+var _show_card := false
+
 func build() -> void:
 	var lessons := Curriculum.lessons(vehicle, Prefs.mode)
 	var done := Prefs.passed_count(vehicle)
@@ -59,12 +61,34 @@ func _build_lessons(lessons: Array, done: int) -> void:
 		if state == "done":
 			state_name += ", " + tr("A11Y_SUNFLOWERS") % _got(lessons[i])
 		var name_: String = Curriculum.label(lessons[i]) + (", " + state_name if state_name != "" else "")
-		var t := UI.tappable(row, Color(0, 0, 0, 0), func(): selected = idx; rebuild(), name_, 14, 2)
+		var t := UI.tappable(row, Color(0, 0, 0, 0), func(): _pick(idx, idx <= done, lessons[idx]), name_, 14, 2)
 		path.add_row(t, dot)
 	add_child(path)
 	if Prefs.mode != "pro" and Curriculum.lessons(vehicle).any(func(k): return k in Curriculum.PRO_ONLY):
 		add_child(UI.label(tr("LESSON_PRO_ONLY"), UI.SMALL, 600, "muted"))
-	add_child(_lesson_card(lessons, done))
+	var card := _lesson_card(lessons, done)
+	add_child(card)
+	if _show_card:
+		_show_card = false
+		# The card is below the whole path: bring it into view, so a tap visibly does something.
+		(func():
+			var scroll := get_parent()
+			while scroll and not scroll is ScrollContainer:
+				scroll = scroll.get_parent()
+			if scroll and is_instance_valid(card):
+				scroll.ensure_control_visible(card)
+		).call_deferred()
+
+
+## A tap on a lesson. Kids fly an open lesson straight away (its dot is a play button); grown-ups
+## see its card, scrolled into view.
+func _pick(i: int, open: bool, key: String) -> void:
+	if Prefs.mode == "kids" and open:
+		app.start(vehicle, key)
+		return
+	selected = i
+	_show_card = true
+	rebuild()
 
 
 func _dot(i: int, state: String) -> Control:
@@ -144,7 +168,7 @@ func _flowers(key: String, px: int) -> Control:
 	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var got := _got(key)
 	for i in Rating.MAX:
-		row.add_child(Glyph.make("sunflower" if i < got else "sunflower_off", px, Pal.c("accent" if i < got else "line")))
+		row.add_child(Glyph.make("sunflower" if i < got else "sunflower_off", px, Pal.c("accent" if i < got else "faint")))
 	return row
 
 

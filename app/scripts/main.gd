@@ -127,8 +127,11 @@ func open_pilot_cards() -> void:
 	_push(_make("res://scripts/screens/pilot_cards.gd"))
 
 
-func open_pilots() -> void:
-	_push(_make("res://scripts/screens/pilots.gd"))
+## Who's flying: for the child (only the animals), or from settings for grown-ups (add, remove).
+func open_pilots(manage := false) -> void:
+	var s := _make("res://scripts/screens/pilots.gd")
+	s.manage = manage
+	_push(s)
 
 
 func open_pad() -> void:
@@ -151,6 +154,9 @@ func open_theory(card: String) -> void:
 func back() -> void:
 	if is_instance_valid(_gate):
 		_gate.close()
+		return
+	for card in find_children("*", "BreakCard", false, false):
+		card.rest()
 		return
 	if flight:
 		flight.on_back()

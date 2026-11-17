@@ -150,7 +150,8 @@ func _card(vehicle: String, date: String, kids: bool) -> Control:
 		col.add_child(flowers)
 		col.add_child(UI.label(tr("CARD_KIDS_FOR"), UI.BODY, 600, "text"))
 	else:
-		var facts := UI.hbox(12)
+		# Side by side, or one under the other with larger text so no word breaks.
+		var facts: BoxContainer = UI.vbox(8) if Pal.text_scale() > 1.15 else UI.hbox(12)
 		var when := UI.vbox(2)
 		when.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		when.add_child(UI.label(tr("CARD_EXAM"), UI.CAPTION, 600, "muted"))

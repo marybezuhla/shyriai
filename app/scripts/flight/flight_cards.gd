@@ -47,7 +47,7 @@ static func rating(f, got: int, before: Dictionary) -> Control:
 	row.alignment = BoxContainer.ALIGNMENT_CENTER
 	for i in Rating.MAX:
 		var on := i < got
-		row.add_child(Glyph.make("sunflower" if on else "sunflower_off", 40, Pal.c("accent" if on else "line")))
+		row.add_child(Glyph.make("sunflower" if on else "sunflower_off", 40, Pal.c("accent" if on else "faint")))
 	box.add_child(row)
 	# Kids see no numbers: the sunflowers and the tip say it all.
 	if f.mode != "kids":
@@ -76,10 +76,10 @@ const STREAK := 3
 static func crashed(f, streak := 0) -> Control:
 	var col := UI.vbox(12)
 	if f.sim is UgvSim:
-		col.add_child(UI.label(f.tr("CRASHED_UGV"), UI.TITLE_L, 600, "text", true))
 		var tipped := false
 		for e in f.sim.events:
 			tipped = tipped or e["type"] == "tipped"
+		col.add_child(UI.label(f.tr("CRASHED_UGV_TIPPED" if tipped else "CRASHED_UGV"), UI.TITLE_L, 600, "text", true))
 		var why: String = f.tr("CRASHED_UGV_TIP") if tipped else f.tr("CRASHED_UGV_HIT")
 		var speed: float = f.sim.crash_speed
 		col.add_child(UI.label(why % (FlightTask.num(speed, 0) if tipped else FlightTask.num(speed)), UI.BODY, 500, "muted"))
@@ -118,8 +118,14 @@ static func _retry_buttons(f, col: VBoxContainer, streak: int, tip: String) -> v
 		col.add_child(_tip_box(f.tr("TIP") + " " + f.tr(tip_key(tip, f.task_key, f.mode))))
 	col.add_child(UI.primary(f.tr("AGAIN"), f.restart, "play"))
 	if streak >= STREAK and f.mode != "kids":
-		col.add_child(secondary(f.tr("PRACTICE"), func(): f.app.open_flight(f.vehicle, f.task_key, f.flight_seed, true)))
-	col.add_child(secondary(f.tr("EXIT"), f.leave))
+		# Side by side, so both fit a phone held sideways even with larger text.
+		var pair := UI.hbox(10)
+		for b in [secondary(f.tr("PRACTICE"), func(): f.app.open_flight(f.vehicle, f.task_key, f.flight_seed, true)), secondary(f.tr("EXIT"), f.leave)]:
+			b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			pair.add_child(b)
+		col.add_child(pair)
+	else:
+		col.add_child(secondary(f.tr("EXIT"), f.leave))
 
 
 ## The most fitting tip there is: for this very failure, then for the lesson, then a general one.

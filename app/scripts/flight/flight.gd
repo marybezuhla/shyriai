@@ -52,7 +52,7 @@ var _hint_panel := PanelContainer.new()
 var _bar_fill := Panel.new()
 var _bar_text: Label
 var _stats := {}
-var _counter: Label
+var _counter: Control
 ## The plane's speed tape and wind arrow, when shown.
 var _tape: Control
 var _wind_arrow: Control

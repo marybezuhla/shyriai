@@ -58,6 +58,8 @@ static func build_chip(f: Flight) -> Control:
 	var title := Curriculum.label(f.task_key)
 	if not f.task.is_mission and not f.task.is_free and f.mode != "kids":
 		title = f.tr("LESSON_N") % (Curriculum.lessons(f.vehicle, f.mode).find(f.task_key) + 1) + " · " + title
+	if f.practice:
+		title += " · " + f.tr("PRACTICE_TAG")  # it stays clear this try is not scored
 	chip.add_child(UI.label(title, UI.BODY, 700, "text", false, false))
 	var bar_row := UI.hbox(8)
 	var bar := Panel.new()
@@ -178,6 +180,23 @@ static func _draw_wind_arrow(f: Flight) -> void:
 	a.draw_colored_polygon(PackedVector2Array([tip + d * 2.0, tip - d * 4.0 + side, tip - d * 4.0 - side]), Pal.c("text"))
 
 
+## Kids' counter: filled dots for what is done, empty ones for what is left. Many: a bar instead.
+static func _draw_dots(f: Flight) -> void:
+	var c: Control = f._counter
+	var n := maxi(1, f.task.counter_max)
+	var done := clampi(f.task.counter, 0, n)
+	if n > 12:
+		c.draw_rect(Rect2(0, 8, c.size.x, 6), Pal.c("line"))
+		c.draw_rect(Rect2(0, 8, c.size.x * done / n, 6), Pal.c("accent"))
+		return
+	for i in n:
+		var at := Vector2(9.0 + i * 18.0, c.size.y / 2.0)
+		if i < done:
+			c.draw_circle(at, 7.0, Pal.c("accent"), true, -1.0, true)
+		else:
+			c.draw_arc(at, 6.0, 0, TAU, 20, Pal.c("text"), 2.0, true)
+
+
 static func build_counters(f: Flight, top: HBoxContainer, glass: Color) -> void:
 	if f.mode == "kids":
 		if f.task.counter_shown:
@@ -185,7 +204,12 @@ static func build_counters(f: Flight, top: HBoxContainer, glass: Color) -> void:
 			# Sunflowers are what the kitten mission collects; other counts need no picture.
 			if f.task.key == "MIS_CAM_KITTEN":
 				row.add_child(Glyph.make("sunflower", 26, Pal.c("accent")))
-			f._counter = UI.label("0", UI.TITLE_S, 700, "text", true, false)
+			# No numbers for kids: a dot for each one to find, filled in as they are found.
+			f._counter = Control.new()
+			var n := maxi(1, f.task.counter_max)
+			f._counter.custom_minimum_size = Vector2(minf(n, 12) * 18.0, 22)
+			f._counter.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+			f._counter.draw.connect(func(): _draw_dots(f))
 			row.add_child(f._counter)
 			top.add_child(UI.panel(row, glass, 22, 10))
 	else:
@@ -238,7 +262,11 @@ static func build_counters(f: Flight, top: HBoxContainer, glass: Color) -> void:
 ## The flight numbers, once a frame.
 static func update_stats(f: Flight) -> void:
 	if f._counter:
-		f._counter.text = "%d / %d" % [f.task.counter, f.task.counter_max]
+		# The count is often known only once the task has set up: the row grows to fit it.
+		var w := minf(maxi(1, f.task.counter_max), 12) * 18.0
+		if f._counter.custom_minimum_size.x != w:
+			f._counter.custom_minimum_size.x = w
+		f._counter.queue_redraw()
 	if f._stats.has("ALT"):
 		f._stats["ALT"].text = f.tr("UNIT_M") % FlightTask.num(maxf(0.0, f.sim.altitude()))
 	if f._stats.has("SPEED"):

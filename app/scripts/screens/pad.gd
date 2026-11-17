@@ -40,7 +40,8 @@ func _axes_card() -> Control:
 	for st in Prefs.PAD_AXES:
 		var m: Dictionary = Prefs.pad_axes.get(st, FlightInput.default_axis(st, Prefs.stick_mode == "1"))
 		var what := tr("PAD_AXIS") % (int(m["a"]) + 1)
-		if m["inv"]:
+		# Up reads negative on every gamepad: "reversed" is said only for a stick learnt that way.
+		if m["inv"] and Prefs.pad_axes.has(st):
 			what += " · " + tr("PAD_INVERTED")
 		if _learning == st:
 			what = tr("PAD_MOVE_" + ("UP" if st in ["throttle", "pitch"] else "RIGHT"))
@@ -61,13 +62,16 @@ func _buttons_card() -> Control:
 
 
 func _row(title: String, value: String, id: String) -> Control:
-	var row := UI.hbox(10)
+	# With larger text the value goes under the name, so neither is cut or pushed off the screen.
+	var row: BoxContainer = UI.vbox(4) if Pal.text_scale() > 1.15 else UI.hbox(10)
 	var t := UI.label(title, UI.TEXT, 600)
 	t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(t)
 	var on := _learning == id
-	row.add_child(UI.panel(UI.label(value, UI.SMALL, 700, "on_accent" if on else "text", false, false),
-		Pal.c("accent") if on else Pal.c("surface2"), 8, 6))
+	var pill := UI.panel(UI.label(value, UI.SMALL, 700, "on_accent" if on else "text", false, false),
+		Pal.c("accent") if on else Pal.c("surface2"), 8, 6)
+	pill.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	row.add_child(pill)
 	return UI.tappable(row, Color(0, 0, 0, 0), func(): _learn(id), title + ": " + value, 10, 8)
 
 

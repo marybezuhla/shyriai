@@ -16,7 +16,8 @@ static func build_bottom(f: Flight, col: VBoxContainer, ins: Dictionary) -> void
 	var room := f.get_viewport_rect().size.x - 2.0 * Flight.SIDE - float(ins["left"]) - float(ins["right"]) - 24.0
 	if (f.task is PhotoTask and f.task.kit) or f.task.action != "" or home_button(f) or arm_button(f):
 		room -= 96.0
-	f._view_compact = (room - Flight.VIEW_FULL) / 2.0 < 104.0
+	# With larger text the three views would stand one under another over the drone: one button then.
+	f._view_compact = (room - Flight.VIEW_FULL) / 2.0 < 104.0 or Pal.text_scale() > 1.15
 	room -= Flight.VIEW_COMPACT if f._view_compact else Flight.VIEW_FULL
 	# A square screen (an unfolded phone held upright) is narrower still: the button shows only
 	# its icon.

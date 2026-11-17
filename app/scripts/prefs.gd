@@ -163,6 +163,8 @@ func welcome(child: bool) -> void:
 	welcomed = true
 	mode = "kids" if child else "simple"
 	kids_lock = child
+	# A young child may not read yet: hints are read aloud (only if the phone has a voice for it).
+	speak_hints = child
 	_undo = {}
 	_save()
 	_apply_theme()
