@@ -250,3 +250,20 @@ class Toggle extends Control:
 			edge.anti_aliasing = true
 			draw_style_box(edge, r)
 		draw_circle(Vector2(x, h / 2.0), h / 2.0 - 3.0, knob, true, -1.0, true)
+
+
+## Short points, one under another, each with a dot: "a|b|c".
+static func points(text: String) -> Control:
+	var list := vbox(10)
+	for point in text.split("|"):
+		var row := hbox(12)
+		var dot := Control.new()
+		dot.custom_minimum_size = Vector2(10, 10)
+		dot.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+		dot.draw.connect(func(): dot.draw_circle(Vector2(5, 11), 4.0, Pal.c("accent"), true, -1.0, true))
+		row.add_child(dot)
+		var t := label(point.strip_edges(), TEXT, 500)
+		t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(t)
+		list.add_child(row)
+	return list

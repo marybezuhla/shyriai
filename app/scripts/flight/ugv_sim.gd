@@ -10,7 +10,7 @@ extends DroneSim
 const UGV := {
 	# vmax m/s, turn deg/s on the spot with the tracks full opposite (a real tracked robot
 	# turns about 60°/s on firm ground), tau s to reach the stick's speed, tip deg sideways and
-	# tip_pitch deg nose up or down: a long, low tracked robot goes over sideways much sooner.
+	# tip_pitch deg nose up or down: a long, narrow tracked robot goes over sideways much sooner.
 	"kids": {"vmax": 2.2, "turn": 80.0, "tau": 0.3, "crash": false, "bounce": 0.3, "tip": 90.0,
 		"battery_s": 0.0, "wind": 0.0, "gust": 0.0},
 	"simple": {"vmax": 3.0, "turn": 70.0, "tau": 0.4, "crash": false, "bounce": 0.0, "tip": 90.0,

@@ -4,7 +4,7 @@ extends Screen
 
 const TERMS := [
 	"THROTTLE", "YAW", "PITCH", "ROLL", "STICKMODE", "DEADZONE", "EXPO", "HOVER", "GIMBAL", "GPS",
-	"RTH", "FAILSAFE", "LIPO", "ARM", "FPV", "MODES",
+	"RTH", "FAILSAFE", "LIPO", "ARM", "FPV", "MODES", "RATES", "LEAD",
 	"AOA", "STALL", "SPIN", "CIRCUIT", "WINDSOCK", "GLIDE", "FLARE", "GOAROUND", "UGV",
 ]
 

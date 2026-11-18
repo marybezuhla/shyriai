@@ -11,6 +11,11 @@ var _seen_done := -1
 
 var _show_card := false
 
+
+## Opened on one lesson: its card shows, scrolled into view.
+func show_lesson() -> void:
+	_show_card = true
+
 func build() -> void:
 	var lessons := Curriculum.lessons(vehicle, Prefs.mode)
 	var done := Prefs.passed_count(vehicle)
@@ -128,6 +133,11 @@ func _lesson_card(lessons: Array, done: int) -> Control:
 		card.add_child(UI.primary(tr("LESSON_START"), func(): app.start(vehicle, key), "play"))
 	else:
 		card.add_child(UI.label(tr("LESSON_LOCKED"), UI.SMALL, 600, "muted"))
+	# The book's chapter about it, before the flight (kids have their own little book).
+	var ch := Book.chapter_for(vehicle, key)
+	if ch != "" and Prefs.mode != "kids":
+		var n := Book.index_of(ch) + 1
+		card.add_child(UI.secondary(tr("BOOK_READ_ABOUT") % [n, tr("BOOK_%s_T" % ch)], func(): _to_chapter(ch)))
 	return UI.panel(card, Pal.c("surface"), 22, 18)
 
 
@@ -202,3 +212,11 @@ func _build_free() -> void:
 	col.add_child(UI.primary(tr("FREE_GO_UGV" if machine == "ugv" else "FREE_GO"), func(): app.start(vehicle, key), "play"))
 	add_child(col)
 
+
+## Opened from that chapter: back to it, so screens do not pile up.
+func _to_chapter(id: String) -> void:
+	var below = app.stack[-2] if app.stack.size() > 1 else null
+	if below != null and below.get("id") == id:
+		app.back()
+	else:
+		app.open_chapter(id)
