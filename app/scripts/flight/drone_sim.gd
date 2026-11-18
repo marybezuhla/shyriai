@@ -39,6 +39,8 @@ var tilt := Vector2.ZERO  # pitch, roll in radians, for drawing only
 var on_ground := true
 var crashed := false
 var crash_speed := 0.0
+## What the crash was: "ground" (came down too fast), "obstacle" or "wingtip" (a plane landing banked).
+var crash_kind := ""
 var battery := 1.0
 var time := 0.0
 ## What happened during the last step: {"type": "landed"|"bump"|"crash"|"took_off", "speed": float}
@@ -73,6 +75,7 @@ func place(at: Vector3, heading := 0.0) -> void:
 	on_ground = pos.y <= ground.call(pos.x, pos.z) + 0.01
 	crashed = false
 	crash_speed = 0.0
+	crash_kind = ""
 	battery = 1.0
 	time = 0.0
 
@@ -234,15 +237,16 @@ func _collide() -> void:
 		if into <= 0.0:
 			continue
 		if p["crash"] and into > float(p.get("crash_speed", CRASH_SPEED)):
-			_crash(into)
+			_crash(into, "obstacle")
 			return
 		# Bounce softly in Kids mode, stop against it otherwise.
 		vel += normal * into * (1.0 + float(p["bounce"]))
 		events.append({"type": "bump", "speed": into})
 
 
-func _crash(speed: float) -> void:
+func _crash(speed: float, kind := "ground") -> void:
 	crashed = true
+	crash_kind = kind
 	crash_speed = speed
 	events.append({"type": "crash", "speed": speed})
 

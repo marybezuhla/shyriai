@@ -66,7 +66,7 @@ func add_person(at: Vector3) -> void:
 	var n := Node3D.new()
 	n.position = Vector3(at.x, height(at.x, at.z), at.z)
 	add_child(n)
-	var jacket := _mat(Color("#D9473B"))
+	var jacket := _mat(Pal.SIGNAL_RED)
 	var skin := _mat(Color("#E7B992"))
 	var dark := _mat(Color("#39254F"))
 	var parts := [
@@ -170,6 +170,13 @@ func hoop_done(i: int) -> void:
 		tw.tween_property(_hoops[i], "scale", Vector3.ONE * 1.25, 0.12)
 		tw.tween_property(_hoops[i], "scale", Vector3.ONE * 0.001, 0.25)
 		tw.tween_callback(_hoops[i].hide)
+
+
+## A hoop passed earlier is there again, for another go.
+func hoop_reset(i: int) -> void:
+	if i < _hoops.size():
+		_hoops[i].scale = Vector3.ONE
+		_hoops[i].show()
 
 
 ## A thin pole for slalom and figure eights.
@@ -663,7 +670,7 @@ func add_kit() -> Node3D:
 	for size in [Vector3(0.22, 0.01, 0.07), Vector3(0.07, 0.01, 0.2)]:
 		var c := MeshInstance3D.new()
 		c.mesh = _box(size)
-		c.material_override = _shared_mat(Color("#D9473B"))
+		c.material_override = _shared_mat(Pal.SIGNAL_RED)
 		c.position = Vector3(0, 0.115, 0)
 		n.add_child(c)
 	return n

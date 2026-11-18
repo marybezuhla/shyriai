@@ -8,12 +8,14 @@ class_name UgvSim
 extends DroneSim
 
 const UGV := {
-	# vmax m/s, turn deg/s at full opposite tracks, tau s to reach the stick's speed, tip deg.
-	"kids": {"vmax": 2.2, "turn": 70.0, "tau": 0.3, "crash": false, "bounce": 0.3, "tip": 90.0,
+	# vmax m/s, turn deg/s on the spot with the tracks full opposite (a real tracked robot
+	# turns about 60°/s on firm ground), tau s to reach the stick's speed, tip deg sideways and
+	# tip_pitch deg nose up or down: a long, narrow tracked robot goes over sideways much sooner.
+	"kids": {"vmax": 2.2, "turn": 80.0, "tau": 0.3, "crash": false, "bounce": 0.3, "tip": 90.0,
 		"battery_s": 0.0, "wind": 0.0, "gust": 0.0},
-	"simple": {"vmax": 3.0, "turn": 80.0, "tau": 0.4, "crash": false, "bounce": 0.0, "tip": 90.0,
+	"simple": {"vmax": 3.0, "turn": 70.0, "tau": 0.4, "crash": false, "bounce": 0.0, "tip": 90.0,
 		"battery_s": 0.0, "wind": 0.0, "gust": 0.0},
-	"pro": {"vmax": 4.0, "turn": 90.0, "tau": 0.6, "crash": true, "bounce": 0.0, "tip": 32.0,
+	"pro": {"vmax": 4.0, "turn": 60.0, "tau": 0.6, "crash": true, "bounce": 0.0, "tip": 32.0, "tip_pitch": 42.0,
 		"battery_s": 600.0, "wind": 0.0, "gust": 0.0, "crash_speed": 2.5},
 }
 const HALF_LEN := 0.8  # m, for reading the slope under the robot
@@ -84,7 +86,8 @@ func step(dt: float, throttle: float, yaw_in: float, pitch: float, roll: float) 
 
 	var f := float(grip.call(pos.x, pos.z))
 	var v := (tracks.x + tracks.y) * 0.5 * float(p["vmax"]) * f
-	var w := (tracks.x - tracks.y) * deg_to_rad(p["turn"]) * f  # positive turns right
+	# Positive turns right. Mud lets the tracks slip, so turns there are slower still.
+	var w := (tracks.x - tracks.y) * 0.5 * deg_to_rad(p["turn"]) * lerpf(f, 1.0, 0.15)
 	# Uphill is slower, downhill a little faster.
 	var slope := _slope_along()
 	v *= clampf(1.0 - slope * 1.6 * signf(v), 0.25, 1.3)
@@ -116,7 +119,7 @@ func step(dt: float, throttle: float, yaw_in: float, pitch: float, roll: float) 
 
 	# Tipping over on a slope that is too steep (Adult mode).
 	var lean := rad_to_deg(acos(clampf(att.y.y, -1.0, 1.0)))
-	if p["crash"] and lean > float(p["tip"]):
+	if p["crash"] and tip_share() > 1.0:
 		crashed = true
 		crash_speed = lean
 		events.append({"type": "tipped", "speed": lean})
@@ -150,3 +153,17 @@ func _terrain_basis() -> Basis:
 	var back := -along
 	var x := up.cross(back).normalized()
 	return Basis(x, up, back)
+
+
+## How near the robot is to tipping over: 1 = over. Sideways the limit is "tip", along the slope
+## "tip_pitch".
+func tip_share() -> float:
+	var side := absf(rad_to_deg(tilt.y)) / float(p["tip"])
+	return maxf(side, absf(rad_to_deg(tilt.x)) / float(p.get("tip_pitch", p["tip"])))
+
+
+## The limit for the way the robot leans most now.
+func tip_limit() -> float:
+	var side := absf(rad_to_deg(tilt.y)) / float(p["tip"])
+	var along := absf(rad_to_deg(tilt.x)) / float(p.get("tip_pitch", p["tip"]))
+	return float(p["tip"]) if side >= along else float(p.get("tip_pitch", p["tip"]))

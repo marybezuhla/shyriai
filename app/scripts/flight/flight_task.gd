@@ -63,6 +63,22 @@ const FILES := {
 	"FREE_INTERCEPT": "res://scripts/flight/tasks/free_flight.gd",
 	"MIS_CAM_MEDS": "res://scripts/flight/tasks/mission_meds.gd",
 	"MIS_CAM_DOG": "res://scripts/flight/tasks/mission_dog.gd",
+	"MIS_CAM_LINK": "res://scripts/flight/tasks/mission_link.gd",
+	"MIS_CAM_JAM": "res://scripts/flight/tasks/mission_link.gd",
+	"WING_LEVEL": "res://scripts/flight/tasks/wing_rings.gd",
+	"WING_TURN": "res://scripts/flight/tasks/wing_turn.gd",
+	"WING_TAKEOFF": "res://scripts/flight/tasks/wing_takeoff.gd",
+	"WING_CIRCUIT": "res://scripts/flight/tasks/wing_rings.gd",
+	"WING_STALL": "res://scripts/flight/tasks/wing_stall.gd",
+	"WING_LANDING": "res://scripts/flight/tasks/wing_landing.gd",
+	"WING_INTO_WIND": "res://scripts/flight/tasks/wing_pattern.gd",
+	"WING_PATTERN": "res://scripts/flight/tasks/wing_pattern.gd",
+	"WING_KIDS_STORKS": "res://scripts/flight/tasks/wing_rings.gd",
+	"MIS_WING_CLOUDS": "res://scripts/flight/tasks/wing_rings.gd",
+	"MIS_WING_KITE": "res://scripts/flight/tasks/wing_find.gd",
+	"MIS_WING_SEARCH": "res://scripts/flight/tasks/wing_find.gd",
+	"MIS_WING_FLOOD": "res://scripts/flight/tasks/wing_flood.gd",
+	"FREE_WING": "res://scripts/flight/tasks/free_flight.gd",
 }
 ## The racing gates of the FPV lessons and the race, in order, centre 2.2 m up.
 const GATE_COURSE: Array[Vector3] = [
@@ -174,8 +190,14 @@ func make_sim(vehicle_: String) -> DroneSim:
 		var u := UgvSim.new(mode, 11)
 		u.grip = world.grip
 		sim = u
+	elif vehicle_ == "wing":
+		sim = WingSim.new(mode, 11)
 	elif vehicle_ == "fpv" and mode != "kids":
 		var f := FpvSim.new(mode, 11)
+		f.configure(Prefs.fpv_rates, Prefs.fpv_quad)
+		# Adult missions are flown in the mode the pilot picked for them.
+		if key.begins_with("MIS_FPV_") and mode == "pro":
+			flight_mode = Prefs.fpv_mission_mode
 		f.flight_mode = flight_mode
 		sim = f
 	else:
@@ -189,7 +211,13 @@ func make_sim(vehicle_: String) -> DroneSim:
 	sim.ground = world.height
 	sim.obstacles = world.obstacles
 	sim.place(start_position(), start_heading())
+	tune(sim)
 	return sim
+
+
+## Override: adjust the physics once it is placed (e.g. the stall lesson turns off stall protection).
+func tune(_sim: DroneSim) -> void:
+	pass
 
 
 ## What the vehicle gets from the sticks: nothing while the radio link is down.
@@ -386,7 +414,9 @@ func ring_step(sim: DroneSim) -> String:
 		var n: Vector3 = g["n"]
 		var d0 := (_prev - c).dot(n)
 		var d1 := (sim.pos - c).dot(n)
-		if d0 < 0.0 and d1 >= 0.0:
+		# Kids' rings count from either side: a child who flies through backwards still went through.
+		var crossed := (d0 < 0.0 and d1 >= 0.0) or (bool(g.get("both", false)) and d0 > 0.0 and d1 <= 0.0)
+		if crossed:
 			var hit := _prev.lerp(sim.pos, d0 / (d0 - d1))
 			var off: Vector3 = hit - c
 			var inside := false
@@ -404,6 +434,7 @@ func ring_step(sim: DroneSim) -> String:
 	return res
 
 
-func restart_rings() -> void:
-	ring_i = 0
+## Back to a ring (the first by default): the rings from there count again.
+func restart_rings(from := 0) -> void:
+	ring_i = from
 	_prev = Vector3.INF

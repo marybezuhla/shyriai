@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # Tests of the drone physics and of every lesson: each lesson must be passable with the sticks alone,
 # in every mode. CI fails if anything here fails. Not shipped in the APK.
-extends "res://tests/sim_courses.gd"
+extends "res://tests/sim_book.gd"
 
 
 func _ready() -> void:
@@ -14,6 +14,42 @@ func _ready() -> void:
 	test_adult_crashes_into_a_house()
 	test_battery_lands_by_itself()
 	test_fpv_physics()
+	await _every_course()
+	test_return_home()
+	test_fpv_setup()
+	test_pilot_findings()
+	test_pad_prefs()
+	test_kid_pilots()
+	test_kids_texts()
+	test_book()
+	test_kids_book()
+	for mode in ["simple", "pro"]:
+		for key in ["MIS_CAM_LINK", "MIS_CAM_JAM"]:
+			await test_link_mission(key, mode)
+	test_quiz_texts()
+	test_rating_rules()
+	test_results_are_kept()
+	test_saved_results_are_checked()
+	test_tips()
+	test_damaged_save_falls_back()
+	await test_free_flight()
+	await _other_layouts()
+	# Every lesson and mission the app offers was flown in every mode that offers it.
+	for v in Curriculum.VEHICLES:
+		for m in Prefs.MODES:
+			for k in Curriculum.lessons(v, m) + Curriculum.missions(v, m):
+				check(_flown.has(k + "/" + m), "%s %s was flown to a pass in the tests" % [m, k])
+	if failures == 0:
+		print("SIM OK")
+		get_tree().quit(0)
+	else:
+		print("SIM FAILED: %d" % failures)
+		get_tree().quit(1)
+
+
+
+## Every course, vehicle by vehicle, in every mode.
+func _every_course() -> void:
 	for mode in Prefs.MODES:
 		await test_sticks_lesson(mode)
 		await test_takeoff_lesson(mode)
@@ -58,13 +94,19 @@ func _ready() -> void:
 		await test_meds(mode)
 	await test_meds_rules()
 	await test_dog()
-	test_quiz_texts()
-	test_rating_rules()
-	test_results_are_kept()
-	test_saved_results_are_checked()
-	test_damaged_save_falls_back()
-	await test_free_flight()
-	# Missions change with every attempt: fly them with other layouts too.
+	test_wing_physics()
+	for mode in Prefs.MODES:
+		for key in Curriculum.lessons("wing", mode) + Curriculum.missions("wing", mode):
+			await test_wing_task(key, mode)
+	await test_wing_landing_rules()
+	await test_wing_obstacles()
+	await test_wing_stall_needs_slowing()
+	await test_wing_level_needs_hands()
+	await test_wing_kids_assist()
+
+
+## Missions change with every attempt: fly them with other layouts too.
+func _other_layouts() -> void:
 	for seed_ in [1234, 9001]:
 		_seed = seed_
 		await test_kitten_mission()
@@ -78,18 +120,15 @@ func _ready() -> void:
 				await test_intercept_task(key, mode)
 		for key in ["MIS_UGV_CARGO", "MIS_UGV_EVAC"]:
 			await test_ugv_task(key, "simple")
+		for key in ["MIS_WING_SEARCH", "MIS_WING_FLOOD"]:
+			await test_wing_task(key, "simple")
+		for key in ["MIS_CAM_LINK", "MIS_CAM_JAM"]:
+			await test_link_mission(key, "simple")
+		# The wind comes from either end: both ways round the field.
+		for key in ["WING_INTO_WIND", "WING_PATTERN"]:
+			await test_wing_task(key, "pro")
+		await test_wing_task("MIS_WING_KITE", "kids")
 	_seed = 7
-	# Every lesson and mission the app offers was flown in every mode that offers it.
-	for v in Curriculum.VEHICLES:
-		for m in Prefs.MODES:
-			for k in Curriculum.lessons(v, m) + Curriculum.missions(v, m):
-				check(_flown.has(k + "/" + m), "%s %s was flown to a pass in the tests" % [m, k])
-	if failures == 0:
-		print("SIM OK")
-		get_tree().quit(0)
-	else:
-		print("SIM FAILED: %d" % failures)
-		get_tree().quit(1)
 
 
 # --- Sunflowers, results, licences, free flight ------------------------------
@@ -149,6 +188,20 @@ func test_saved_results_are_checked() -> void:
 	check(Prefs.pilot_name == "" and Prefs.free["wind"] == "none" and Prefs.free["balls"] == true
 		and Prefs.free["time"] == "dusk", "odd values are ignored, good ones kept")
 	Prefs.erase_all()
+	check(not Prefs.welcomed, "a fresh start asks who will play")
+	Prefs._apply({"mode": "pro"})
+	check(Prefs.welcomed, "a file from before the question is not asked again")
+	Prefs._apply({"welcomed": "yes"})
+	check(Prefs.welcomed, "an odd value does not bring the question back")
+	Prefs.erase_all()
+
+
+## The tip after three failed tries fits the failure, with a general one for everything else.
+func test_tips() -> void:
+	check(FlightCards.tip_key("TIP_FAIL_JOLT_CARGO", "MIS_UGV_CARGO", "pro") == "TIP_FAIL_JOLT_CARGO", "a tip for the failure itself")
+	check(FlightCards.tip_key("TIP_FAIL_JOLT_STRETCHER", "UGV_STRETCHER", "kids") == "TIP_FAIL_JOLT_STRETCHER_KIDS", "kids get their own tip")
+	check(FlightCards.tip_key("TIP_NOTHING", "CAM_HOLD", "simple") == "TIP_GENERIC", "a general tip when there is no other")
+	check(FlightCards.tip_key("TIP_NOTHING", "CAM_HOLD", "kids") == "TIP_GENERIC_KIDS", "and a kids one for kids")
 
 
 func test_free_flight() -> void:
@@ -166,6 +219,7 @@ func test_free_flight() -> void:
 			for b in balls:
 				sim.pos = b
 				task.step(DT, sim, {"throttle": 0.0, "yaw": 0.0, "pitch": 0.0, "roll": 0.0})
+				_kids_words(task)
 			check(task.counter == balls.size() and balls.size() == 10 and not task.done,
 				"%s %s: all ten balls collected, still flying" % [m, key])
 			world.queue_free()

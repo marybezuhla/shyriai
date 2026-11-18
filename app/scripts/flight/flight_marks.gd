@@ -1,0 +1,125 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# What the flight draws over the 3D view: the gold diamond on the next target, or an arrow at the
+# edge of the screen pointing to it, a ring on the ground, and a thin circle round a far-away drone.
+class_name FlightMarks
+extends RefCounted
+
+
+static func draw(f: Flight) -> void:
+	var rect := f._marks.get_rect()
+	if f.task.marker != Vector3.INF:
+		var behind := f.cam.is_position_behind(f.task.marker)
+		var p := f.cam.unproject_position(f.task.marker)
+		# Keep the arrow clear of the sticks along the bottom: under a thumb it cannot be seen.
+		var inner := rect.grow_individual(-40, -40, -40, -maxf(40.0, f.stick_band()))
+		if not behind and inner.has_point(p):
+			# Grows and pulses when a child needs help finding it.
+			var r := 9.0
+			if f.kids_help():
+				r = 13.0 + 3.0 * sin(Time.get_ticks_msec() / 160.0)
+			_diamond(f, p, r)
+		else:
+			# An arrow at the edge of the screen, pointing towards the target.
+			var c := inner.get_center()
+			var dir := (p - c)
+			if behind:
+				dir = -dir
+			if dir.length() < 1.0:
+				dir = Vector2.UP
+			dir = dir.normalized()
+			var t := minf(absf((inner.size.x / 2.0) / dir.x) if dir.x != 0.0 else INF, absf((inner.size.y / 2.0) / dir.y) if dir.y != 0.0 else INF)
+			var tip := c + dir * t
+			var side := Vector2(-dir.y, dir.x)
+			var col := Pal.c("accent")
+			var arrow := PackedVector2Array([tip + dir * 12, tip - dir * 6 + side * 11, tip - dir * 6 - side * 11])
+			f._marks.draw_colored_polygon(arrow, col)
+			# A dark edge keeps the gold arrow visible against a bright sky.
+			arrow.append(arrow[0])
+			f._marks.draw_polyline(arrow, Pal.INK, 2.0, true)
+		if f.task.ring > 0.0:
+			_ground_ring(f, f.task.marker, f.task.ring)
+	if f.view == "fpv" and f.sim is FpvSim and f.mode != "kids":
+		_osd(f, rect)
+	if f.home != null and FlightTask.flat_distance(f.sim.pos, f.world.pad) > 12.0:
+		_home_mark(f, rect.grow_individual(-40, -40, -40, -maxf(40.0, f.stick_band())))
+	# A thin ring round the drone when it is far and tiny.
+	if f.view == "pilot" and not f.cam.is_position_behind(f.sim.pos):
+		var d := f.cam.position.distance_to(f.sim.pos)
+		if d > 14.0:
+			var q := f.cam.unproject_position(f.sim.pos + Vector3(0, 0.1, 0))
+			var col2 := Pal.CREAM if f.look == "dusk" else Pal.VIOLET
+			col2.a = 0.7
+			f._marks.draw_arc(q, 16.0, 0, TAU, 32, col2, 2.0, true)
+
+
+static func _diamond(f: Flight, p: Vector2, r: float) -> void:
+	var col := Pal.c("accent")
+	f._marks.draw_colored_polygon(PackedVector2Array([p + Vector2(0, -r), p + Vector2(r, 0), p + Vector2(0, r), p + Vector2(-r, 0)]), col)
+	f._marks.draw_polyline(PackedVector2Array([p + Vector2(0, -r), p + Vector2(r, 0), p + Vector2(0, r), p + Vector2(-r, 0), p + Vector2(0, -r)]), Pal.INK, 2.0, true)
+
+
+static func _ground_ring(f: Flight, center: Vector3, radius: float) -> void:
+	var pts := PackedVector2Array()
+	var g := f.sim.ground.call(center.x, center.z) as float
+	for i in 49:
+		var a := i * TAU / 48.0
+		var w := Vector3(center.x + cos(a) * radius, g + 0.05, center.z + sin(a) * radius)
+		if f.cam.is_position_behind(w):
+			return
+		pts.append(f.cam.unproject_position(w))
+	var col := Pal.c("accent")
+	f._marks.draw_polyline(pts, Pal.INK, 5.0, true)
+	f._marks.draw_polyline(pts, col, 3.0, true)
+
+
+## A small house over the pad, or at the screen's edge on the side where the pad is: where home is.
+static func _home_mark(f: Flight, inner: Rect2) -> void:
+	var at: Vector3 = f.world.pad + Vector3(0, 1.0, 0)
+	var behind := f.cam.is_position_behind(at)
+	var p := f.cam.unproject_position(at)
+	if behind or not inner.has_point(p):
+		var c := inner.get_center()
+		var dir := (p - c) * (-1.0 if behind else 1.0)
+		dir = dir.normalized() if dir.length() > 1.0 else Vector2.DOWN
+		var t := minf(absf((inner.size.x / 2.0) / dir.x) if dir.x != 0.0 else INF, absf((inner.size.y / 2.0) / dir.y) if dir.y != 0.0 else INF)
+		p = c + dir * t
+	var r := 9.0
+	var house := PackedVector2Array([
+		p + Vector2(0, -r), p + Vector2(r, -r * 0.1), p + Vector2(r * 0.75, -r * 0.1), p + Vector2(r * 0.75, r),
+		p + Vector2(-r * 0.75, r), p + Vector2(-r * 0.75, -r * 0.1), p + Vector2(-r, -r * 0.1),
+	])
+	f._marks.draw_colored_polygon(house, Pal.CREAM)
+	house.append(house[0])
+	f._marks.draw_polyline(house, Pal.INK, 2.0, true)
+
+
+## The FPV goggles' on-screen display: a cross in the middle, the battery's voltage and the flight
+## time, and DISARMED while the motors are off.
+static func _osd(f: Flight, rect: Rect2) -> void:
+	var c := rect.get_center()
+	var col := Color(1, 1, 1, 0.85)
+	var shade := Color(0, 0, 0, 0.6)
+	for d in [Vector2(1, 0), Vector2(0, 1)]:
+		f._marks.draw_line(c - d * 14.0, c - d * 5.0, col, 2.0)
+		f._marks.draw_line(c + d * 5.0, c + d * 14.0, col, 2.0)
+	var font := Pal.font(700)
+	var size := 16
+	var sim := f.sim as FpvSim
+	# A 4-cell pack: 16.8 V full, 13.2 V empty, and it sags under throttle.
+	var volts := FlightBattery.volts(sim)
+	var line := FlightTask.num(volts) + " V   " + FlightTask.clock(sim.time)
+	var at := Vector2(c.x - 70.0, c.y + 64.0)
+	var low: bool = volts < FlightBattery.CELL_WARN * FlightBattery.CELLS and sim.p["battery_s"] > 0.0
+	f._marks.draw_string(font, at + Vector2(1, 1), line, HORIZONTAL_ALIGNMENT_CENTER, 140.0, size, shade)
+	f._marks.draw_string(font, at, line, HORIZONTAL_ALIGNMENT_CENTER, 140.0, size, Pal.SIGNAL_RED if low else col)
+	if low and sim.armed:
+		var warn := "LAND NOW" if volts < FlightBattery.CELL_LAND * FlightBattery.CELLS else "LOW BATTERY"
+		var p := Vector2(c.x - 130.0, c.y + 90.0)
+		f._marks.draw_string(font, p + Vector2(1, 1), warn, HORIZONTAL_ALIGNMENT_CENTER, 260.0, size + 2, shade)
+		f._marks.draw_string(font, p, warn, HORIZONTAL_ALIGNMENT_CENTER, 260.0, size + 2, Pal.SIGNAL_RED)
+	if not sim.armed:
+		var big := 28
+		var w := 260.0
+		var p := Vector2(c.x - w / 2.0, c.y - 30.0)
+		f._marks.draw_string(font, p + Vector2(2, 2), "DISARMED", HORIZONTAL_ALIGNMENT_CENTER, w, big, shade)
+		f._marks.draw_string(font, p, "DISARMED", HORIZONTAL_ALIGNMENT_CENTER, w, big, Pal.SIGNAL_RED)

@@ -8,6 +8,21 @@ const RADIUS_CARD := 18
 const RADIUS_PILL := 14
 
 
+## Text sizes in design units, before the reader's text-size setting. One place, so the
+## whole app can be tuned together.
+const MICRO := 11
+const CAPTION := 12
+const SMALL := 13
+const BODY := 14
+const TEXT := 15
+const LEAD := 16
+const TITLE_S := 18
+const TITLE := 20
+const TITLE_L := 22
+const DISPLAY := 24
+const DISPLAY_L := 30
+
+
 static func label(text: String, px: int, weight := 500, token := "text", display := false, wraps := true) -> Label:
 	var l := Label.new()
 	l.text = text
@@ -81,12 +96,16 @@ static func panel(content: Control, bg: Color, radius := RADIUS_CARD, pad := 14)
 
 ## A whole card that can be tapped. The card is drawn by a panel; an invisible button on top
 ## takes the touch, keyboard focus and the screen-reader name.
-static func tappable(content: Control, bg: Color, on_press: Callable, a11y_name := "", radius := RADIUS_CARD, pad := 14, outline := false) -> PanelContainer:
+static func tappable(content: Control, bg: Color, on_press: Callable, a11y_name := "", radius := RADIUS_CARD, pad := 14, outline := false, edge_color := Color.TRANSPARENT) -> PanelContainer:
 	var p := PanelContainer.new()
 	# An outline marks the chosen option, so it stands out even where gold is pale on white.
 	var edge := Pal.c("on_accent") if outline else Color.TRANSPARENT
-	var normal := box(bg, radius, pad, edge, 2 if outline else 0)
-	var pressed := box(bg.lerp(Pal.c("text"), 0.08), radius, pad, edge, 2 if outline else 0)
+	var edge_w := 2 if outline else 0
+	if edge_color.a > 0.0:
+		edge = edge_color
+		edge_w = 3
+	var normal := box(bg, radius, pad, edge, edge_w)
+	var pressed := box(bg.lerp(Pal.c("text"), 0.08), radius, pad, edge, edge_w)
 	p.add_theme_stylebox_override("panel", normal)
 	p.add_child(content)
 	_ignore_mouse(content)
@@ -115,6 +134,11 @@ static func tappable(content: Control, bg: Color, on_press: Callable, a11y_name 
 	b.pressed.connect(on_press)
 	p.add_child(b)
 	p.mouse_filter = Control.MOUSE_FILTER_PASS
+	# The panel fits the button inside its padding; stretch it over the whole card afterwards, so a
+	# finger on the card's edge counts too.
+	p.sort_children.connect(func():
+		b.position = Vector2.ZERO
+		b.size = p.size)
 	return p
 
 
@@ -129,15 +153,18 @@ static func icon_button(icon: String, on_press: Callable, a11y_name: String, bg:
 
 ## Segmented choice, e.g. Kids / Simple / Adult.
 static func segmented(options: Array, selected: String, on_pick: Callable) -> PanelContainer:
-	var row := HBoxContainer.new()
+	# The words grow with the text size; three options with larger text no longer fit side by side
+	# on a phone, so they stand one under another instead.
+	var stacked := Pal.text_scale() > 1.15 and options.size() > 2
+	var row: BoxContainer = VBoxContainer.new() if stacked else HBoxContainer.new()
 	row.add_theme_constant_override("separation", 6)
 	for opt in options:
 		var on: bool = opt[0] == selected
 		var c := CenterContainer.new()
 		c.custom_minimum_size = Vector2(0, 52)
-		var l := label(opt[1], 15, 700 if on else 600, "on_accent" if on else "text", false, false)
-		# Three options share one row on a narrow phone: larger text would no longer fit, so it stays fixed.
-		l.add_theme_font_size_override("font_size", 14)
+		var l := label(opt[1], 14, 700 if on else 600, "on_accent" if on else "text", false, false)
+		if not stacked and options.size() > 2:
+			l.add_theme_font_size_override("font_size", roundi(14 * minf(Pal.text_scale(), 1.15)))
 		c.add_child(l)
 		var id: String = opt[0]
 		var t := tappable(c, Pal.c("accent") if on else Color(0, 0, 0, 0), func(): on_pick.call(id), opt[1], RADIUS_PILL, 0, on)
@@ -163,6 +190,14 @@ static func primary(text: String, on_press: Callable, icon := "") -> PanelContai
 	c.custom_minimum_size = Vector2(0, 52)
 	c.add_child(row)
 	return tappable(c, Pal.c("accent"), on_press, text, 16, 0)
+
+
+## A quieter full-width button: the second choice beside a primary one.
+static func secondary(text: String, on_press: Callable) -> PanelContainer:
+	var c := CenterContainer.new()
+	c.custom_minimum_size = Vector2(0, 48)
+	c.add_child(label(text, TEXT, 700, "text", false, false))
+	return tappable(c, Pal.c("surface2"), on_press, text, 16, 0)
 
 
 static func _ignore_mouse(n: Node) -> void:
@@ -215,3 +250,20 @@ class Toggle extends Control:
 			edge.anti_aliasing = true
 			draw_style_box(edge, r)
 		draw_circle(Vector2(x, h / 2.0), h / 2.0 - 3.0, knob, true, -1.0, true)
+
+
+## Short points, one under another, each with a dot: "a|b|c".
+static func points(text: String) -> Control:
+	var list := vbox(10)
+	for point in text.split("|"):
+		var row := hbox(12)
+		var dot := Control.new()
+		dot.custom_minimum_size = Vector2(10, 10)
+		dot.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+		dot.draw.connect(func(): dot.draw_circle(Vector2(5, 11), 4.0, Pal.c("accent"), true, -1.0, true))
+		row.add_child(dot)
+		var t := label(point.strip_edges(), TEXT, 500)
+		t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(t)
+		list.add_child(row)
+	return list

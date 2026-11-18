@@ -11,9 +11,14 @@ const PATH := "user://prefs.json"
 const OLD_PATH := "user://prefs.cfg"
 const MAX_BYTES := 65536
 const MODES := ["kids", "simple", "pro"]
-const THEMES := ["dusk", "day", "system"]
+const THEMES := ["dusk", "day", "starry", "sky", "seanight", "mallow"]
 const LANGUAGES := ["system", "uk", "en"]
 const VIEWS := ["pilot", "chase", "drone", "fpv", "ugv"]
+## The views each machine has (as FlightBottom.view_list offers them).
+const MACHINE_VIEWS := {
+	"camera": ["pilot", "chase", "drone"], "fpv": ["fpv", "chase", "pilot"],
+	"ugv": ["ugv", "chase", "pilot"], "wing": ["chase", "pilot", "fpv"],
+}
 const TEXT_SIZES := {"normal": 1.0, "large": 1.2, "larger": 1.5}
 ## Mode 2: throttle on the left stick (most radios). Mode 1: throttle on the right.
 const STICK_MODES := ["2", "1"]
@@ -30,26 +35,59 @@ const NAME_MAX := 32
 ## Longer than any flight can last: a bigger time in a saved file is not trusted.
 const MAX_SECONDS := 3600.0
 
+## The FPV drone (Adult): how fast the sticks turn it, which size of drone, and the flight mode for
+## missions. Each is one of a few named choices.
+const CHOICES := {
+	"fpv_rates": ["medium", "soft", "sharp"],
+	"fpv_quad": ["5in", "3in"],
+	"fpv_mission_mode": ["angle", "horizon", "acro"],
+	"pad_dead": ["medium", "small", "large"],
+}
+## A radio or gamepad: which axis is each stick (and whether it is turned round), and which button
+## or switch does what. Empty means the usual gamepad layout.
+const PAD_AXES := ["throttle", "yaw", "pitch", "roll"]
+const PAD_BUTTONS := ["pause", "view", "arm"]
+const PAD_DEAD := {"small": 0.04, "medium": 0.08, "large": 0.15}
+
 ## A fresh install, and what "Erase all data" goes back to.
 const DEFAULTS := {
-	"mode": "simple", "theme": "dusk", "language": "system", "text_size": "normal",
-	"kids_lock": false, "sound": true, "stick_mode": "2", "stick_feel": "normal", "pilot_name": "",
+	"mode": "simple", "theme": "dusk", "theme_system": false, "language": "system", "text_size": "normal",
+	"welcomed": false, "kids_lock": false, "break_reminder": true, "speak_hints": false, "sound": true, "stick_mode": "2", "stick_feel": "normal", "pilot_name": "",
 	"free": {"wind": "none", "time": "day", "balls": true, "fpv": "angle"},
+	"fpv_rates": "medium", "fpv_quad": "5in", "fpv_mission_mode": "angle", "pad_dead": "medium",
+	"pad_axes": {}, "pad_buttons": {},
 }
 
 var mode: String = DEFAULTS["mode"]
 ## The theme the grown-up chose. Kids mode shows "morning" instead, without changing this.
 var theme: String = DEFAULTS["theme"]
+## Follow the phone's light or dark setting, within the chosen look's pair.
+var theme_system: bool = DEFAULTS["theme_system"]
 var language: String = DEFAULTS["language"]
 var text_size: String = DEFAULTS["text_size"]
+## The first-run question "Who will play?" has been answered.
+var welcomed: bool = DEFAULTS["welcomed"]
 ## Leaving Kids mode or opening settings needs a sum solved.
 var kids_lock: bool = DEFAULTS["kids_lock"]
+## Kids mode: after 20 minutes of flying, between lessons, a reminder to rest the eyes.
+var break_reminder: bool = DEFAULTS["break_reminder"]
+## Flight hints read aloud with the phone's own voice.
+var speak_hints: bool = DEFAULTS["speak_hints"]
 var sound: bool = DEFAULTS["sound"]
 var stick_mode: String = DEFAULTS["stick_mode"]
 var stick_feel: String = DEFAULTS["stick_feel"]
 ## The name on the pilot's licence: optional, kept only on this phone.
 var pilot_name: String = DEFAULTS["pilot_name"]
 var free: Dictionary = DEFAULTS["free"].duplicate()
+var fpv_rates: String = DEFAULTS["fpv_rates"]
+var fpv_quad: String = DEFAULTS["fpv_quad"]
+var fpv_mission_mode: String = DEFAULTS["fpv_mission_mode"]
+var pad_dead: String = DEFAULTS["pad_dead"]
+## {"throttle": {"a": 2, "inv": true}, ...}: the stick's axis, and if pushing up or right reads
+## negative on it.
+var pad_axes: Dictionary = {}
+## {"pause": {"b": 6}, "arm": {"a": 4}, ...}: a button, or a switch that shows up as an axis.
+var pad_buttons: Dictionary = {}
 ## Best result per mode and task: {"simple": {"CAM_TAKEOFF": {"f": 2, "t": 14.5}}}.
 ## "f" = most sunflowers, "t" = shortest time of a pass, each kept on its own.
 var best := {}
@@ -61,6 +99,12 @@ var passed := {}
 var missions := {}
 ## Camera per mode and vehicle: {"kids/camera": "chase", ...}
 var views := {}
+## Children flying on this phone, from two on (see KidPilots): [{"animal", "color", "slice"}],
+## and which of them flies now.
+var kid_pilots: Array = []
+var kid_pilot := 0
+## The book's chapters read (see Book).
+var book_read: Array = []
 
 ## What was just erased, so it can be put back: {"mode", "passed", "missions"} or {"all": saved data}.
 var _undo := {}
@@ -95,6 +139,14 @@ func set_theme(value: String) -> void:
 		_apply_theme()
 
 
+func set_theme_system(on: bool) -> void:
+	if on != theme_system:
+		theme_system = on
+		_undo = {}
+		_save()
+		_apply_theme()
+
+
 func set_language(value: String) -> void:
 	if value in LANGUAGES and value != language:
 		language = value
@@ -112,9 +164,39 @@ func set_text_size(value: String) -> void:
 		_apply_theme()
 
 
+## The answer to the first-run question: a child gets Kids mode with the grown-ups' lock on,
+## a grown-up gets Simple mode. Either can be changed later.
+func welcome(child: bool) -> void:
+	welcomed = true
+	mode = "kids" if child else "simple"
+	kids_lock = child
+	# A young child may not read yet: hints are read aloud (only if the phone has a voice for it).
+	speak_hints = child
+	_undo = {}
+	_save()
+	_apply_theme()
+	changed.emit()
+
+
 func set_kids_lock(on: bool) -> void:
 	if on != kids_lock:
 		kids_lock = on
+		_undo = {}
+		_save()
+		changed.emit()
+
+
+func set_break_reminder(on: bool) -> void:
+	if on != break_reminder:
+		break_reminder = on
+		_undo = {}
+		_save()
+		changed.emit()
+
+
+func set_speak_hints(on: bool) -> void:
+	if on != speak_hints:
+		speak_hints = on
 		_undo = {}
 		_save()
 		changed.emit()
@@ -150,6 +232,51 @@ func set_pilot_name(value: String) -> void:
 		pilot_name = clean
 		_undo = {}
 		_save()
+
+
+## One of the CHOICES settings.
+func set_choice(key: String, value: String) -> void:
+	if CHOICES.has(key) and value in CHOICES[key] and get(key) != value:
+		set(key, value)
+		_undo = {}
+		_save()
+		changed.emit()
+
+
+func set_pad_axis(stick: String, axis: int, inv: bool) -> void:
+	if stick in PAD_AXES and axis >= 0 and axis < JOY_AXIS_MAX:
+		pad_axes[stick] = {"a": axis, "inv": inv}
+		_undo = {}
+		_save()
+		changed.emit()
+
+
+func set_pad_button(action: String, what: Dictionary) -> void:
+	if action in PAD_BUTTONS and _pad_bind_ok(what):
+		pad_buttons[action] = what
+		_undo = {}
+		_save()
+		changed.emit()
+
+
+## Back to the usual gamepad layout.
+func reset_pad() -> void:
+	pad_axes = {}
+	pad_buttons = {}
+	pad_dead = DEFAULTS["pad_dead"]
+	_undo = {}
+	_save()
+	changed.emit()
+
+
+static func _pad_bind_ok(what) -> bool:
+	if not what is Dictionary or what.size() != 1:
+		return false
+	if what.has("b"):
+		return (what["b"] is float or what["b"] is int) and int(what["b"]) >= 0 and int(what["b"]) < JOY_BUTTON_MAX
+	if what.has("a"):
+		return (what["a"] is float or what["a"] is int) and int(what["a"]) >= 0 and int(what["a"]) < JOY_AXIS_MAX
+	return false
 
 
 func set_free(key: String, value) -> void:
@@ -284,6 +411,9 @@ func erase_all() -> void:
 	passed = {}
 	missions = {}
 	views = {}
+	kid_pilots = []
+	kid_pilot = 0
+	book_read = []
 	_save()
 	_drop_backup()
 	_apply_language()
@@ -321,10 +451,14 @@ func undo_reset() -> void:
 ## behind and everyone else sees it as a pilot on the ground does. Kept per mode and vehicle.
 func view_for(m: String, vehicle := "camera") -> String:
 	var machine := Curriculum.machine(vehicle)
-	var fallback := "fpv" if machine == "fpv" else ("chase" if m == "kids" else ("ugv" if machine == "ugv" else "pilot"))
+	var fallback := "fpv" if machine == "fpv" else ("chase" if m == "kids" or machine == "wing" else ("ugv" if machine == "ugv" else "pilot"))
 	if vehicle == "survey":
 		fallback = "drone"  # a survey is flown through the camera, kids too
-	return views.get(m + "/" + vehicle, fallback)
+	elif machine == "wing" and m == "pro":
+		fallback = "pilot"  # as a real model pilot flies: from the ground
+	var v = views.get(m + "/" + vehicle, fallback)
+	# A view saved for another machine (an old or edited file) is not used.
+	return v if v in MACHINE_VIEWS.get(machine, VIEWS) else fallback
 
 
 func set_view(m: String, vehicle: String, v: String) -> void:
@@ -334,8 +468,14 @@ func set_view(m: String, vehicle: String, v: String) -> void:
 		_save()
 
 
+## Looks again at the phone's light or dark setting.
+func refresh_theme() -> void:
+	if Pal.pick(theme, theme_system, mode == "kids") != Pal.current:
+		_apply_theme()
+
+
 func _apply_theme() -> void:
-	Pal.apply("morning" if mode == "kids" else theme, TEXT_SIZES.get(text_size, 1.0))
+	Pal.apply(theme, TEXT_SIZES.get(text_size, 1.0), theme_system, mode == "kids")
 
 
 func _apply_language() -> void:
@@ -413,6 +553,22 @@ func _apply(d: Dictionary) -> void:
 	_apply_settings(d)
 	_apply_results(d)
 	_apply_progress(d)
+	KidPilots.read(d.get("kid_pilots"), d.get("kid_pilot"))
+	Book.read(d.get("book_read"))
+
+
+## Saves after a chapter of the book was read. The screen is not drawn again (that would move the
+## focus); the Theory tab shows the new count when it next opens.
+func book_changed() -> void:
+	_undo = {}
+	_save()
+
+
+## Saves after a pilot was added, chosen or removed.
+func pilots_changed() -> void:
+	_undo = {}
+	_save()
+	changed.emit()
 
 
 func _apply_settings(d: Dictionary) -> void:
@@ -422,15 +578,31 @@ func _apply_settings(d: Dictionary) -> void:
 	var t = d.get("theme")
 	if t is String and t in THEMES:
 		theme = t
+	elif t is String and t == "system":
+		# Before the six looks, "system" was a third choice: Dusk or Day as the phone is.
+		theme = "dusk"
+		theme_system = true
+	var follow = d.get("theme_system")
+	if follow is bool:
+		theme_system = follow
 	var l = d.get("language")
 	if l is String and l in LANGUAGES:
 		language = l
 	var ts = d.get("text_size")
 	if ts is String and TEXT_SIZES.has(ts):
 		text_size = ts
+	var w = d.get("welcomed")
+	# Files from before the question existed belong to pilots who already know the app.
+	welcomed = w if w is bool else true
 	var k = d.get("kids_lock")
 	if k is bool:
 		kids_lock = k
+	var sh = d.get("speak_hints")
+	if sh is bool:
+		speak_hints = sh
+	var br = d.get("break_reminder")
+	if br is bool:
+		break_reminder = br
 	var snd = d.get("sound")
 	if snd is bool:
 		sound = snd
@@ -443,6 +615,24 @@ func _apply_settings(d: Dictionary) -> void:
 	var pn = d.get("pilot_name")
 	if pn is String:
 		pilot_name = _clean_name(pn)
+	var pa = d.get("pad_axes")
+	if pa is Dictionary:
+		for st in pa:
+			var bind = pa[st]
+			if st in PAD_AXES and bind is Dictionary and (bind.get("a") is float or bind.get("a") is int) and bind.get("inv") is bool:
+				var ax := int(bind["a"])
+				if ax >= 0 and ax < JOY_AXIS_MAX:
+					pad_axes[st] = {"a": ax, "inv": bind["inv"]}
+	var pb = d.get("pad_buttons")
+	if pb is Dictionary:
+		for act in pb:
+			if act in PAD_BUTTONS and _pad_bind_ok(pb[act]):
+				var what: Dictionary = pb[act]
+				pad_buttons[act] = {what.keys()[0]: int(what.values()[0])}
+	for key in CHOICES:
+		var cv = d.get(key)
+		if cv is String and cv in CHOICES[key]:
+			set(key, cv)
 	var fr = d.get("free")
 	if fr is Dictionary:
 		for key in ["wind", "time", "fpv", "balls"]:
@@ -546,11 +736,14 @@ func _read_missions(list: Array) -> Array:
 
 func _data() -> Dictionary:
 	return {
-		"version": 1, "mode": mode, "theme": theme, "language": language, "text_size": text_size,
-		"kids_lock": kids_lock, "sound": sound, "stick_mode": stick_mode, "stick_feel": stick_feel,
+		"version": 1, "mode": mode, "theme": theme, "theme_system": theme_system, "language": language, "text_size": text_size,
+		"welcomed": welcomed, "kids_lock": kids_lock, "break_reminder": break_reminder, "speak_hints": speak_hints, "sound": sound, "stick_mode": stick_mode, "stick_feel": stick_feel,
 		"views": views.duplicate(true), "passed": passed.duplicate(true),
 		"missions": missions.duplicate(true), "best": best.duplicate(true),
 		"licences": licences.duplicate(true), "pilot_name": pilot_name, "free": free.duplicate(),
+		"fpv_rates": fpv_rates, "fpv_quad": fpv_quad, "fpv_mission_mode": fpv_mission_mode,
+		"pad_dead": pad_dead, "pad_axes": pad_axes.duplicate(true), "pad_buttons": pad_buttons.duplicate(true),
+		"kid_pilots": kid_pilots.duplicate(true), "kid_pilot": kid_pilot, "book_read": book_read.duplicate(),
 	}
 
 

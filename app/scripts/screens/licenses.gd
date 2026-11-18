@@ -38,5 +38,5 @@ func build() -> void:
 func _block(title: String, body: String) -> void:
 	var v := UI.vbox(6)
 	v.add_child(UI.eyebrow(title))
-	v.add_child(UI.label(body.strip_edges(), 12, 500, "muted"))
+	v.add_child(UI.label(body.strip_edges(), UI.CAPTION, 500, "muted"))
 	add_child(v)

@@ -45,7 +45,79 @@ const THEMES := {
 		"warn": Color("#B85F10"),
 		"bad": Color("#B8324F"),
 	},
-	# Morning: the Kids mode look. Sky-light, the same violet ink and gold.
+	# Sky: light, a pale blue with navy text and a wheat-yellow accent.
+	"sky": {
+		"bg": Color("#EAF2FB"),
+		"surface": Color("#FFFFFF"),
+		"surface2": Color("#DCE9F7"),
+		"line": Color("#B9CFE6"),
+		"text": Color("#12355B"),
+		"muted": Color("#3B5878"),
+		"faint": Color("#4A6585"),
+		"accent": Color("#F5C542"),
+		"on_accent": Color("#12355B"),
+		"accent_text": Color("#1D5A9E"),
+		"focus": Color("#1D5A9E"),
+		"seed": Color("#6B4A2E"),
+		"ok": Color("#3E8E2F"),
+		"warn": Color("#B85F10"),
+		"bad": Color("#B8324F"),
+	},
+	# Starry night: Sky's dark pair, navy with a gold accent.
+	"starry": {
+		"bg": Color("#0F1D33"),
+		"surface": Color("#182A47"),
+		"surface2": Color("#22385C"),
+		"line": Color("#304A73"),
+		"text": Color("#F3F6FF"),
+		"muted": Color("#BCC8DE"),
+		"faint": Color("#9AABC8"),
+		"accent": Color("#FFD23F"),
+		"on_accent": Color("#0F1D33"),
+		"accent_text": Color("#FFD23F"),
+		"focus": Color("#FFD23F"),
+		"seed": Color("#6B4A2E"),
+		"ok": Color("#7DBE6A"),
+		"warn": Color("#F29B50"),
+		"bad": Color("#E5708B"),
+	},
+	# Mallow: light, a blush pink with deep teal text and a pink accent.
+	"mallow": {
+		"bg": Color("#FCEFF2"),
+		"surface": Color("#FFFFFF"),
+		"surface2": Color("#F6DDE4"),
+		"line": Color("#E6BFCB"),
+		"text": Color("#0F4848"),
+		"muted": Color("#3C6262"),
+		"faint": Color("#426767"),
+		"accent": Color("#E5708B"),
+		"on_accent": Color("#2B0B18"),
+		"accent_text": Color("#9C2D53"),
+		"focus": Color("#9C2D53"),
+		"seed": Color("#6B4A2E"),
+		"ok": Color("#3E8E2F"),
+		"warn": Color("#B85F10"),
+		"bad": Color("#B8324F"),
+	},
+	# Sea night: Mallow's dark pair, deep teal with a pink accent.
+	"seanight": {
+		"bg": Color("#0E2E30"),
+		"surface": Color("#15403F"),
+		"surface2": Color("#1D5150"),
+		"line": Color("#2A6463"),
+		"text": Color("#FDF0F3"),
+		"muted": Color("#C5DBD8"),
+		"faint": Color("#A2C3BF"),
+		"accent": Color("#F08CA5"),
+		"on_accent": Color("#0E2E30"),
+		"accent_text": Color("#F7A8BC"),
+		"focus": Color("#F08CA5"),
+		"seed": Color("#6B4A2E"),
+		"ok": Color("#7DBE6A"),
+		"warn": Color("#F29B50"),
+		"bad": Color("#E5708B"),
+	},
+	# Morning: the Kids mode look of Day. Sky-light, the same violet ink and gold.
 	"morning": {
 		"bg": Color("#EAF3F8"),
 		"surface": Color("#FFFFFF"),
@@ -71,6 +143,8 @@ const INK := Color("#2A1D3B")
 const CREAM := Color("#FFF0D5")
 const VIOLET := Color("#463161")
 const LOGO_DOT := Color("#39254F")
+## The bright red of a rescue jacket and of a signal tarp: seen from the air.
+const SIGNAL_RED := Color("#D9473B")
 ## Toy colours for hoops, balloons, butterflies and signs: one set, so they match.
 const TOY := {
 	"pink": Color("#E5708B"),
@@ -81,10 +155,15 @@ const TOY := {
 	"orange": Color("#F29B50"),
 }
 
-## Kids get slightly larger text; everything else follows from it.
-const TEXT_SCALE := {"morning": 1.1}
+## The six looks in pairs, light and dark: "Follow the system" picks one of a pair. Kids see the
+## light one (Day as Morning).
+const PAIRS := {"day": "dusk", "sky": "starry", "mallow": "seanight"}
+const KIDS_LOOK := {"day": "morning", "sky": "sky", "mallow": "mallow"}
+## Kids read slightly larger text; everything else follows from it.
+const KIDS_TEXT := 1.1
 
 var current := "dusk"
+var kids := false
 var _fonts := {}
 
 
@@ -94,20 +173,40 @@ func c(token: String) -> Color:
 
 ## Text size: the look's own scale (Kids read a little larger) times the reader's choice.
 func text_scale() -> float:
-	return TEXT_SCALE.get(current, 1.0) * _user_scale
+	return (KIDS_TEXT if kids else 1.0) * _user_scale
 
 
 var _user_scale := 1.0
 
 
-func apply(choice: String, user_scale := 1.0) -> void:
+## The light look of a pair, from either of its two.
+static func light_of(look: String) -> String:
+	for l in PAIRS:
+		if look == l or look == PAIRS[l]:
+			return l
+	return "day"
+
+
+static func pick(choice: String, follow_system: bool, kids_mode: bool) -> String:
+	var chosen := choice if THEMES.has(choice) else "dusk"
+	if follow_system and DisplayServer.is_dark_mode_supported():
+		var light := light_of(chosen)
+		chosen = PAIRS[light] if DisplayServer.is_dark_mode() else light
+	if kids_mode:
+		chosen = KIDS_LOOK[light_of(chosen)]
+	return chosen
+
+
+static func is_dark(look: String) -> bool:
+	return look in PAIRS.values()
+
+
+## A look by the grown-up's choice: with "follow the system", the pair's light or dark one as the
+## phone is now. Kids get the pair's light look.
+func apply(choice: String, user_scale := 1.0, follow_system := false, kids_mode := false) -> void:
 	_user_scale = user_scale
-	var chosen := choice
-	if choice == "system":
-		chosen = "dusk" if DisplayServer.is_dark_mode() or not DisplayServer.is_dark_mode_supported() else "day"
-	if not THEMES.has(chosen):
-		chosen = "dusk"
-	current = chosen
+	kids = kids_mode
+	current = pick(choice, follow_system, kids_mode)
 	RenderingServer.set_default_clear_color(c("bg"))
 	changed.emit()
 

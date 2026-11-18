@@ -18,6 +18,10 @@ config/quit_on_go_back=false
 boot_splash/bg_color=Color(0.164706, 0.113725, 0.231373, 1)
 boot_splash/show_image=false
 
+[audio]
+
+general/text_to_speech=true
+
 [autoload]
 
 Pal="*res://scripts/palette.gd"

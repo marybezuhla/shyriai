@@ -1,28 +1,35 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # The flight screen: the 3D world, the drone, two sticks, a thin status line and one hint.
+class_name Flight
 extends Control
 
 const STEP := 1.0 / 60.0
 ## Width of the progress and meter bars.
 const BAR_W := 120.0
-const DEADZONE := 0.08
+## Side margin of the HUD: clear of Android's back-swipe edge.
+const SIDE := 28.0
+## Widths of the view switch, full and as one cycling button.
+const VIEW_FULL := 360.0
+const VIEW_COMPACT := 150.0
 
 var app: Node  # main.gd
 var vehicle := "camera"
-## What is flown: the course's machine ("camera", "fpv" or "ugv").
+## What is flown: the course's machine ("camera", "fpv", "ugv" or "wing").
 var machine := "camera"
 var task_key := "CAM_STICKS"
 var mode := "simple"
 var look := "dusk"
 ## Which world and task variant to build; tests and "Start over" keep it, a new attempt changes it.
 var flight_seed := 7
+## Practice: the same task with no timer, no sunflowers and nothing saved.
+var practice := false
 ## Tests set this to fly by themselves: func(sim, task) -> {"throttle", "yaw", "pitch", "roll"}.
 var autopilot := Callable()
 
 var sim: DroneSim
 var task: FlightTask
 var world: FlightWorld
-var drone: Node3D  # DroneView or UgvView
+var drone: Node3D  # DroneView, UgvView or WingView
 ## The robot's camera pose a moment ago, for late video: [pos, basis] per physics step.
 var _cam_history: Array = []
 var _shown_load := ""
@@ -45,14 +52,44 @@ var _hint_panel := PanelContainer.new()
 var _bar_fill := Panel.new()
 var _bar_text: Label
 var _stats := {}
-var _counter: Label
+var _counter: Control
+## The plane's speed tape and wind arrow, when shown.
+var _tape: Control
+var _wind_arrow: Control
+var _lean_gauge: Control
 var _view_box := VBoxContainer.new()
 var _overlay: Control
 ## The survey camera's buttons, when the task is flown with a camera.
 var _kit: PhotoKit
 var _paused := false
+var _rebuild_queued := false
+var _view_compact := false
+var _view_icon := false
 var _finished := false
+var _sock: Node3D
+## The camera drone's way home (not for kids); null for other machines.
+var home: FlightHome
+## Fits the HUD to the screen's height again (after a longer hint).
+var _hud_fit := Callable()
+## FPV and plane battery warnings (Adult mode).
+var battery: FlightBattery
+var _hint_warn := false
+## A short message of the flight itself (a translation key), how long it stays, and if it warns.
+var _alert := ""
+var _alert_t := 0.0
+var _alert_warn := false
+var _arm_label: Label
+## The hint last read aloud: a new one is read, a changing count in the same one is not.
+var _spoken := ""
+## Nothing moves and no time counts until the pilot first moves a stick.
+var _waiting := true
+## Seconds with no step forward in the task.
+var _stuck := 0.0
+## Kids get help after this long with no step forward.
+const KIDS_HELP_AFTER := 15.0
+var _first_sticks := {}
 var _sticks := {"throttle": 0.0, "yaw": 0.0, "pitch": 0.0, "roll": 0.0}
+var _pad := FlightInput.new()
 var _sound := FlightSound.new()
 ## What the task had done a physics step ago, so each new ball, gate or step gets its blip.
 var _last_progress := 0.0
@@ -69,7 +106,7 @@ func setup(app_: Node, vehicle_: String, task_key_: String) -> void:
 	mode = Prefs.mode
 	# Kids always fly on a clear day; otherwise the world follows the app's look, or the time of day
 	# chosen for free flight.
-	look = "day" if mode == "kids" or Pal.current != "dusk" else "dusk"
+	look = "dusk" if Pal.is_dark(Pal.current) else "day"
 	if task_key.begins_with("FREE_"):
 		var t: String = Prefs.free["time"]
 		if mode != "kids" or t in Prefs.FREE_TIMES_KIDS:
@@ -89,6 +126,8 @@ func _ready() -> void:
 	if task.look != "":
 		look = task.look
 	world = FlightWorld.new()
+	# The plane needs room: a flat valley along the runway for take-offs and landings.
+	world.airfield = machine == "wing"
 	add_child(world)
 	world.build(look, 7)
 	task.world = world
@@ -97,6 +136,12 @@ func _ready() -> void:
 		view = task.view_hint
 
 	sim = task.make_sim(machine)
+	if machine == "camera" and mode != "kids" and not task.is_free:
+		home = FlightHome.new()
+	elif mode == "pro":
+		battery = FlightBattery.new()
+	if sim is FpvSim and mode == "pro":
+		sim.armed = false  # armed with a button, throttle down, as on a real drone
 	if task is PhotoTask:
 		var vp := get_viewport_rect().size
 		task.aspect = vp.x / maxf(vp.y, 1.0)
@@ -106,6 +151,18 @@ func _ready() -> void:
 		world.add_child(drone)
 		drone.build(world.pal["drone"], world.pal["drone_front"], task.load_kind)
 		_shown_load = task.load_kind
+	elif machine == "wing":
+		drone = WingView.new()
+		world.add_child(drone)
+		drone.build(world.pal["drone"], world.pal["drone_front"])
+		# A windsock beside the runway's near end, where the pilot can see it.
+		var at := Vector3(WorldLand.RUNWAY_X + WorldLand.RUNWAY_W / 2.0 + 4.0, 0, WorldLand.RUNWAY_Z0 - 8.0)
+		at.y = world.height(at.x, at.z)
+		_sock = AirProps.add_windsock(world, at)
+		# As at a real field, the pilot stands beside the runway, about its middle, and the circuit
+		# is flown on the far side: never behind the pilot or over their head.
+		var me := Vector3(WorldLand.RUNWAY_X + 16.0, 0, (WorldLand.RUNWAY_Z0 + WorldLand.RUNWAY_Z1) / 2.0 - 5.0)
+		world.pilot = me + Vector3(0, world.height(me.x, me.z) + 1.7, 0)
 	else:
 		drone = DroneView.new()
 		world.add_child(drone)
@@ -141,10 +198,28 @@ func _physics_process(_delta: float) -> void:
 	if task is PhotoTask and task.report_open:
 		return
 	_read_sticks()
+	if autopilot.is_valid() and sim is FpvSim:
+		sim.armed = true
+	elif FlightBottom.arm_button(self):
+		var sw := _pad.arm_switch()
+		if sw != 0 and (sw > 0) != sim.armed:
+			_toggle_arm(true)
+	_alert_t = maxf(0.0, _alert_t - STEP)
+	var pilot := _sticks
 	# No radio link: the robot gets no commands and stops by itself.
 	_sticks = task.controls(_sticks)
-	sim.step(STEP, _sticks["throttle"], _sticks["yaw"], _sticks["pitch"], _sticks["roll"])
-	task.step(STEP, sim, _sticks)
+	if home and not _waiting:
+		home.update(sim, task, STEP)
+		home.take_back(pilot, task.link_ok)
+		if home.active:
+			_sticks = home.sticks(sim, world.pad)
+	if battery and not _waiting:
+		battery.update(self)
+	if _waiting and not _ready_to_go():
+		task.step(0.0, sim, _sticks)  # sets the first hints; no time passes
+	else:
+		sim.step(STEP, _sticks["throttle"], _sticks["yaw"], _sticks["pitch"], _sticks["roll"])
+		task.step(STEP, sim, _sticks)
 	_sound_events()
 	_cam_history.append([sim.pos, sim.orientation()])
 	if _cam_history.size() > 90:
@@ -157,12 +232,34 @@ func _physics_process(_delta: float) -> void:
 		_crashed()
 	elif sim.p.get("battery_s", 0.0) > 0.0 and sim.battery <= 0.0 and (sim.on_ground or sim is UgvSim):
 		# The battery ran out and the drone has come down (or the robot has stopped): say so.
-		task.fail_with("FAIL_BATTERY_UGV" if sim is UgvSim else "FAIL_BATTERY")
+		task.fail_with(FlightBattery.fail_key(sim))
 		_not_this_time()
+
+
+## The flight starts with the first move of a stick, so reading the goal costs no time. Tests and
+## free flight start at once.
+func _ready_to_go() -> bool:
+	if autopilot.is_valid() or task_key.begins_with("FREE_"):
+		_waiting = false
+		return true
+	if _first_sticks.is_empty():
+		_first_sticks = _sticks.duplicate()
+		return false
+	for k in _sticks:
+		if absf(float(_sticks[k]) - float(_first_sticks[k])) > 0.12:
+			_waiting = false
+			return true
+	return false
+
+
+func kids_help() -> bool:
+	return mode == "kids" and _stuck > KIDS_HELP_AFTER and task.marker != Vector3.INF
 
 
 func _process(delta: float) -> void:
 	drone.sync(sim, delta)
+	if _sock:
+		AirProps.blow_windsock(_sock, sim.wind())
 	if not _paused and not _finished:
 		_sound.motors(_motor_load(), _motors_running(), delta)
 		_sound.no_link(not task.link_ok, delta)
@@ -180,7 +277,7 @@ func _process(delta: float) -> void:
 func _motor_load() -> float:
 	if sim is UgvSim:
 		return 0.25 + 0.75 * clampf(maxf(absf(sim.tracks.x), absf(sim.tracks.y)), 0.0, 1.0)
-	if sim is FpvSim:
+	if sim is FpvSim or sim is WingSim:
 		return sim.throttle01
 	var h := Vector2(sim.vel.x, sim.vel.z).length() / 8.0
 	return clampf(0.45 + 0.3 * _sticks["throttle"] + 0.25 * h, 0.2, 1.0)
@@ -191,6 +288,8 @@ func _motors_running() -> bool:
 		return false
 	if sim is UgvSim:
 		return true
+	if sim is WingSim:
+		return sim.throttle01 > 0.02
 	return not sim.on_ground or _sticks["throttle"] > 0.05 or (sim is FpvSim and sim.throttle01 > 0.05)
 
 
@@ -200,6 +299,8 @@ func _sound_events() -> void:
 	var jumped := task.progress - _last_progress >= 0.04 or task.counter > _last_counter
 	if jumped and not task.done:
 		_sound.play("blip")
+	# Kids: a while with no step forward brings a gentle reminder of where to go.
+	_stuck = 0.0 if task.progress != _last_progress or task.counter != _last_counter else _stuck + STEP
 	_last_progress = task.progress
 	_last_counter = task.counter
 	for e in sim.events:
@@ -209,130 +310,27 @@ func _sound_events() -> void:
 			_sound.play("thud")
 
 
-var _joy_throttle := false
-
-
 func _read_sticks() -> void:
-	if autopilot.is_valid():
-		_sticks = autopilot.call(sim, task)
-		return
-	if not _thr.spring_y:
-		# Keys move the throttle stick on screen, step by step.
-		var k := _keys(KEY_W, KEY_S)
-		if k != 0.0:
-			_thr.value.y = clampf(_thr.value.y + k * STEP * 0.9, -1.0, 1.0)
-			_thr.queue_redraw()
-	var t := _thr.value.y
-	var y := _left.value.x
-	var p := _fwd.value.y
-	var r := _right.value.x
-	# A gamepad or a radio in joystick mode. In Mode 1 its up/down axes swap like the screen sticks.
-	var thr_axis := JOY_AXIS_RIGHT_Y if _mode1 else JOY_AXIS_LEFT_Y
-	var fwd_axis := JOY_AXIS_LEFT_Y if _mode1 else JOY_AXIS_RIGHT_Y
-	for dev in Input.get_connected_joypads():
-		if _thr.spring_y:
-			t = _bigger(t, -_axis(dev, thr_axis))
-		elif not _thr.touched:
-			# A gamepad or radio drives the throttle until the screen stick is touched, but only once
-			# its stick has been moved: a self-centring gamepad would otherwise start at half throttle.
-			var a := Input.get_joy_axis(dev, thr_axis)
-			if absf(a) > 0.2:
-				_joy_throttle = true
-			if _joy_throttle:
-				t = -a
-		y = _bigger(y, _axis(dev, JOY_AXIS_LEFT_X))
-		p = _bigger(p, -_axis(dev, fwd_axis))
-		r = _bigger(r, _axis(dev, JOY_AXIS_RIGHT_X))
-	# A keyboard: W/S up and down, A/D turn, arrows move.
-	if _thr.spring_y:
-		t = _bigger(t, _keys(KEY_W, KEY_S))
-	y = _bigger(y, _keys(KEY_D, KEY_A))
-	p = _bigger(p, _keys(KEY_UP, KEY_DOWN))
-	r = _bigger(r, _keys(KEY_RIGHT, KEY_LEFT))
-	if machine != "ugv":
-		var e: float = Prefs.STICK_FEELS.get(Prefs.stick_feel, 0.0)
-		y = _soft(y, e)
-		p = _soft(p, e)
-		r = _soft(r, e)
-	_sticks = {"throttle": t, "yaw": y, "pitch": p, "roll": r}
-
-
-## Expo: the same full deflection, but gentler near the centre, for fine moves. e = 0 changes nothing.
-static func _soft(x: float, e: float) -> float:
-	return (1.0 - e) * x + e * x * x * x
-
-
-func _axis(dev: int, axis: JoyAxis) -> float:
-	var v := Input.get_joy_axis(dev, axis)
-	return 0.0 if absf(v) < DEADZONE else v
-
-
-func _keys(plus: Key, minus: Key) -> float:
-	return float(Input.is_physical_key_pressed(plus)) - float(Input.is_physical_key_pressed(minus))
-
-
-func _bigger(a: float, b: float) -> float:
-	return a if absf(a) >= absf(b) else b
+	_sticks = autopilot.call(sim, task) if autopilot.is_valid() else _pad.read(self)
 
 
 # --- Camera -----------------------------------------------------------------
 
 func _place_camera(delta: float) -> void:
-	var target := sim.pos + Vector3(0, 0.15, 0)
-	if view == "fpv":
-		# The FPV camera is fixed to the drone, tilted up, so the horizon tilts with it.
-		var up_tilt := 10.0 if sim is not FpvSim else (20.0 if mode == "simple" else 30.0)
-		var b := sim.orientation()
-		cam.global_basis = b * Basis(Vector3.RIGHT, deg_to_rad(up_tilt))
-		cam.position = sim.pos + b * Vector3(0, 0.12, -0.45)
-		cam.fov = 95.0
-	elif view == "drone":
-		# The drone's own camera on a steady gimbal: tilted down a little, or as far as the survey
-		# camera is tilted. The shutter uses the very same pose.
-		cam.position = Photo.camera_position(sim.pos, sim.yaw)
-		cam.global_basis = Photo.camera_basis(sim.yaw, task.tilt if task is PhotoTask else "forward")
-		cam.fov = Photo.FOV
-	elif view == "ugv":
-		# The robot's own camera on its mast. Some tasks show its video late, as over a slow radio link.
-		var pose: Array = [sim.pos, sim.orientation()]
-		var back := int(round(task.video_delay / STEP))
-		if back > 0 and _cam_history.size() > back:
-			pose = _cam_history[_cam_history.size() - 1 - back]
-		var b: Basis = pose[1]
-		cam.global_basis = b * Basis(Vector3.RIGHT, deg_to_rad(-8.0))
-		cam.position = pose[0] + b * Vector3(0, 1.2, -0.6)
-		cam.fov = 80.0
-	elif view == "chase":
-		var back := -sim.forward() * 6.0 + Vector3(0, 2.6, 0)
-		var want := target + back
-		var g := sim.ground.call(want.x, want.z) as float
-		want.y = maxf(want.y, g + 1.0)
-		var k := 1.0 - exp(-delta * 4.0)
-		cam.position = cam.position.lerp(want, k) if cam.position != Vector3.ZERO else want
-		cam.fov = 62.0
-		cam.look_at(target + sim.forward() * 2.0, Vector3.UP)
-	else:
-		# The pilot stands behind the pad and turns the head; far away, the view zooms in a little.
-		cam.position = world.pilot
-		var d := cam.position.distance_to(target)
-		cam.fov = lerpf(cam.fov, clampf(70.0 - d * 0.9, 32.0, 62.0), 1.0 - exp(-delta * 2.0))
-		# Straight overhead, looking up would need another "up": just keep the last view there.
-		if d > 0.5 and Vector2(target.x - world.pilot.x, target.z - world.pilot.z).length() > 0.3:
-			var look_at := target.lerp(world.pilot + (target - world.pilot) * 0.5, 0.15)
-			cam.look_at(look_at, Vector3.UP)
+	FlightCamera.place(self, delta)
 
 
 func set_view(v: String) -> void:
 	view = v
 	Prefs.set_view(mode, vehicle, v)
 	cam.position = Vector3.ZERO
-	_build_view_toggle()
+	FlightBottom.build_view_toggle(self)
 
 
 # --- HUD --------------------------------------------------------------------
 
 func _build_hud() -> void:
-	_build_no_signal()
+	FlightHud.build_no_signal(self)
 	_hud.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_hud.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_hud)
@@ -346,8 +344,9 @@ func _build_hud() -> void:
 	var m := MarginContainer.new()
 	m.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	m.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	m.add_theme_constant_override("margin_left", 16 + int(ins["left"]))
-	m.add_theme_constant_override("margin_right", 16 + int(ins["right"]))
+	# Wide enough at the sides that a thumb on a stick is not taken for Android's back swipe.
+	m.add_theme_constant_override("margin_left", SIDE + int(ins["left"]))
+	m.add_theme_constant_override("margin_right", SIDE + int(ins["right"]))
 	m.add_theme_constant_override("margin_top", 12 + int(ins["top"]))
 	m.add_theme_constant_override("margin_bottom", 14 + int(ins["bottom"]))
 	_hud.add_child(m)
@@ -362,15 +361,16 @@ func _build_hud() -> void:
 	top.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	top.add_child(UI.icon_button("pause", pause, tr("PAUSE"), glass))
 
-	top.add_child(UI.panel(_build_chip(), glass, 16, 10))
+	top.add_child(UI.panel(FlightHud.build_chip(self), glass, 16, 10))
 
 	var gap := Control.new()
 	gap.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	gap.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	top.add_child(gap)
 
-	_build_counters(top, glass)
+	FlightHud.build_counters(self, top, glass)
 	col.add_child(top)
+	FlightHud.fit_top(self, top)
 
 	_build_hint(col)
 
@@ -379,107 +379,66 @@ func _build_hud() -> void:
 	fill.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	col.add_child(fill)
 
-	_build_bottom(col, ins)
-	_build_view_toggle()
+	FlightBottom.build_bottom(self, col, ins)
+	_hud_fit = FlightBottom.fit_height.bind(self, col, ins)
+	FlightBottom.build_view_toggle(self)
+	if not get_viewport().size_changed.is_connected(_on_resize):
+		get_viewport().size_changed.connect(_on_resize)
 
 
-func _build_no_signal() -> void:
-	# "No signal" over the robot's video while the radio link is down.
-	var nl := ColorRect.new()
-	nl.color = Color(Pal.INK, 0.82)
-	nl.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	nl.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var nl_center := CenterContainer.new()
-	nl_center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	nl_center.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var nl_text := Label.new()
-	nl_text.text = tr("NO_SIGNAL")
-	nl_text.add_theme_font_override("font", Pal.font(600, true))
-	nl_text.add_theme_font_size_override("font_size", roundi(26 * Pal.text_scale()))
-	nl_text.add_theme_color_override("font_color", Pal.CREAM)
-	nl_center.add_child(nl_text)
-	nl.add_child(nl_center)
-	nl.visible = false
-	add_child(nl)
-	_nolink = nl
+## The screen turned, folded or unfolded (Android may also turn it only after the flight opened):
+## build the HUD again for the new size, keeping the throttle where it was.
+func _on_resize() -> void:
+	if not _rebuild_queued:
+		_rebuild_queued = true
+		_rebuild_hud.call_deferred()
 
 
-## The title with its progress bar and, for loads, the comfort or cargo meter.
-func _build_chip() -> Control:
-	var chip := UI.vbox(6)
-	var title := Curriculum.label(task_key)
-	if not task.is_mission and not task.is_free and mode != "kids":
-		title = tr("LESSON_N") % (Curriculum.lessons(vehicle, mode).find(task_key) + 1) + " · " + title
-	chip.add_child(UI.label(title, 14, 700, "text", false, false))
-	var bar_row := UI.hbox(8)
-	var bar := Panel.new()
-	bar.custom_minimum_size = Vector2(BAR_W, 6)
-	bar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	bar.add_theme_stylebox_override("panel", UI.box(Pal.c("line"), 3, 0))
-	_bar_fill.add_theme_stylebox_override("panel", UI.box(Pal.c("accent"), 3, 0))
-	_bar_fill.size = Vector2(0, 6)
-	bar.add_child(_bar_fill)
-	bar_row.add_child(bar)
-	if mode != "kids":
-		_bar_text = UI.label("0 %", 12, 700, "muted", false, false)
-		bar_row.add_child(_bar_text)
-	if task.is_free:
-		# Free flight has no progress: the bar is not shown, and not kept either.
-		bar_row.free()
-		_bar_fill = null
-		_bar_text = null
-	else:
-		chip.add_child(bar_row)
-	# A second bar for how the load is doing, e.g. the casualty's comfort.
-	if task.meter >= 0.0:
-		var mrow := UI.hbox(8)
-		var mbar := Panel.new()
-		mbar.custom_minimum_size = Vector2(BAR_W, 6)
-		mbar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		mbar.add_theme_stylebox_override("panel", UI.box(Pal.c("line"), 3, 0))
-		_meter_fill = Panel.new()
-		_meter_fill.add_theme_stylebox_override("panel", UI.box(Pal.c("ok"), 3, 0))
-		_meter_fill.size = Vector2(BAR_W, 6)
-		mbar.add_child(_meter_fill)
-		mrow.add_child(mbar)
-		var meter_text := UI.label(tr(Curriculum.text_key(task.meter_label, mode)), 12, 700, "muted", false, false)
-		mrow.add_child(meter_text)
-		chip.add_child(mrow)
-	return chip
+func _rebuild_hud() -> void:
+	_rebuild_queued = false
+	if not is_inside_tree():
+		return
+	var thr_y := _thr.value.y
+	var was_enabled := _left.enabled
+	_hud.queue_free()
+	_nolink.queue_free()
+	_hud = Control.new()
+	_marks = Control.new()
+	_hint = Label.new()
+	_hint_panel = PanelContainer.new()
+	_bar_fill = Panel.new()
+	_bar_text = null
+	_meter_fill = null
+	_counter = null
+	_kit = null
+	_stats = {}
+	_tape = null
+	_arm_label = null
+	_wind_arrow = null
+	_lean_gauge = null
+	_view_box = VBoxContainer.new()
+	_left = Stick.new()
+	_right = Stick.new()
+	_thr = _right if _mode1 else _left
+	_fwd = _left if _mode1 else _right
+	_build_hud()
+	if not _thr.spring_y:
+		_thr.value.y = thr_y
+	_left.enabled = was_enabled
+	_right.enabled = was_enabled
+	if _overlay:
+		move_child(_overlay, -1)  # the open card stays on top
 
 
-## Kids see a simple counter; everyone else sees the flight numbers.
-func _build_counters(top: HBoxContainer, glass: Color) -> void:
-	if mode == "kids":
-		if task.counter_shown:
-			var row := UI.hbox(8)
-			# Sunflowers are what the kitten mission collects; other counts need no picture.
-			if task.key == "MIS_CAM_KITTEN":
-				row.add_child(Glyph.make("sunflower", 26, Pal.c("accent")))
-			_counter = UI.label("0", 18, 700, "text", true, false)
-			row.add_child(_counter)
-			top.add_child(UI.panel(row, glass, 22, 10))
-	else:
-		var stats := UI.hbox(18)
-		var names := ["ALT", "TIME"]
-		if mode == "pro":
-			names = ["ALT", "SPEED", "BATTERY", "TIME"]
-		if machine == "ugv":
-			names = ["SPEED", "BATTERY", "TIME"] if mode == "pro" else ["SPEED", "TIME"]
-		elif machine == "fpv" and mode != "pro":
-			names = ["ALT", "SPEED", "TIME"]
-		if task.target_info:
-			names = ["TARGET", "CLOSING", "SPEED", "TIME"] if mode == "pro" else ["TARGET", "CLOSING", "TIME"]
-		for n in names:
-			var s := UI.vbox(1)
-			var head := UI.eyebrow(tr("STAT_" + n))
-			head.autowrap_mode = TextServer.AUTOWRAP_OFF
-			s.add_child(head)
-			var v := UI.label("–", 16, 800, "text", false, false)
-			_stats[n] = v
-			s.add_child(v)
-			stats.add_child(s)
-		top.add_child(UI.panel(stats, glass, 16, 10))
+## How tall the band of sticks along the bottom is, so marks can keep clear of it.
+func stick_band() -> float:
+	return _left.custom_minimum_size.y + 44.0
+
+
+## The top line must fit the screen: drop the least needed numbers until it does.
+func _ins_x() -> float:
+	var ins: Dictionary = app.insets() if app else {}
+	return float(ins.get("left", 0.0)) + float(ins.get("right", 0.0))
 
 
 func _build_hint(col: VBoxContainer) -> void:
@@ -498,78 +457,56 @@ func _build_hint(col: VBoxContainer) -> void:
 	col.add_child(hint_row)
 
 
-func _build_bottom(col: VBoxContainer, ins: Dictionary) -> void:
-	# Sticks and the view switch at the bottom.
-	var bottom := HBoxContainer.new()
-	bottom.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	# Sticks as big as fit beside the camera switch (narrow phones in landscape get a little less).
-	var room := get_viewport_rect().size.x - 32.0 - float(ins["left"]) - float(ins["right"]) - 344.0
-	if (task is PhotoTask and task.kit) or task.action != "":
-		room -= 80.0  # the camera or action buttons beside the right stick
-	var stick_px := int(clampf(room / 2.0, 104.0, 150.0 if mode == "kids" else 128.0))
-	for s in [_left, _right]:
-		s.kids = mode == "kids"
-		s.custom_minimum_size = Vector2(stick_px, stick_px)
-	# The FPV throttle stays where the thumb leaves it, like on a real radio, and starts at zero.
-	if machine == "fpv" and mode != "kids":
-		_thr.spring_y = false
-		_thr.value.y = -1.0
-	var left_label := "STICK_LEFT_FPV" if not _left.spring_y else "STICK_LEFT"
-	var right_label := "STICK_RIGHT"
-	if _mode1:
-		left_label = "STICK_LEFT_M1"
-		right_label = "STICK_RIGHT_FPV_M1" if machine == "fpv" else "STICK_RIGHT_M1"
-	if sim is UgvSim:
-		left_label = "STICK_TRACK_L" if sim.tank else "STICK_DRIVE"
-		right_label = "STICK_TRACK_R" if sim.tank else "STICK_TURN"
-	bottom.add_child(_stick_with_label(_left, tr(left_label)))
-	_view_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_view_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	bottom.add_child(_view_box)
-	if task is PhotoTask and task.kit:
-		_kit = PhotoKit.new()
-		_kit.build(task, mode == "kids", shutter)
-		bottom.add_child(_kit)
-	if task.action != "":
-		var act := ActionButton.new()
-		act.build(task, sim)
-		bottom.add_child(act)
-	bottom.add_child(_stick_with_label(_right, tr(right_label)))
-	col.add_child(bottom)
+## Arms or disarms the FPV drone. Arming needs the throttle the drone really gets (screen, radio or
+## gamepad) all the way down, as Betaflight does. Disarming works on the ground, and in the air
+## from the radio's switch or button too: real pilots cut the motors in a crash.
+func _toggle_arm(from_radio := false) -> void:
+	var f := sim as FpvSim
+	if f.armed:
+		if f.on_ground or from_radio:
+			f.armed = false
+		return
+	if float(_pad.read(self)["throttle"]) > -0.9:
+		alert("HINT_ARM_THROTTLE", true)
+		return
+	f.armed = true
+	alert("HINT_ARMED", false)
 
 
-func _stick_with_label(s: Stick, text: String) -> Control:
-	var v := UI.vbox(4)
-	v.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	v.add_child(s)
-	if mode != "kids":
-		# On a small glass pill, so the label reads over any part of the world.
-		var l := UI.label(text, 12, 700, "text", false, false)
-		l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		var glass := Pal.c("bg")
-		glass.a = 0.78
-		var pill := UI.panel(l, glass, 10, 4)
-		pill.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-		v.add_child(pill)
-	return v
+## A radio's or gamepad's own buttons: pause, the next view, arm.
+func _input(event: InputEvent) -> void:
+	if not event is InputEventJoypadButton:
+		return
+	match FlightInput.button_action(event):
+		"pause":
+			if _paused:
+				resume()
+			elif not _finished:
+				pause()
+		"view":
+			if not _paused and not _finished:
+				FlightBottom.next_view(self)
+		"arm":
+			if FlightBottom.arm_button(self) and not _paused:
+				_toggle_arm(true)
 
 
-func _build_view_toggle() -> void:
-	for c in _view_box.get_children():
-		c.queue_free()
-	var fill := Control.new()
-	fill.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	fill.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_view_box.add_child(fill)
-	var views := [["ugv", Curriculum.label("VIEW_DRONE")], ["chase", Curriculum.label("VIEW_BEHIND")], ["pilot", Curriculum.label("VIEW_PILOT")]] if machine == "ugv" \
-		else [["fpv", Curriculum.label("VIEW_FPV")], ["chase", Curriculum.label("VIEW_CHASE")], ["pilot", Curriculum.label("VIEW_PILOT")]] if machine == "fpv" \
-		else [["pilot", Curriculum.label("VIEW_PILOT")], ["chase", Curriculum.label("VIEW_CHASE")], ["drone", Curriculum.label("VIEW_DRONE")]]
-	var seg := UI.segmented(views, view, set_view)
-	seg.custom_minimum_size = Vector2(360, 0)
-	var center := CenterContainer.new()
-	center.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	center.add_child(seg)
-	_view_box.add_child(center)
+## Reads a hint with the phone's own voice in the app's language, if it has one. Nothing leaves the
+## phone through the app; with no voice for the language, nothing is said.
+static func say_aloud(text: String) -> void:
+	if not DisplayServer.has_feature(DisplayServer.FEATURE_TEXT_TO_SPEECH):
+		return
+	var voices := DisplayServer.tts_get_voices_for_language(TranslationServer.get_locale().substr(0, 2))
+	if voices.is_empty():
+		return
+	DisplayServer.tts_stop()
+	DisplayServer.tts_speak(text, voices[0])
+
+
+func alert(key: String, warn: bool, seconds := 3.0) -> void:
+	_alert = key
+	_alert_t = seconds
+	_alert_warn = warn
 
 
 func _update_hud() -> void:
@@ -597,90 +534,53 @@ func _update_hud() -> void:
 		_bar_fill.size = Vector2(BAR_W * task.progress, 6)
 	if _bar_text:
 		_bar_text.text = "%d %%" % int(round(task.progress * 100.0))
-	if task.hint != "":
-		var text := tr(task.hint)
+	_update_hint()
+	FlightHud.update_stats(self)
+
+
+## The line of words over the view: the task's hint, or a more urgent message, maybe read aloud.
+func _update_hint() -> void:
+	var ready := "HINT_PRACTICE" if practice else Curriculum.text_key("HINT_READY", mode)
+	var hint_key := ready if _waiting and (task.hint == "" or practice) else task.hint
+	if kids_help():
+		hint_key = "HINT_KIDS_HELP"
+	var warn := false
+	if sim is FpvSim and not sim.armed:
+		hint_key = "HINT_ARM"
+	if home and home.alert != "":
+		hint_key = home.alert
+		warn = home.alert_warn
+	if _alert_t > 0.0:
+		hint_key = _alert
+		warn = _alert_warn
+	if _arm_label:
+		_arm_label.get_parent().get_parent().visible = not sim.armed or sim.on_ground
+		_arm_label.text = tr("DISARM" if sim.armed else "ARM")
+	if warn != _hint_warn:
+		_hint_warn = warn
+		_hint_panel.add_theme_stylebox_override("panel", UI.box(Pal.c("warn" if warn else "text"), 12, 9))
+	if hint_key != "":
+		var text := tr(hint_key)
 		if not task.hint_args.is_empty() and text.contains("%"):
 			text = text % task.hint_args
+		if hint_key != _spoken and Prefs.speak_hints:
+			_spoken = hint_key
+			say_aloud(text)
 		if text != _hint.text:
 			_hint.text = text
 			# Short hints sit on one line; long ones wrap at a comfortable width.
 			var w := _hint.get_theme_font("font").get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, _hint.get_theme_font_size("font_size")).x
-			_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART if w > 520.0 else TextServer.AUTOWRAP_OFF
-			_hint.custom_minimum_size = Vector2(520, 0) if w > 520.0 else Vector2.ZERO
-	_hint_panel.visible = task.hint != ""
-	if _counter:
-		_counter.text = "%d / %d" % [task.counter, task.counter_max]
-	if _stats.has("ALT"):
-		_stats["ALT"].text = tr("UNIT_M") % FlightTask.num(maxf(0.0, sim.altitude()))
-	if _stats.has("SPEED"):
-		_stats["SPEED"].text = tr("UNIT_MS") % FlightTask.num(Vector2(sim.vel.x, sim.vel.z).length())
-	if _stats.has("BATTERY"):
-		_stats["BATTERY"].text = "%d %%" % int(ceil(sim.battery * 100.0))
-	if _stats.has("TARGET"):
-		_stats["TARGET"].text = tr("UNIT_M") % FlightTask.num(task.target_dist, 0)
-		_stats["CLOSING"].text = ("+" if task.closing >= 0.0 else "") + tr("UNIT_MS") % FlightTask.num(task.closing)
-	if _stats.has("TIME"):
-		var t := int(sim.time)
-		_stats["TIME"].text = FlightTask.clock(t)
+			var wrap := minf(520.0, get_viewport_rect().size.x - 2.0 * SIDE - _ins_x() - 24.0)
+			_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART if w > wrap else TextServer.AUTOWRAP_OFF
+			_hint.custom_minimum_size = Vector2(wrap, 0) if w > wrap else Vector2.ZERO
+			if _hud_fit.is_valid():
+				_hud_fit.call_deferred()  # a longer hint may need the sticks a little smaller
+	_hint_panel.visible = hint_key != ""
 
 
 ## Markers drawn over the 3D view: where to fly, and where the drone is when it is small.
 func _draw_marks() -> void:
-	var rect := _marks.get_rect()
-	if task.marker != Vector3.INF:
-		var behind := cam.is_position_behind(task.marker)
-		var p := cam.unproject_position(task.marker)
-		var inner := rect.grow(-40)
-		if not behind and inner.has_point(p):
-			_diamond(p, 9.0)
-		else:
-			# An arrow at the edge of the screen, pointing towards the target.
-			var c := rect.size / 2.0
-			var dir := (p - c)
-			if behind:
-				dir = -dir
-			if dir.length() < 1.0:
-				dir = Vector2.UP
-			dir = dir.normalized()
-			var t := minf(absf((inner.size.x / 2.0) / dir.x) if dir.x != 0.0 else INF, absf((inner.size.y / 2.0) / dir.y) if dir.y != 0.0 else INF)
-			var tip := c + dir * t
-			var side := Vector2(-dir.y, dir.x)
-			var col := Pal.c("accent")
-			var arrow := PackedVector2Array([tip + dir * 12, tip - dir * 6 + side * 11, tip - dir * 6 - side * 11])
-			_marks.draw_colored_polygon(arrow, col)
-			# A dark edge keeps the gold arrow visible against a bright sky.
-			arrow.append(arrow[0])
-			_marks.draw_polyline(arrow, Pal.INK, 2.0, true)
-		if task.ring > 0.0:
-			_ground_ring(task.marker, task.ring)
-	# A thin ring round the drone when it is far and tiny.
-	if view == "pilot" and not cam.is_position_behind(sim.pos):
-		var d := cam.position.distance_to(sim.pos)
-		if d > 14.0:
-			var q := cam.unproject_position(sim.pos + Vector3(0, 0.1, 0))
-			var col2 := Pal.c("text") if look == "dusk" else Pal.VIOLET
-			col2.a = 0.7
-			_marks.draw_arc(q, 16.0, 0, TAU, 32, col2, 2.0, true)
-
-
-func _diamond(p: Vector2, r: float) -> void:
-	var col := Pal.c("accent")
-	_marks.draw_colored_polygon(PackedVector2Array([p + Vector2(0, -r), p + Vector2(r, 0), p + Vector2(0, r), p + Vector2(-r, 0)]), col)
-	_marks.draw_polyline(PackedVector2Array([p + Vector2(0, -r), p + Vector2(r, 0), p + Vector2(0, r), p + Vector2(-r, 0), p + Vector2(0, -r)]), Pal.INK, 2.0, true)
-
-
-func _ground_ring(center: Vector3, radius: float) -> void:
-	var pts := PackedVector2Array()
-	var g := sim.ground.call(center.x, center.z) as float
-	for i in 49:
-		var a := i * TAU / 48.0
-		var w := Vector3(center.x + cos(a) * radius, g + 0.05, center.z + sin(a) * radius)
-		if cam.is_position_behind(w):
-			return
-		pts.append(cam.unproject_position(w))
-	var col := Pal.c("accent")
-	_marks.draw_polyline(pts, Pal.INK, 5.0, true)
-	_marks.draw_polyline(pts, col, 3.0, true)
+	FlightMarks.draw(self)
 
 
 # --- Survey camera ----------------------------------------------------------
@@ -710,17 +610,19 @@ func pause() -> void:
 	_paused = true
 	_sound.hush(true)
 	_show_overlay(FlightCards.pause(self))
+	OS.low_processor_usage_mode = true  # a still picture: no need to draw it sixty times a second
 
 
 func resume() -> void:
 	_paused = false
 	_sound.hush(false)
 	_hide_overlay()
+	OS.low_processor_usage_mode = false
 
 
 ## "Start over" keeps the same layout (the same house, the same field); "Again" after a result too.
 func restart() -> void:
-	app.open_flight(vehicle, task_key, flight_seed)
+	app.open_flight(vehicle, task_key, flight_seed, practice)
 
 
 func leave() -> void:
@@ -740,6 +642,11 @@ func _finish() -> void:
 	_finished = true
 	_sound.stop_motors()
 	_sound.play("chime")
+	if practice:
+		_show_overlay(FlightCards.practice_done(self))
+		return
+	if app:
+		app.fails.erase(task_key)
 	if task.is_mission:
 		Prefs.mark_mission(task_key)
 	else:
@@ -747,20 +654,29 @@ func _finish() -> void:
 	var got := Rating.sunflowers(task_key, mode, sim.time, _touches)
 	var before := Prefs.record(task_key, got, sim.time)
 	_show_overlay(FlightCards.passed(self, got, before, _next_task()))
+	add_child(Confetti.new())
 
 
 func _crashed() -> void:
 	_finished = true
 	_sound.stop_motors()
 	_sound.play("thud")
-	_show_overlay(FlightCards.crashed(self))
+	_show_overlay(FlightCards.crashed(self, _fail_streak()))
 
 
 func _not_this_time() -> void:
 	_finished = true
 	_sound.stop_motors()
 	_sound.play("fail")
-	_show_overlay(FlightCards.not_this_time(self))
+	_show_overlay(FlightCards.not_this_time(self, _fail_streak()))
+
+
+## Tries in a row that did not pass, this one included. Practice tries do not count.
+func _fail_streak() -> int:
+	if app == null or practice:
+		return 0
+	app.fails[task_key] = int(app.fails.get(task_key, 0)) + 1
+	return app.fails[task_key]
 
 
 func _next_task() -> String:

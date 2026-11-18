@@ -54,6 +54,14 @@ const PALETTES := {
 
 var pal: Dictionary
 var pad := Vector3.ZERO
+## The plane's world: the hills open into a flat valley along the runway, so take-offs and landings
+## have room. Set before build_land().
+var airfield := false
+## The runway: centre line at x, from z0 (near the pad) to z1 (far end), RUNWAY_W wide.
+const RUNWAY_X := 6.0
+const RUNWAY_Z0 := -6.0
+const RUNWAY_Z1 := -96.0
+const RUNWAY_W := 10.0
 var pilot := Vector3(0, 1.7, 11)
 var obstacles: Array[Dictionary] = []
 ## Every house: {"pos": Vector3, "rot": float}. The roof ridge is 6 m above the ground.
@@ -68,9 +76,14 @@ var _hills: Array[Dictionary] = []
 ## Potholes: x, z = centre, y = radius.
 var _dips: Array[Vector3] = []
 var _muds: Array[Vector3] = []
+## True while build_land runs: what is made then never moves, and may be batched.
+var _building := false
+## Boxes of the same size are one mesh, so they can be batched.
+var _boxes := {}
 
 
 func build_land(look: String, seed_ := 7) -> void:
+	_building = true
 	pal = PALETTES.get(look, PALETTES["day"])
 	_noise.seed = seed_
 	_noise.frequency = 0.012
@@ -78,10 +91,44 @@ func build_land(look: String, seed_ := 7) -> void:
 	_terrain()
 	_field()
 	_pad()
+	if airfield:
+		_runway()
 	_poplars()
 	for h in HOUSE_SPOTS:
 		_house(h, atan2(h.x, h.z) + PI)  # front door towards the pad
 	_decor_sunflowers(Vector3(-12, 0, -18))
+	_building = false
+	_batch_statics()
+
+
+## Parts of the land that never move, and come many times with the same shape and colour (runway
+## dashes, poplars, house walls), are drawn together in one go: far fewer draw calls on a phone.
+func _batch_statics() -> void:
+	var groups := {}
+	for n in get_children():
+		if n is MeshInstance3D and n.has_meta("static"):
+			var key := "%d/%d" % [n.mesh.get_instance_id(), n.material_override.get_instance_id()]
+			if not groups.has(key):
+				groups[key] = []
+			groups[key].append(n)
+	for key in groups:
+		var list: Array = groups[key]
+		if list.size() < 3:
+			continue
+		var mm := MultiMesh.new()
+		mm.transform_format = MultiMesh.TRANSFORM_3D
+		mm.mesh = list[0].mesh
+		mm.instance_count = list.size()
+		for i in list.size():
+			mm.set_instance_transform(i, list[i].transform)
+		var mmi := MultiMeshInstance3D.new()
+		mmi.multimesh = mm
+		mmi.material_override = list[0].material_override
+		mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		add_child(mmi)
+		for n in list:
+			remove_child(n)
+			n.queue_free()
 
 
 func _hill_height(h: Dictionary, x: float, z: float) -> float:
@@ -125,6 +172,10 @@ func _base_height(x: float, z: float) -> float:
 	if r <= FLAT:
 		return 0.0
 	var ramp := smoothstep(FLAT, FLAT + 45.0, r)
+	if airfield and z < 130.0:
+		# The valley along the runway, all the way out, and clear behind the pilot too: a plane
+		# landing towards the pilot comes in over it.
+		ramp *= smoothstep(70.0, 110.0, absf(x))
 	return ramp * (6.0 + 9.0 * (_noise.get_noise_2d(x, z) + 0.6))
 
 
@@ -159,14 +210,18 @@ func _mesh(mesh: Mesh, c: Color, at: Vector3, rot_y := 0.0) -> MeshInstance3D:
 	mi.position = at
 	mi.rotation.y = rot_y
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	if _building:
+		mi.set_meta("static", true)
 	add_child(mi)
 	return mi
 
 
 func _box(size: Vector3) -> BoxMesh:
-	var b := BoxMesh.new()
-	b.size = size
-	return b
+	if not _boxes.has(size):
+		var b := BoxMesh.new()
+		b.size = size
+		_boxes[size] = b
+	return _boxes[size]
 
 
 func _environment() -> void:
@@ -269,6 +324,23 @@ func _pad() -> void:
 	dot.height = 0.06
 	dot.radial_segments = 16
 	_mesh(dot, pal["pad_mark"], pad + Vector3(0, 0.035, 0))
+
+
+func _runway() -> void:
+	var len_ := RUNWAY_Z0 - RUNWAY_Z1
+	var mid := Vector3(RUNWAY_X, 0.02, (RUNWAY_Z0 + RUNWAY_Z1) / 2.0)
+	_mesh(_box(Vector3(RUNWAY_W, 0.03, len_)), pal["road"], mid)
+	# Centre-line dashes, so its direction reads from the air.
+	var dash := _box(Vector3(0.35, 0.04, 3.0))
+	var z := RUNWAY_Z0 - 4.0
+	while z > RUNWAY_Z1 + 3.0:
+		_mesh(dash, pal["pad"], Vector3(RUNWAY_X, 0.03, z))
+		z -= 7.0
+
+
+## True if (x, z) is on the runway.
+func on_runway(x: float, z: float) -> bool:
+	return absf(x - RUNWAY_X) <= RUNWAY_W / 2.0 and z <= RUNWAY_Z0 and z >= RUNWAY_Z1
 
 
 func _poplars() -> void:

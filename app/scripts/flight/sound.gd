@@ -23,7 +23,7 @@ func setup(vehicle: String, kids: bool, on: bool) -> void:
 	_kids = kids
 	if not _on:
 		return
-	_motor = _player(_stream("ugv" if vehicle == "ugv" else ("fpv" if vehicle == "fpv" else "drone")))
+	_motor = _player(_stream(vehicle if vehicle in ["ugv", "fpv", "wing"] else "drone"))
 	_motor.volume_db = -80.0
 	_fx = _player(_stream("chime"))
 	_beep = _player(_stream("beep"))
@@ -103,11 +103,12 @@ static func _make(name_: String) -> AudioStreamWAV:
 	var out := PackedFloat32Array()
 	var loop := false
 	match name_:
-		"drone", "fpv":
+		"drone", "fpv", "wing":
 			# Two rotor pairs a few hertz apart: the slow beat is what makes a quadcopter sound alive.
+			# A plane has one propeller: one steady tone, a little lower.
 			# Half a second holds a whole number of waves of both, so the loop has no click.
-			var f := 110.0 if name_ == "drone" else 220.0
-			var f2 := f + (2.0 if name_ == "drone" else 4.0)
+			var f: float = {"drone": 110.0, "fpv": 220.0, "wing": 150.0}[name_]
+			var f2: float = f + {"drone": 2.0, "fpv": 4.0, "wing": 0.0}[name_]
 			var n := int(RATE / 2.0)  # half a second of samples
 			out.resize(n)
 			var lp := 0.0
