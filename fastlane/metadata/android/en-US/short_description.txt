@@ -1,1 +1,1 @@
-A drone and ground-robot piloting trainer for kids and adults, fully offline
+Offline drone and robot piloting trainer: no internet, no accounts, no ads
