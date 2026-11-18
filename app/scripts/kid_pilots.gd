@@ -128,7 +128,9 @@ static func read(list, active) -> void:
 	for p in list:
 		if Prefs.kid_pilots.size() >= MAX:
 			break
-		if p is Dictionary and p.get("animal") in ANIMALS and p.get("color") in COLORS and p.get("slice", {}) is Dictionary:
+		# The same animal or colour twice (an edited file) would be two pilots no one can tell apart.
+		if p is Dictionary and p.get("animal") in ANIMALS and p.get("color") in COLORS and p.get("slice", {}) is Dictionary \
+				and not Prefs.kid_pilots.any(func(q): return q["animal"] == p["animal"] or q["color"] == p["color"]):
 			Prefs.kid_pilots.append({"animal": p["animal"], "color": p["color"], "slice": _read_slice(p.get("slice", {}))})
 	if Prefs.kid_pilots.size() < 2:
 		Prefs.kid_pilots = []

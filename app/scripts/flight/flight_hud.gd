@@ -293,6 +293,7 @@ static func update_stats(f: Flight) -> void:
 		f._stats["BATTERY"].text = FlightBattery.text(f)
 	if f._stats.has("TARGET"):
 		f._stats["TARGET"].text = f.tr("UNIT_M") % FlightTask.num(f.task.target_dist, 0)
+	if f._stats.has("CLOSING"):  # on a narrow top line it goes first
 		f._stats["CLOSING"].text = ("+" if f.task.closing >= 0.0 else "") + f.tr("UNIT_MS") % FlightTask.num(f.task.closing)
 	if f._stats.has("TIME"):
 		var t := int(f.sim.time)

@@ -8,6 +8,8 @@ const TABS := [
 	["theory", "theory", "TAB_THEORY", "res://scripts/screens/theory.gd"],
 ]
 
+## The frame the last flight was opened in.
+var _opened_at := -1
 var stack: Array[Screen] = []
 var tab := "learn"
 
@@ -161,6 +163,9 @@ func back() -> void:
 	if flight:
 		flight.on_back()
 		return
+	# Something open over the screen (the big licence) closes first.
+	if not stack.is_empty() and stack.back().has_method("close_overlay") and stack.back().close_overlay():
+		return
 	if stack.size() > 1:
 		stack.pop_back().queue_free()
 		_show()
@@ -176,6 +181,9 @@ func start(vehicle: String, key: String) -> void:
 
 
 func open_flight(vehicle: String, key: String, seed_ := -1, practice := false) -> void:
+	# Two starts in one frame (a double tap that slips through) would build two worlds.
+	if Engine.get_process_frames() == _opened_at:
+		return
 	# Kids mode, a long while in the air: a break first, between flights rather than in one.
 	if Prefs.mode == "kids" and Prefs.break_reminder and flown >= BreakCard.AFTER:
 		var card := BreakCard.new()
@@ -195,6 +203,7 @@ func open_flight(vehicle: String, key: String, seed_ := -1, practice := false) -
 	Engine.max_fps = 60  # smooth enough, and a 120 Hz phone does not burn its battery twice as fast
 	_bg.visible = false
 	_frame.visible = false
+	_opened_at = Engine.get_process_frames()
 	flight = load("res://scripts/flight/flight.gd").new()
 	flight.setup(self, vehicle, key)
 	flight.practice = practice
