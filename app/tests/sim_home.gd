@@ -165,6 +165,15 @@ func test_pad_prefs() -> void:
 	check(int(FlightInput.default_axis("throttle", false)["a"]) == JOY_AXIS_LEFT_Y and int(FlightInput.default_axis("throttle", true)["a"]) == JOY_AXIS_RIGHT_Y,
 		"the usual layout follows Mode 2 and Mode 1")
 	Prefs.erase_all()
+	# A file someone edited by hand: the rest of the settings still load.
+	Prefs._apply({"welcomed": true, "theme": 1, "language": "en", "text_size": "larger", "kids_lock": true,
+		"kid_pilots": [{"animal": "fox", "color": "gold"}, {"animal": "fox", "color": "gold"}, {"animal": "owl", "color": "blue"}],
+		"views": {"simple/camera": "ugv", "simple/wing": "drone", "simple/fpv": "chase"}})
+	check(Prefs.language == "en" and Prefs.text_size == "larger" and Prefs.kids_lock, "a theme that is a number does not lose the other settings")
+	check(Prefs.kid_pilots.size() == 2, "the same animal twice is one pilot")
+	check(Prefs.view_for("simple", "camera") == "pilot" and Prefs.view_for("simple", "wing") == "chase" and Prefs.view_for("simple", "fpv") == "chase",
+		"a view saved for another machine is not used")
+	Prefs.erase_all()
 
 
 ## Several children on one phone: each keeps their own Kids mode progress; nothing else changes.

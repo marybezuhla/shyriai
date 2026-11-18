@@ -64,6 +64,21 @@ static func build_bottom(f: Flight, col: VBoxContainer, ins: Dictionary) -> void
 		bottom.add_child(b)
 	bottom.add_child(stick_with_label(f, f._right, f.tr(right_label)))
 	col.add_child(bottom)
+	fit_height(f, col, ins)
+	fit_height.call_deferred(f, col, ins)  # again once the hint and numbers have their text
+
+
+## A low landscape phone with the largest text and an extra bar (comfort, cargo) may not fit
+## everything: the sticks give up the height that is missing, so nothing is cut off.
+static func fit_height(f: Flight, col: VBoxContainer, ins: Dictionary) -> void:
+	if not is_instance_valid(col) or not is_instance_valid(f):
+		return
+	var high := f.get_viewport_rect().size.y - 26.0 - float(ins["top"]) - float(ins["bottom"])
+	var over := col.get_combined_minimum_size().y - high
+	if over > 0.0:
+		var px := maxf(64.0, f._left.custom_minimum_size.y - over)
+		for s in [f._left, f._right]:
+			s.custom_minimum_size = Vector2(px, px)
 
 
 ## Adult camera drones have a "Home" button beside the right stick.

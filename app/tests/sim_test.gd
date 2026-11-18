@@ -14,6 +14,40 @@ func _ready() -> void:
 	test_adult_crashes_into_a_house()
 	test_battery_lands_by_itself()
 	test_fpv_physics()
+	await _every_course()
+	test_return_home()
+	test_fpv_setup()
+	test_pilot_findings()
+	test_pad_prefs()
+	test_kid_pilots()
+	test_kids_texts()
+	for mode in ["simple", "pro"]:
+		for key in ["MIS_CAM_LINK", "MIS_CAM_JAM"]:
+			await test_link_mission(key, mode)
+	test_quiz_texts()
+	test_rating_rules()
+	test_results_are_kept()
+	test_saved_results_are_checked()
+	test_tips()
+	test_damaged_save_falls_back()
+	await test_free_flight()
+	await _other_layouts()
+	# Every lesson and mission the app offers was flown in every mode that offers it.
+	for v in Curriculum.VEHICLES:
+		for m in Prefs.MODES:
+			for k in Curriculum.lessons(v, m) + Curriculum.missions(v, m):
+				check(_flown.has(k + "/" + m), "%s %s was flown to a pass in the tests" % [m, k])
+	if failures == 0:
+		print("SIM OK")
+		get_tree().quit(0)
+	else:
+		print("SIM FAILED: %d" % failures)
+		get_tree().quit(1)
+
+
+
+## Every course, vehicle by vehicle, in every mode.
+func _every_course() -> void:
 	for mode in Prefs.MODES:
 		await test_sticks_lesson(mode)
 		await test_takeoff_lesson(mode)
@@ -67,23 +101,10 @@ func _ready() -> void:
 	await test_wing_stall_needs_slowing()
 	await test_wing_level_needs_hands()
 	await test_wing_kids_assist()
-	test_return_home()
-	test_fpv_setup()
-	test_pilot_findings()
-	test_pad_prefs()
-	test_kid_pilots()
-	test_kids_texts()
-	for mode in ["simple", "pro"]:
-		for key in ["MIS_CAM_LINK", "MIS_CAM_JAM"]:
-			await test_link_mission(key, mode)
-	test_quiz_texts()
-	test_rating_rules()
-	test_results_are_kept()
-	test_saved_results_are_checked()
-	test_tips()
-	test_damaged_save_falls_back()
-	await test_free_flight()
-	# Missions change with every attempt: fly them with other layouts too.
+
+
+## Missions change with every attempt: fly them with other layouts too.
+func _other_layouts() -> void:
 	for seed_ in [1234, 9001]:
 		_seed = seed_
 		await test_kitten_mission()
@@ -106,17 +127,6 @@ func _ready() -> void:
 			await test_wing_task(key, "pro")
 		await test_wing_task("MIS_WING_KITE", "kids")
 	_seed = 7
-	# Every lesson and mission the app offers was flown in every mode that offers it.
-	for v in Curriculum.VEHICLES:
-		for m in Prefs.MODES:
-			for k in Curriculum.lessons(v, m) + Curriculum.missions(v, m):
-				check(_flown.has(k + "/" + m), "%s %s was flown to a pass in the tests" % [m, k])
-	if failures == 0:
-		print("SIM OK")
-		get_tree().quit(0)
-	else:
-		print("SIM FAILED: %d" % failures)
-		get_tree().quit(1)
 
 
 # --- Sunflowers, results, licences, free flight ------------------------------

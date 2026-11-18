@@ -664,7 +664,8 @@ func _hud_fits() -> void:
 	var shapes := [Vector2i(1280, 720), Vector2i(1280, 800), Vector2i(2400, 1080), Vector2i(1800, 2200), Vector2i(800, 360)]
 	for size in ["normal", "larger"]:
 		Prefs.set_text_size(size)
-		for key in [["camera", "CAM_SQUARE"], ["survey", "SRV_TILT"], ["camera", "MIS_CAM_MEDS"], ["wing", "WING_CIRCUIT"], ["ugv", "UGV_DRIVE"]]:
+		for key in [["camera", "CAM_SQUARE"], ["survey", "SRV_TILT"], ["camera", "MIS_CAM_MEDS"], ["wing", "WING_CIRCUIT"], ["ugv", "UGV_DRIVE"],
+				["ugv", "UGV_EVACUATION"], ["intercept", "INT_LEAD"]]:
 			get_window().size = shapes[0]
 			main.start(key[0], key[1])
 			await _frames(3)

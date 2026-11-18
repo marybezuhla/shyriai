@@ -3,6 +3,9 @@
 # certificate instead, with no numbers. The name is optional and stays on this phone.
 extends Screen
 
+## The licence shown full screen, if open.
+var _big: CanvasLayer
+
 
 func build() -> void:
 	var kids := Prefs.mode == "kids"
@@ -89,6 +92,15 @@ func _show_big(v: String, date: String, kids: bool) -> void:
 	layer.add_child(cover)
 	close.pressed.connect(layer.queue_free)
 	add_child(layer)
+	_big = layer
+
+
+## Back with the big licence open closes only the licence.
+func close_overlay() -> bool:
+	if is_instance_valid(_big) and not _big.is_queued_for_deletion():
+		_big.queue_free()
+		return true
+	return false
 
 
 func _name_field() -> LineEdit:

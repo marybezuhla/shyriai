@@ -85,6 +85,10 @@ func _records() -> void:
 	card._show_big("camera", Prefs.licence_date("camera"), false)
 	await s._frames(2)
 	await s._shot("uk-dusk-licence-big")
+	var depth: int = main.stack.size()
+	main.back()
+	await s._frames(2)
+	assert(main.stack.size() == depth and main.stack.back() == card, "Back closes only the big licence")
 	main.back()
 
 

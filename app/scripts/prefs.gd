@@ -14,6 +14,11 @@ const MODES := ["kids", "simple", "pro"]
 const THEMES := ["dusk", "day", "starry", "sky", "seanight", "mallow"]
 const LANGUAGES := ["system", "uk", "en"]
 const VIEWS := ["pilot", "chase", "drone", "fpv", "ugv"]
+## The views each machine has (as FlightBottom.view_list offers them).
+const MACHINE_VIEWS := {
+	"camera": ["pilot", "chase", "drone"], "fpv": ["fpv", "chase", "pilot"],
+	"ugv": ["ugv", "chase", "pilot"], "wing": ["chase", "pilot", "fpv"],
+}
 const TEXT_SIZES := {"normal": 1.0, "large": 1.2, "larger": 1.5}
 ## Mode 2: throttle on the left stick (most radios). Mode 1: throttle on the right.
 const STICK_MODES := ["2", "1"]
@@ -448,7 +453,9 @@ func view_for(m: String, vehicle := "camera") -> String:
 		fallback = "drone"  # a survey is flown through the camera, kids too
 	elif machine == "wing" and m == "pro":
 		fallback = "pilot"  # as a real model pilot flies: from the ground
-	return views.get(m + "/" + vehicle, fallback)
+	var v = views.get(m + "/" + vehicle, fallback)
+	# A view saved for another machine (an old or edited file) is not used.
+	return v if v in MACHINE_VIEWS.get(machine, VIEWS) else fallback
 
 
 func set_view(m: String, vehicle: String, v: String) -> void:
@@ -560,7 +567,7 @@ func _apply_settings(d: Dictionary) -> void:
 	var t = d.get("theme")
 	if t is String and t in THEMES:
 		theme = t
-	elif t == "system":
+	elif t is String and t == "system":
 		# Before the six looks, "system" was a third choice: Dusk or Day as the phone is.
 		theme = "dusk"
 		theme_system = true
