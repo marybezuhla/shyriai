@@ -2,7 +2,7 @@
 
 Тренажер пілотування для Android: камерні й FPV-дрони та наземні роботизовані комплекси (НРК). Для дітей і дорослих. Українська та англійська. Безкоштовно, без реклами й акаунтів, без інтернету. Потрібен Android 7 або новіший і OpenGL ES 3.0.
 
-> **Версія 1.0.** Чотири машини: камерний дрон (8 уроків, 4 місії), FPV-дрон (6 уроків, 4 місії), НРК (5 уроків, 4 місії) і літак (8 уроків, 2 місії; для дітей 4 уроки й 2 місії), курс аерозйомки й пошуку (5 уроків, 3 місії; для дітей 3 уроки й фотоальбом), курс перехоплення (5 уроків, 3 місії; для дітей метелики), а також картки теорії з питаннями «Перевір себе» і словничок.
+> **Версія 1.0.** Чотири машини: камерний дрон (8 уроків, 4 місії), FPV-дрон (6 уроків, 4 місії), НРК (5 уроків, 4 місії) і літак (8 уроків, 2 місії; для дітей 4 уроки й 2 місії), курс аерозйомки й пошуку (5 уроків, 3 місії; для дітей 3 уроки й фотоальбом), курс перехоплення (5 уроків, 3 місії; для дітей метелики), а також «Підручник пілота» на 10 розділів із питаннями «Перевір себе», дитяча «Книжечка пілота» і словничок.
 
 ## Задум
 
@@ -47,7 +47,7 @@
 
 A piloting trainer for Android: camera and FPV drones, and ground robots (UGVs). For kids and adults. Ukrainian and English. Free, no ads, no accounts, no internet. Requires Android 7 or newer and OpenGL ES 3.0.
 
-> **Version 1.0.** Four vehicles: the camera drone (8 lessons, 4 missions), the FPV drone (6 lessons, 4 missions), the UGV (5 lessons, 4 missions) and the plane (8 lessons, 2 missions; 4 lessons and 2 missions for kids), the aerial survey course (5 lessons, 3 missions; 3 lessons and a photo album for kids), the interception course (5 lessons, 3 missions; butterflies for kids), plus the theory cards with "Check yourself" questions and a glossary.
+> **Version 1.0.** Four vehicles: the camera drone (8 lessons, 4 missions), the FPV drone (6 lessons, 4 missions), the UGV (5 lessons, 4 missions) and the plane (8 lessons, 2 missions; 4 lessons and 2 missions for kids), the aerial survey course (5 lessons, 3 missions; 3 lessons and a photo album for kids), the interception course (5 lessons, 3 missions; butterflies for kids), plus the pilot's book in 10 chapters with "Check yourself" questions, a little book for kids and a glossary.
 
 ## The idea
 
