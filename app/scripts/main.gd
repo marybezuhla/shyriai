@@ -111,10 +111,32 @@ func open_tab(name_: String) -> void:
 	_show()
 
 
-func open_lessons(vehicle: String) -> void:
+## A course's lessons; with a key, that lesson's card is open.
+func open_lessons(vehicle: String, key := "") -> void:
 	var s := _make("res://scripts/screens/lessons.gd")
 	s.vehicle = vehicle
+	var i := Curriculum.lessons(vehicle, Prefs.mode).find(key)
+	if i >= 0:
+		s.selected = i
+		s.show_lesson()
 	_push(s)
+
+
+func open_book() -> void:
+	_push(_make("res://scripts/screens/book_contents.gd"))
+
+
+## A chapter of the book; "Next" takes the place of the chapter before, so Back leads to the contents.
+func open_chapter(id: String, replace := false) -> void:
+	var s := _make("res://scripts/screens/book_chapter.gd")
+	s.id = id
+	if replace and stack.size() > 1:
+		stack.pop_back().queue_free()
+	_push(s)
+
+
+func open_kids_book() -> void:
+	_push(_make("res://scripts/screens/kids_book.gd"))
 
 
 func open_settings() -> void:

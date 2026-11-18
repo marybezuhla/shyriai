@@ -103,6 +103,8 @@ var views := {}
 ## and which of them flies now.
 var kid_pilots: Array = []
 var kid_pilot := 0
+## The book's chapters read (see Book).
+var book_read: Array = []
 
 ## What was just erased, so it can be put back: {"mode", "passed", "missions"} or {"all": saved data}.
 var _undo := {}
@@ -411,6 +413,7 @@ func erase_all() -> void:
 	views = {}
 	kid_pilots = []
 	kid_pilot = 0
+	book_read = []
 	_save()
 	_drop_backup()
 	_apply_language()
@@ -551,6 +554,12 @@ func _apply(d: Dictionary) -> void:
 	_apply_results(d)
 	_apply_progress(d)
 	KidPilots.read(d.get("kid_pilots"), d.get("kid_pilot"))
+	Book.read(d.get("book_read"))
+
+
+## Saves after a chapter of the book was read.
+func book_changed() -> void:
+	pilots_changed()
 
 
 ## Saves after a pilot was added, chosen or removed.
@@ -732,7 +741,7 @@ func _data() -> Dictionary:
 		"licences": licences.duplicate(true), "pilot_name": pilot_name, "free": free.duplicate(),
 		"fpv_rates": fpv_rates, "fpv_quad": fpv_quad, "fpv_mission_mode": fpv_mission_mode,
 		"pad_dead": pad_dead, "pad_axes": pad_axes.duplicate(true), "pad_buttons": pad_buttons.duplicate(true),
-		"kid_pilots": kid_pilots.duplicate(true), "kid_pilot": kid_pilot,
+		"kid_pilots": kid_pilots.duplicate(true), "kid_pilot": kid_pilot, "book_read": book_read.duplicate(),
 	}
 
 

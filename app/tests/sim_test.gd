@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # Tests of the drone physics and of every lesson: each lesson must be passable with the sticks alone,
 # in every mode. CI fails if anything here fails. Not shipped in the APK.
-extends "res://tests/sim_home.gd"
+extends "res://tests/sim_book.gd"
 
 
 func _ready() -> void:
@@ -21,6 +21,8 @@ func _ready() -> void:
 	test_pad_prefs()
 	test_kid_pilots()
 	test_kids_texts()
+	test_book()
+	test_kids_book()
 	for mode in ["simple", "pro"]:
 		for key in ["MIS_CAM_LINK", "MIS_CAM_JAM"]:
 			await test_link_mission(key, mode)
