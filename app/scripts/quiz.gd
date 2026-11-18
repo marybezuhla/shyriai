@@ -42,7 +42,10 @@ static func panel(card: String, picked: Dictionary, redraw: Callable) -> Control
 				if chosen == "":
 					picked[q] = opt
 					redraw.call()
-			box.add_child(UI.tappable(row, bg, pick, _t(q + "_" + opt), 14, 12))
+			var a11y := _t(q + "_" + opt)
+			if shown:
+				a11y += " · " + _t("QUIZ_IS_RIGHT" if is_right else "QUIZ_IS_WRONG")
+			box.add_child(UI.tappable(row, bg, pick, a11y, 14, 12))
 		if chosen != "":
 			if chosen == "A":
 				right += 1

@@ -46,7 +46,7 @@ func _book_card(title: String, desc: String, share: float, on_press: Callable) -
 	row.add_child(Glyph.make("theory", 30, Pal.c("accent_text")))
 	row.add_child(text)
 	row.add_child(Glyph.make("chevron", 20, Pal.c("muted")))
-	return UI.tappable(row, Pal.c("surface"), on_press, title, UI.RADIUS_CARD, 16, false, Pal.c("accent"))
+	return UI.tappable(row, Pal.c("surface"), on_press, title + ". " + desc, UI.RADIUS_CARD, 16, false, Pal.c("accent"))
 
 
 func _card(title: String, desc: String, on_press: Callable) -> Control:

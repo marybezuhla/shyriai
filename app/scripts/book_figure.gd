@@ -12,7 +12,7 @@ var kind := ""
 static func make(kind_: String) -> BookFigure:
 	var f := BookFigure.new()
 	f.kind = kind_
-	f.custom_minimum_size = Vector2(0, {"sticks": 140.0, "lipo": 120.0, "wing": 170.0}.get(kind_, 0.0) * Pal.text_scale())
+	f.custom_minimum_size = Vector2(0, {"sticks": 165.0, "lipo": 120.0, "wing": 170.0}.get(kind_, 0.0) * Pal.text_scale())
 	f.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	f.set("accessibility_name", f.tr("BOOK_FIG_" + kind_.to_upper()))
 	return f
@@ -45,8 +45,10 @@ func _sticks() -> void:
 	var r := 44.0 * minf(s, 1.3)
 	var m1 := Prefs.stick_mode == "1"
 	var labels := ["BOOK_FIG_LEFT_M1", "BOOK_FIG_RIGHT_M1"] if m1 else ["BOOK_FIG_LEFT", "BOOK_FIG_RIGHT"]
+	var top := 24.0 * s
+	_text(Vector2(0, 16.0 * s), tr("BOOK_FIG_MODE") % ("1" if m1 else "2"), size.x, "text", UI.SMALL, 700)
 	for i in 2:
-		var c := Vector2(size.x * (0.27 + 0.46 * i), r + 8.0)
+		var c := Vector2(size.x * (0.27 + 0.46 * i), top + r + 8.0)
 		draw_circle(c, r, Pal.c("surface2"))
 		draw_arc(c, r, 0.0, TAU, 40, Pal.c("line"), 2.0, true)
 		draw_line(c - Vector2(r - 8, 0), c + Vector2(r - 8, 0), Pal.c("line"), 1.5)
@@ -56,7 +58,7 @@ func _sticks() -> void:
 		_arrow(c, c - Vector2(0, r - 10), col)
 		_arrow(c, c + Vector2(r - 10, 0), col)
 		draw_circle(c, 10.0, Pal.c("accent"))
-		_text(Vector2(c.x - 80.0, c.y + r + 24.0 * s), tr(labels[i]), 160.0)
+		_text(Vector2(c.x - 80.0, c.y + r + 24.0 * s), tr(labels[i]), 160.0, "text")
 
 
 func _lipo() -> void:
@@ -76,8 +78,8 @@ func _lipo() -> void:
 		var top := k % 2 == 0
 		var label := FlightTask.num(marks[k][0]) + " " + tr("BOOK_FIG_V")
 		# The end marks hug the edges, so the names between have room at the largest text.
-		var w := 150.0
-		var lx := x - w / 2.0
+		var w := 190.0
+		var lx := clampf(x - w / 2.0, 0.0, size.x - w)
 		var align := HORIZONTAL_ALIGNMENT_CENTER
 		if k == 0:
 			lx = x0 - 6.0
@@ -94,9 +96,9 @@ func _lipo() -> void:
 
 func _wing() -> void:
 	var s := Pal.text_scale()
-	var c := Vector2(size.x * 0.56, 84.0 * s)
+	var c := Vector2(size.x * 0.58, size.y * 0.55)
 	var aoa := deg_to_rad(12.0)  # the nose up into the air (y grows downwards)
-	var chord := minf(size.x * 0.62, 260.0)
+	var chord := minf(size.x * 0.6, 260.0)
 	var dir := Vector2(cos(aoa), sin(aoa))
 	var n := Vector2(-dir.y, dir.x)
 	# A wing's cross-section: rounded nose, thin tail.
@@ -115,8 +117,13 @@ func _wing() -> void:
 	_arrow(Vector2(12, nose.y), Vector2(nose.x - 18.0, nose.y), Pal.c("accent"))
 	_text(Vector2(0, nose.y - 12.0), tr("BOOK_FIG_AIR"), maxf(nose.x - 18.0, 110.0), "accent_text")
 	draw_line(nose, nose + Vector2(chord + 20.0, 0), Pal.c("line"), 1.5)
-	draw_arc(nose, chord * 0.75, 0.0, aoa, 12, Pal.c("accent"), 2.5, true)
-	_text(Vector2(nose.x + chord * 0.2, nose.y + chord * 0.3 + 18.0 * s), tr("BOOK_FIG_AOA"), chord, "text")
-	var tip := c - n * 58.0 * s
+	var arc_r := chord * 0.32
+	draw_arc(nose, arc_r, 0.0, aoa, 12, Pal.c("accent"), 2.5, true)
+	# Under the wing, from its nose: clear of the drawing at any text size.
+	var below := c.y + chord * 0.5 * sin(aoa) + 28.0 * s
+	_text(Vector2(nose.x, below), tr("BOOK_FIG_AOA"), size.x - nose.x, "accent_text", UI.SMALL, 600, HORIZONTAL_ALIGNMENT_LEFT)
+	# Lift stands square to the oncoming air: straight up, its name above it.
+	var tip := Vector2(c.x, size.y * 0.22 + 6.0)
 	_arrow(c, tip, Pal.c("ok"))
-	_text(Vector2(tip.x + 6.0, tip.y + 12.0), tr("BOOK_FIG_LIFT"), 120.0, "ok")
+	var w := minf(size.x, 220.0 * s)
+	_text(Vector2(clampf(tip.x - w / 2.0, 0.0, size.x - w), tip.y - 10.0), tr("BOOK_FIG_LIFT"), w, "ok")

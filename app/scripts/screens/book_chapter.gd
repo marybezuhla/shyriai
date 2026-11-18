@@ -25,7 +25,7 @@ func build() -> void:
 			text.add_child(UI.panel(BookFigure.make(ch["fig"]), Pal.c("surface2"), 16, 12))
 	add_child(UI.panel(text, Pal.c("surface"), 22, 18))
 	var card: String = ch["card"]
-	if card != "":
+	if card != "" and ch.get("short", true):
 		var short := UI.vbox(10)
 		short.add_child(UI.eyebrow(tr("BOOK_SHORT")))
 		short.add_child(UI.points(tr(card + "_BODY")))
@@ -83,14 +83,35 @@ func _ways_on(i: int, ch: Dictionary) -> void:
 	var go: Array = ch["try"]
 	if not go.is_empty() and Prefs.mode != "kids":
 		col.add_child(UI.label(tr("BOOK_TRY_IN") % Curriculum.label(go[1]), UI.SMALL, 600, "muted"))
-		col.add_child(UI.primary(tr("BOOK_TRY"), func(): app.open_lessons(go[0], go[1]), "play"))
+		col.add_child(UI.primary(tr("BOOK_TRY"), func(): _to_lesson(go[0], go[1]), "play"))
 	if i + 1 < Book.CHAPTERS.size():
 		var nxt: String = Book.CHAPTERS[i + 1]["id"]
 		col.add_child(UI.secondary(tr("BOOK_NEXT") % [i + 2, tr("BOOK_%s_T" % nxt)], func(): app.open_chapter(nxt, true)))
 	else:
-		col.add_child(UI.secondary(tr("BOOK_TO_CONTENTS"), func(): app.back()))
+		col.add_child(UI.secondary(tr("BOOK_TO_CONTENTS"), _to_contents))
 	_end = col
 	add_child(col)
+
+
+## Opened from that course's lessons: back to them, so screens do not pile up.
+func _to_lesson(vehicle: String, key: String) -> void:
+	var below = app.stack[-2] if app.stack.size() > 1 else null
+	if below != null and below.get("vehicle") == vehicle:
+		app.back()
+		below.selected = Curriculum.lessons(vehicle, Prefs.mode).find(key)
+		below.show_lesson()
+		below.rebuild()
+	else:
+		app.open_lessons(vehicle, key)
+
+
+## The contents, wherever this chapter was opened from.
+func _to_contents() -> void:
+	var below = app.stack[-2] if app.stack.size() > 1 else null
+	if below != null and below.get_script() == preload("res://scripts/screens/book_contents.gd"):
+		app.back()
+	else:
+		app.open_book(true)
 
 
 func _process(_delta: float) -> void:
@@ -133,6 +154,7 @@ func _explain(term: String) -> void:
 	close.pressed.connect(layer.queue_free)
 	add_child(layer)
 	_pop = layer
+	close.grab_focus.call_deferred()  # a screen reader or keyboard lands on the explanation
 
 
 ## Back with a word open closes only the word.

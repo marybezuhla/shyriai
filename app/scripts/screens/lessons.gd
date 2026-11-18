@@ -137,7 +137,7 @@ func _lesson_card(lessons: Array, done: int) -> Control:
 	var ch := Book.chapter_for(vehicle, key)
 	if ch != "" and Prefs.mode != "kids":
 		var n := Book.index_of(ch) + 1
-		card.add_child(UI.secondary(tr("BOOK_READ_ABOUT") % [n, tr("BOOK_%s_T" % ch)], func(): app.open_chapter(ch)))
+		card.add_child(UI.secondary(tr("BOOK_READ_ABOUT") % [n, tr("BOOK_%s_T" % ch)], func(): _to_chapter(ch)))
 	return UI.panel(card, Pal.c("surface"), 22, 18)
 
 
@@ -212,3 +212,11 @@ func _build_free() -> void:
 	col.add_child(UI.primary(tr("FREE_GO_UGV" if machine == "ugv" else "FREE_GO"), func(): app.start(vehicle, key), "play"))
 	add_child(col)
 
+
+## Opened from that chapter: back to it, so screens do not pile up.
+func _to_chapter(id: String) -> void:
+	var below = app.stack[-2] if app.stack.size() > 1 else null
+	if below != null and below.get("id") == id:
+		app.back()
+	else:
+		app.open_chapter(id)

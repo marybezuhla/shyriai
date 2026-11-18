@@ -90,9 +90,24 @@ func _from_lesson() -> void:
 	var want := s.tr("BOOK_READ_ABOUT") % [Book.index_of("WING") + 1, s.tr("BOOK_WING_T")]
 	assert(texts.has(want), "a lesson offers its chapter")
 	await s._shot("book-uk-lesson")
-	main.open_chapter(Book.chapter_for("wing", "WING_STALL"))
+	# Lesson, its chapter, the lesson again: back and forth, the screens do not pile up.
+	var depth: int = main.stack.size()
+	main.stack.back()._to_chapter("WING")
 	await s._frames(2)
+	assert(main.stack.size() == depth + 1 and main.stack.back().id == "WING", "the lesson opens its chapter")
+	main.stack.back()._to_lesson("wing", "WING_LEVEL")
+	await s._frames(2)
+	assert(main.stack.size() == depth and main.stack.back().selected == 0, "and the chapter goes back to the lesson")
 	main.back()
+	await s._frames(2)
+	# The last chapter, opened from "Read on": "Back to the contents" leads to the contents.
+	main.open_tab("theory")
+	main.open_chapter("RULES")
+	await s._frames(2)
+	main.stack.back()._to_contents()
+	await s._frames(2)
+	assert(main.stack.size() == 2 and main.stack.back().get_script() == preload("res://scripts/screens/book_contents.gd"),
+		"the last chapter leads to the contents")
 	main.back()
 	await s._frames(2)
 

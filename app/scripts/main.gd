@@ -122,7 +122,10 @@ func open_lessons(vehicle: String, key := "") -> void:
 	_push(s)
 
 
-func open_book() -> void:
+## The book's contents; `replace`: in place of the screen on top (a chapter).
+func open_book(replace := false) -> void:
+	if replace and stack.size() > 1:
+		stack.pop_back().queue_free()
 	_push(_make("res://scripts/screens/book_contents.gd"))
 
 

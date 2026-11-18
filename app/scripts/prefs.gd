@@ -557,9 +557,11 @@ func _apply(d: Dictionary) -> void:
 	Book.read(d.get("book_read"))
 
 
-## Saves after a chapter of the book was read.
+## Saves after a chapter of the book was read. The screen is not drawn again (that would move the
+## focus); the Theory tab shows the new count when it next opens.
 func book_changed() -> void:
-	pilots_changed()
+	_undo = {}
+	_save()
 
 
 ## Saves after a pilot was added, chosen or removed.

@@ -10,12 +10,13 @@ class_name Book
 extends RefCounted
 
 ## id, its icon, a drawing (see BookFigure) or "", the theory card it carries or "", and the
-## lesson to try it in: [vehicle, key] or [].
+## lesson to try it in: [vehicle, key] or []. "short": false leaves out the card's points where the
+## chapter already says the same.
 const CHAPTERS := [
-	{"id": "CONTROLS", "icon": "learn", "fig": "sticks", "card": "", "try": ["camera", "CAM_STICKS"]},
-	{"id": "CHECKLIST", "icon": "check", "fig": "", "card": "TH_CHECKLIST", "try": ["camera", "CAM_TAKEOFF"]},
+	{"id": "CONTROLS", "icon": "radio", "fig": "sticks", "card": "", "try": ["camera", "CAM_STICKS"]},
+	{"id": "CHECKLIST", "icon": "list", "fig": "", "card": "TH_CHECKLIST", "try": ["camera", "CAM_TAKEOFF"], "short": false},
 	{"id": "CAMERA", "icon": "camera", "fig": "", "card": "TH_SIGNAL", "try": ["camera", "CAM_HOLD"]},
-	{"id": "BATTERY", "icon": "power", "fig": "lipo", "card": "TH_BATTERY", "try": []},
+	{"id": "BATTERY", "icon": "battery", "fig": "lipo", "card": "TH_BATTERY", "try": []},
 	{"id": "SURVEY", "icon": "photo", "fig": "", "card": "", "try": ["survey", "SRV_TILT"]},
 	{"id": "FPV", "icon": "fpv", "fig": "", "card": "", "try": ["fpv", "FPV_THROTTLE"]},
 	{"id": "WING", "icon": "wing", "fig": "wing", "card": "TH_WING", "try": ["wing", "WING_LEVEL"]},
@@ -25,8 +26,8 @@ const CHAPTERS := [
 ]
 ## The kids' book, a page each: the text is BOOK_KIDS_<n> and the pictures are glyphs.
 const KIDS_PAGES := [
-	["camera"], ["grownup", "kid"], ["learn"], ["power"], ["sunflower"], ["home"], ["stork", "wing"],
-	["ugv"], ["fox", "sunflower"],
+	["camera"], ["grownup", "kid"], ["radio"], ["battery"], ["cloud"], ["home"], ["stork", "wing"],
+	["ugv"], ["camera", "kid"], ["fox", "sunflower"],
 ]
 ## Lessons whose chapter is not their vehicle's own.
 const LESSON_CHAPTER := {"CAM_STICKS": "CONTROLS", "CAM_TAKEOFF": "CHECKLIST"}

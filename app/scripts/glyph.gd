@@ -103,6 +103,8 @@ func _draw() -> void:
 			_animal()
 		"kid", "grownup", "home", "power", "plus":
 			_people_and_buttons()
+		"radio", "battery", "cloud", "list":
+			_book_things()
 		"link":
 			_line([[14, 4], [20, 4], [20, 10]])
 			_line([[20, 4], [11, 13]])
@@ -256,3 +258,33 @@ func _people_and_buttons() -> void:
 			_line([[12, 10], [8.5, 12.5]])
 			_line([[12, 10], [15.5, 12.5]])
 			_line([[7, 12], [17, 12], [17, 15], [7, 15]], true)
+
+
+## The book's own pictures: a radio, a battery, a rain cloud, a checklist.
+func _book_things() -> void:
+	match icon:
+		"radio":
+			# A radio with its two sticks and an antenna.
+			_line([[3, 9], [21, 9], [21, 19], [3, 19]], true)
+			_line([[18, 9], [20, 3]])
+			_ring(8, 14, 2.6)
+			_ring(16, 14, 2.6)
+			draw_circle(_p(8, 14), 0.9 * _k, color)
+			draw_circle(_p(16, 14), 0.9 * _k, color)
+		"battery":
+			_line([[4, 7], [19, 7], [19, 17], [4, 17]], true)
+			_line([[19, 10], [21, 10], [21, 14], [19, 14]])
+			_line([[7, 10], [7, 14]])
+			_line([[10.5, 10], [10.5, 14]])
+		"cloud":
+			draw_arc(_p(8.5, 11), 3.5 * _k, PI * 0.5, PI * 1.5, 16, color, _w, true)
+			draw_arc(_p(12.5, 8.5), 4.5 * _k, PI, TAU, 20, color, _w, true)
+			draw_arc(_p(16.5, 11), 3.5 * _k, -PI * 0.5, PI * 0.5, 16, color, _w, true)
+			_line([[8.5, 14.5], [16.5, 14.5]])
+			for x in [8.5, 12.5, 16.5]:
+				_line([[x, 17], [x - 1.5, 21]])
+		"list":
+			_line([[5, 3.5], [19, 3.5], [19, 20.5], [5, 20.5]], true)
+			for y in [8.5, 12.5, 16.5]:
+				_line([[8, y], [9.5, y + 1.3], [11.5, y - 1.2]])
+				_line([[13.5, y], [16.5, y]])

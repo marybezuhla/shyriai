@@ -15,8 +15,14 @@ func build() -> void:
 	pic.custom_minimum_size = Vector2(0, 170)
 	for g in Book.KIDS_PAGES[page]:
 		pic.add_child(Glyph.make(g, 96, Pal.c("text")))
-	add_child(UI.panel(pic, Pal.TOY.values()[page % Pal.TOY.size()].lerp(Pal.c("surface"), 0.55), 26, 16))
-	add_child(UI.label(tr("BOOK_KIDS_%d" % (page + 1)), UI.TITLE, 600))
+	var text := tr("BOOK_KIDS_%d" % (page + 1))
+	var frame := UI.panel(pic, Pal.TOY.values()[page % Pal.TOY.size()].lerp(Pal.c("surface"), 0.55), 26, 16)
+	frame.set("accessibility_name", text)
+	add_child(frame)
+	# Room for four lines on every page, so the buttons below stay put from page to page.
+	var words := UI.label(text, UI.TITLE, 600)
+	words.custom_minimum_size.y = 4.0 * 1.45 * UI.TITLE * Pal.text_scale()
+	add_child(words)
 	var dots := HBoxContainer.new()
 	dots.alignment = BoxContainer.ALIGNMENT_CENTER
 	dots.add_theme_constant_override("separation", 8)
