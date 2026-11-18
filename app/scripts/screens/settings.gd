@@ -173,6 +173,8 @@ func _look_tile(t: String, on: bool) -> Control:
 	# Two-word names ("Starry night") wrap onto a second line with larger text rather than being cut.
 	var name_ := UI.label(tr("THEME_" + t.to_upper()), UI.SMALL, 700, "text")
 	name_.add_theme_color_override("font_color", th["text"])
+	# Three tiles on the narrowest phone: a long one-word name shrinks a little rather than break.
+	UI.fit_words(name_, (390.0 - 2 * UI.GUTTER - 16.0) / 3.0 - 26.0)
 	col.add_child(name_)
 	var sw := UI.hbox(4)
 	for k in ["accent_text", "accent"]:

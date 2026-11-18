@@ -105,6 +105,8 @@ func _draw() -> void:
 			_people_and_buttons()
 		"radio", "battery", "cloud", "list":
 			_book_things()
+		"star", "flag_done", "medal":
+			_badge_things()
 		"link":
 			_line([[14, 4], [20, 4], [20, 10]])
 			_line([[20, 4], [11, 13]])
@@ -288,3 +290,25 @@ func _book_things() -> void:
 			for y in [8.5, 12.5, 16.5]:
 				_line([[8, y], [9.5, y + 1.3], [11.5, y - 1.2]])
 				_line([[13.5, y], [16.5, y]])
+
+
+## For the badges: a star, a finish flag and a medal.
+func _badge_things() -> void:
+	match icon:
+		"star":
+			var pts := []
+			for i in 10:
+				var r := 9.5 if i % 2 == 0 else 4.2
+				var a := -PI / 2.0 + i * PI / 5.0
+				pts.append([12 + cos(a) * r, 12.5 + sin(a) * r])
+			_line(pts, true)
+		"flag_done":
+			_line([[5, 21], [5, 3.5]])
+			_line([[5, 4], [19, 4], [19, 13], [5, 13]], true)
+			for i in 3:  # the chequers
+				draw_rect(Rect2(_p(5 + i * 4.67, 4), Vector2(2.33, 4.5) * _k), color)
+				draw_rect(Rect2(_p(7.33 + i * 4.67, 8.5), Vector2(2.33, 4.5) * _k), color)
+		"medal":
+			_line([[8, 3], [12, 10], [16, 3]])
+			_ring(12, 15, 5.5)
+			_line([[12, 12.5], [12, 17.5]])

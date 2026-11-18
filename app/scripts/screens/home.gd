@@ -46,6 +46,9 @@ func build() -> void:
 	var earned := Curriculum.VEHICLES.any(func(v): return Prefs.licence_date(v) != "")
 	if earned:
 		add_child(_cards_card())
+	# The badges, once there is something to show.
+	if Curriculum.VEHICLES.any(func(v): return Prefs.passed_count(v) > 0) or Prefs.has_progress():
+		add_child(_badges_card())
 
 
 func _pick_mode(m: String) -> void:
@@ -129,7 +132,10 @@ func _vehicle_card(v: String) -> Control:
 	var text := UI.vbox(3)
 	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	text.alignment = BoxContainer.ALIGNMENT_CENTER
-	text.add_child(UI.label(Curriculum.label("VEH_" + v.to_upper()), UI.LEAD, 700))
+	var title := UI.label(Curriculum.label("VEH_" + v.to_upper()), UI.LEAD, 700)
+	# Beside the icon and the count on the narrowest phone: "Перехоплення" shrinks a hair, never breaks.
+	UI.fit_words(title, 390 - 2 * UI.GUTTER - 2 * 14 - 52 - 2 * 14 - 50)
+	text.add_child(title)
 	var done := Prefs.passed_count(v)
 	var desc := Curriculum.label("VEH_%s_DESC" % v.to_upper())
 	if v == "camera" and _new_pilot():
@@ -170,3 +176,28 @@ func _cards_card() -> Control:
 	row.add_child(text)
 	row.add_child(Glyph.make("chevron", 20, Pal.c("muted")))
 	return UI.tappable(row, Pal.c("surface"), func(): app.open_pilot_cards(), title)
+
+
+func _badges_card() -> Control:
+	var kids := Prefs.mode == "kids"
+	var list := Badges.all()
+	var icon_bg := PanelContainer.new()
+	icon_bg.add_theme_stylebox_override("panel", UI.box(Pal.c("surface2"), 16, 0))
+	var ic := CenterContainer.new()
+	ic.custom_minimum_size = Vector2(52, 52)
+	ic.add_child(Glyph.make("medal", 34, Pal.c("accent_text")))
+	icon_bg.add_child(ic)
+	var text := UI.vbox(4)
+	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	text.alignment = BoxContainer.ALIGNMENT_CENTER
+	var title := tr("BADGES_KIDS" if kids else "BADGES")
+	text.add_child(UI.label(title, UI.LEAD, 700))
+	var desc := tr("BADGES_DESC_KIDS") if kids else tr("BADGES_DESC") % [Badges.earned(list), list.size()]
+	text.add_child(UI.label(desc, UI.BODY, 500, "muted"))
+	if not kids:
+		text.add_child(preload("res://scripts/screens/badges.gd")._bar(float(Badges.earned(list)) / list.size()))
+	var row := UI.hbox(14)
+	row.add_child(icon_bg)
+	row.add_child(text)
+	row.add_child(Glyph.make("chevron", 20, Pal.c("muted")))
+	return UI.tappable(row, Pal.c("surface"), func(): app.open_badges(), title + ". " + desc)

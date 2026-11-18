@@ -171,7 +171,7 @@ func _card(vehicle: String, date: String, kids: bool) -> Control:
 		facts.add_child(when)
 		var sf := Prefs.sunflowers_of(vehicle)
 		var score := UI.vbox(2)
-		score.add_child(UI.label(tr("CARD_SUNFLOWERS"), UI.CAPTION, 600, "muted"))
+		score.add_child(UI.label(tr("CARD_SUNFLOWERS"), UI.CAPTION, 600, "muted", false, false))
 		var srow := UI.hbox(4)
 		srow.add_child(Glyph.make("sunflower", 18, Pal.c("accent")))
 		srow.add_child(UI.label(tr("CARD_OF") % [sf.x, sf.y], UI.TEXT, 700, "text", false, false))

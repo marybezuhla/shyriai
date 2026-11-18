@@ -31,7 +31,8 @@ func build() -> void:
 	var src := UI.vbox(6)
 	src.add_child(UI.eyebrow(tr("ABOUT_SOURCE_T")))
 	var link_row := UI.hbox(10)
-	var url := UI.label(SOURCE_URL.trim_prefix("https://"), UI.TEXT, 700, "accent_text")
+	# A break is allowed after each "/" (an invisible space), so the address wraps at large text.
+	var url := UI.label(SOURCE_URL.trim_prefix("https://").replace("/", "/\u200b"), UI.TEXT, 700, "accent_text")
 	url.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	link_row.add_child(url)
 	link_row.add_child(Glyph.make("link", 18, Pal.c("accent_text")))

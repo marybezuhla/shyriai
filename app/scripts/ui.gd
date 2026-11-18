@@ -9,18 +9,19 @@ const RADIUS_PILL := 14
 
 
 ## Text sizes in design units, before the reader's text-size setting. One place, so the
-## whole app can be tuned together.
-const MICRO := 11
-const CAPTION := 12
-const SMALL := 13
-const BODY := 14
-const TEXT := 15
-const LEAD := 16
-const TITLE_S := 18
-const TITLE := 20
-const TITLE_L := 22
-const DISPLAY := 24
-const DISPLAY_L := 30
+## whole app can be tuned together. As in Komora: nothing a reader needs is under 14, running text
+## is 16 to 18; 13 is only for the small marks in flight, where every pixel counts.
+const MICRO := 13
+const CAPTION := 14
+const SMALL := 15
+const BODY := 16
+const TEXT := 17
+const LEAD := 18
+const TITLE_S := 20
+const TITLE := 22
+const TITLE_L := 24
+const DISPLAY := 26
+const DISPLAY_L := 32
 
 
 static func label(text: String, px: int, weight := 500, token := "text", display := false, wraps := true) -> Label:
@@ -49,7 +50,7 @@ static func fit_words(l: Label, max_w: float) -> void:
 
 ## A small uppercase label above a group, like "WHAT WE PILOT".
 static func eyebrow(text: String, token := "muted") -> Label:
-	var l := label(text.to_upper(), 12, 800, token)
+	var l := label(text.to_upper(), CAPTION, 800, token)
 	# Uppercase labels read better with a little air between letters.
 	l.add_theme_font_override("font", Pal.font(800, false, 1))
 	return l
@@ -129,8 +130,14 @@ static func tappable(content: Control, bg: Color, on_press: Callable, a11y_name 
 	b.add_theme_stylebox_override("focus", focus)
 	if a11y_name != "":
 		b.set("accessibility_name", a11y_name)
-	b.button_down.connect(func(): p.add_theme_stylebox_override("panel", pressed))
+	# A finger that lands on a card to scroll the list must not light it up: the card darkens only
+	# once the finger has rested a moment without moving, and a scroll turns it back at once.
+	b.button_down.connect(func(): _press_later(b, p, pressed))
 	b.button_up.connect(func(): p.add_theme_stylebox_override("panel", normal))
+	b.gui_input.connect(func(e: InputEvent):
+		if (e is InputEventScreenDrag or e is InputEventMouseMotion) and b.is_pressed() and e.relative.length() > 2.0:
+			b.set_meta("moved", true)
+			p.add_theme_stylebox_override("panel", normal))
 	b.pressed.connect(on_press)
 	p.add_child(b)
 	p.mouse_filter = Control.MOUSE_FILTER_PASS
@@ -162,7 +169,7 @@ static func segmented(options: Array, selected: String, on_pick: Callable) -> Pa
 		var on: bool = opt[0] == selected
 		var c := CenterContainer.new()
 		c.custom_minimum_size = Vector2(0, 52)
-		var l := label(opt[1], 14, 700 if on else 600, "on_accent" if on else "text", false, false)
+		var l := label(opt[1], SMALL, 700 if on else 600, "on_accent" if on else "text", false, false)
 		if not stacked and options.size() > 2:
 			l.add_theme_font_size_override("font_size", roundi(14 * minf(Pal.text_scale(), 1.15)))
 		c.add_child(l)
@@ -185,7 +192,7 @@ static func primary(text: String, on_press: Callable, icon := "") -> PanelContai
 	row.alignment = BoxContainer.ALIGNMENT_CENTER
 	if icon != "":
 		row.add_child(Glyph.make(icon, 18, Pal.c("on_accent")))
-	row.add_child(label(text, 16, 800, "on_accent", false, false))
+	row.add_child(_button_text(text, 800, "on_accent", 250.0 if icon != "" else 276.0))
 	var c := CenterContainer.new()
 	c.custom_minimum_size = Vector2(0, 52)
 	c.add_child(row)
@@ -196,8 +203,32 @@ static func primary(text: String, on_press: Callable, icon := "") -> PanelContai
 static func secondary(text: String, on_press: Callable) -> PanelContainer:
 	var c := CenterContainer.new()
 	c.custom_minimum_size = Vector2(0, 48)
-	c.add_child(label(text, TEXT, 700, "text", false, false))
+	c.add_child(_button_text(text, 700, "text", 276.0))
 	return tappable(c, Pal.c("surface2"), on_press, text, 16, 0)
+
+
+## A button's words: on one line while they fit, wrapped and centred when they do not, so a long
+## name at the largest text never pushes the screen wider than the phone. `most` is the room
+## inside a card on the narrowest phone.
+static func _button_text(text: String, weight: int, token: String, most: float) -> Label:
+	var l := label(text, TEXT, weight, token)
+	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	var px := l.get_theme_font_size("font_size")
+	var natural := l.get_theme_font("font").get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, px).x
+	l.custom_minimum_size = Vector2(minf(ceilf(natural) + 2.0, most), 0)
+	UI.fit_words(l, most)
+	return l
+
+
+## The pressed look, a tenth of a second after the touch, if the finger is still down and has not
+## moved: a tap shows it, a scroll does not.
+static func _press_later(b: Button, p: PanelContainer, look: StyleBox) -> void:
+	b.set_meta("moved", false)
+	if not b.is_inside_tree():
+		return
+	await b.get_tree().create_timer(0.1).timeout
+	if is_instance_valid(b) and is_instance_valid(p) and b.is_pressed() and not b.get_meta("moved", false):
+		p.add_theme_stylebox_override("panel", look)
 
 
 static func _ignore_mouse(n: Node) -> void:
@@ -211,8 +242,8 @@ static func _ignore_mouse(n: Node) -> void:
 static func switch_row(title: String, desc: String, on: bool, on_toggle: Callable) -> PanelContainer:
 	var text := vbox(3)
 	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	text.add_child(label(title, 16, 700))
-	text.add_child(label(desc, 13, 500, "muted"))
+	text.add_child(label(title, LEAD, 700))
+	text.add_child(label(desc, SMALL, 500, "muted"))
 	var sw := Toggle.new()
 	sw.on = on
 	sw.custom_minimum_size = Vector2(48, 28)
