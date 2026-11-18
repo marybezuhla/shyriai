@@ -1,87 +1,71 @@
 # Ширяй · Shyriai
 
-Тренажер пілотування для Android: камерні й FPV-дрони та наземні роботизовані комплекси (НРК). Для дітей і дорослих. Українська та англійська. Безкоштовно, без реклами й акаунтів, без інтернету. Потрібен Android 7 або новіший і OpenGL ES 3.0.
+Офлайн-тренажер пілотування дронів і наземних роботів для Android. Для дітей і дорослих. Українська та англійська. Безкоштовно, без реклами, акаунтів та інтернету. Потрібен Android 7 або новіший і OpenGL ES 3.0.
 
-> **Версія 1.0.1.** Чотири машини: камерний дрон (8 уроків, 4 місії), FPV-дрон (6 уроків, 4 місії), НРК (5 уроків, 4 місії) і літак (8 уроків, 2 місії; для дітей 4 уроки й 2 місії), курс аерозйомки й пошуку (5 уроків, 3 місії; для дітей 3 уроки й фотоальбом), курс перехоплення (5 уроків, 3 місії; для дітей метелики), а також «Підручник пілота» на 10 розділів із питаннями «Перевір себе», дитяча «Книжечка пілота», словничок на 40 слів, а також відзнаки й загальний підсумок навчання.
+> Відгуки й помилки: [Issues](../../issues).
 
-## Задум
+## Особливості
 
-- 🧒 **Три режими, у кожного свій прогрес.** Дитячий: розбитися неможливо, ігрові завдання, майже без тексту. Простий: дрон допомагає вирівнюватися, є підказки. Дорослий: повна фізика з інерцією, вітром і батареєю.
-- 🛸 **Три машини.** Камерний дрон, який сам зависає. FPV-дрон з режимами Angle, Horizon і Acro. НРК з гусеничним керуванням, рельєфом і затримкою відео.
-- 👪 **Дитячий режим** має свою світлу тему «Ранок» і більший текст. За бажанням є батьківський замок: щоб вийти з дитячого режиму чи відкрити налаштування, треба розв'язати приклад.
-- 👀 **Три камери.** «З землі»: як пілот, що стоїть із пультом, так вчаться літати по-справжньому. «За дроном»: легше для початку. «Камера»: вигляд з самого дрона, для пошуку й огляду.
-- 🎯 **Навчання й місії.** Уроки від простого до складного з чіткими умовами зарахування. Місії: ті самі навички в сюжеті, як-от пошук у полі, траса з воротами, доставка вантажу, евакуація пораненого. Для дітей: кошеня на даху, обручі, посилка бабусі.
-- 🎮 **Керування.** Екранні стіки, геймпад і справжній пульт через USB, щоб моторна памʼять переносилася на реальний дрон. Розкладка Mode 2 або Mode 1 і мʼякші стіки для точних рухів.
-- 📷 **Аерозйомка й пошук.** Окремий курс: камера донизу, чіткий знімок, висота й деталі, обліт, сітка; місії з пошуку людини, огляду дахів і лічби наметів зі звітом після посадки. Для дітей «Фотограф».
-- ✈️ **Літак.** Окремий курс на невеликому літаку-тренері: прямо й рівно, віражі, зліт, зліт проти вітру, коло над полем, звалювання й штопор, посадка на смугу. Місії: знімки хат після повені й пошук людини на великому полі. Для дітей політ із лелеками, хмаринки й повітряний змій.
-- 🎯 **Перехоплення.** Окремий курс на FPV-дроні: наздогнати навчальну мішень, зрізати коло, упередження, зустрічні курси, сутінки й туман. Мішень абстрактна, а перехопленням вважається торкання. Для дітей «Метелики».
-- 🌫️ **Погода.** Туман і зима у вільному польоті та в місіях.
-- 🌻 **Соняшники й посвідчення.** За кожен урок від одного до трьох соняшників: за проходження, за політ без дотиків і за швидкість. Найкращий час зберігається. За всі уроки машини видається посвідчення пілота, а в дитячому режимі грамота.
-- 🕊️ **Вільний політ.** Без завдання: вітер, час доби й золоті кулі для розваги.
-- 🔊 **Звук.** Мотори, що відгукуються на газ, дзвіночок за зарахований урок і сигнал втрати звʼязку. Звук створюється в коді, без аудіофайлів, і вимикається в налаштуваннях.
-- 📘 **Теорія.** Короткі картки: перед польотом, безпека батарей, втрата сигналу, правила польотів в Україні.
-
-Ширяй вчить пілотування як такого. Сценарії лише рятувальні й навчальні, на абстрактних мішенях, без бойових подробиць, а дитячий режим завжди мирний. Тож застосунок можна спокійно давати дітям і використовувати в школах.
+- 🛸 **Шість курсів.** Камерний дрон, FPV-дрон, наземний робот (НРК), літак, аерозйомка й пошук, перехоплення навчальної мішені.
+- 🧒 **Три режими, у кожного свій прогрес.** Дитячий: розбитися неможливо, ігрові завдання, світла тема й батьківський замок. Простий: дрон допомагає, є підказки. Дорослий: інерція, вітер, батарея, FPV аж до Acro.
+- 🎯 **Уроки й місії.** Від простого до складного, з чіткими умовами зарахування. Місії рятувальні й навчальні: пошук у полі, доставка, евакуація, знімки після повені. Без бойових подробиць.
+- 🎮 **Керування.** Екранні стіки, геймпад або справжній пульт через USB; Mode 2 чи Mode 1. Три камери: «З землі», «За дроном» і з самої машини.
+- 📘 **Підручник пілота.** 10 розділів із малюнками й питаннями «Перевір себе», словничок на 40 слів і дитяча «Книжечка пілота».
+- 🌻 **Соняшники, посвідчення й відзнаки.** До трьох соняшників за урок, посвідчення пілота за курс, 14 відзнак і загальний підсумок навчання.
+- 🌫️ **Погода й вільний політ.** Вітер, туман, зима, вечір; політ без завдання.
+- 🎨 **Теми й текст.** Світлі й темні теми, три розміри тексту.
+- 🔊 **Звук** моторів і сигналів створюється в коді, вимикається в налаштуваннях.
 
 ## Встановлення
 
 - 📲 **Напряму:** завантажте файл `.apk` звідси: [github.com/marybezuhla/shyriai/releases/latest](https://github.com/marybezuhla/shyriai/releases/latest).
-- 🔄 **З оновленнями:** скористайтеся безкоштовним застосунком Obtainium. Його можна встановити з F-Droid: [f-droid.org/packages/dev.imranr.obtainium.fdroid](https://f-droid.org/packages/dev.imranr.obtainium.fdroid). В Obtainium натисніть «Додати застосунок» і вставте посилання `github.com/marybezuhla/shyriai`.
+- 🔄 **З оновленнями:** скористайтеся безкоштовним застосунком Obtainium. Його можна встановити з F-Droid: [f-droid.org/packages/dev.imranr.obtainium.fdroid](https://f-droid.org/packages/dev.imranr.obtainium.fdroid) (F-Droid — це безкоштовний каталог застосунків для Android, щось на зразок Google Play. Усі застосунки там мають відкритий код, без реклами й стеження, а перед публікацією їх перевіряють і збирають самі укладачі каталогу). В Obtainium натисніть «Додати застосунок» і вставте посилання `github.com/marybezuhla/shyriai`.
 
 ## Прозорість
 
-- **Дозволи:** жодних, які стосуються людини чи телефону; є лише один внутрішній технічний дозвіл бібліотеки AndroidX. Збірка зупиняється, якщо в APK зʼявляється будь-який інший дозвіл, а надто дозвіл на інтернет.
-- **Дані:** налаштування й прогрес зберігаються лише на телефоні, в одному маленькому файлі. Хмарну копію Android вимкнено, тож після видалення застосунку прогрес починається заново. Пряме перенесення на новий телефон (Android 12+) за нинішнього способу збирання вимкнути не можна, тож тоді файл може перенестися. У налаштуваннях можна почати режим спочатку або стерти всі дані, і одразу «Повернути». Докладніше в [PRIVACY.md](PRIVACY.md).
-- **Підпис:** справжній APK підписано сертифікатом із відбитком SHA-256 `BF:06:A3:A2:27:BB:10:32:DC:B1:41:C8:92:93:85:80:72:A5:A0:0A:F2:BF:70:39:4A:44:9E:B3:25:FF:2E:1F`. Перевірити завантажений файл: `apksigner verify --print-certs shyriai-<версія>.apk`: рядок `SHA-256 digest` має збігтися (там він малими літерами й без двокрапок).
-- **Збірка:** APK збирається з цього коду в GitHub Actions. Godot і його шаблони звіряються за SHA-512. APK підписується лише після схвалення авторки.
-- **Доступність:** розмір тексту можна збільшити в налаштуваннях. Програми читання екрана (TalkBack) поки не підтримуються: рушій Godot на Android їм нічого не передає.
-- **Вразливості:** як повідомити — [SECURITY.md](SECURITY.md).
+- **Дозволи:** жодних, що стосуються людини чи телефону; є лише внутрішній технічний дозвіл бібліотеки AndroidX. Збірка зупиняється, якщо з'являється будь-який інший дозвіл, а надто дозвіл на інтернет.
+- **Дані:** налаштування й прогрес лише на телефоні, в одному маленькому файлі; хмарну копію вимкнено. Пряме перенесення на новий телефон (Android 12+) вимкнути не можна, тож тоді файл може перенестися.
+- **Підпис:** справжній APK підписано сертифікатом із відбитком SHA-256 `BF:06:A3:A2:27:BB:10:32:DC:B1:41:C8:92:93:85:80:72:A5:A0:0A:F2:BF:70:39:4A:44:9E:B3:25:FF:2E:1F`. Перевірити без жодного застосунку: `apksigner verify --print-certs shyriai-<версія>.apk` (з Android SDK Build Tools) має показати саме цей відбиток (малими літерами й без двокрапок).
+- **Збірка:** APK збирається з цього коду в GitHub Actions і підписується лише після схвалення авторки. Godot і його шаблони звіряються за SHA-512.
+- **Доступність:** текст можна збільшити; програми читання екрана (TalkBack) поки не підтримуються: рушій Godot на Android їм нічого не передає.
 - **Як створено:** код написано за допомогою ШІ (Claude, Anthropic) під керівництвом і з тестуванням авторки.
 - **Застереження:** тренажер не замінює занять з інструктором і не дає права на польоти. Перед справжнім польотом дізнайтеся, де і як дозволено літати.
 
-© 2026 marybezuhla. Godot 4.7 · GDScript. Ліцензія GPL-3.0 або новіша. Шрифти Unbounded (лише латиниця й кирилиця, щоб APK був меншим) і Manrope за SIL Open Font License 1.1.
+Godot 4.7 · GDScript. Ліцензія GNU GPL версії 3 або (на ваш вибір) будь-якої пізнішої (GPL-3.0-or-later). Бібліотеки й джерела — [NOTICE.md](NOTICE.md), приватність — [PRIVACY.md](PRIVACY.md), вразливості — [SECURITY.md](SECURITY.md).
 
 ---
 
 # Shyriai · English
 
-A piloting trainer for Android: camera and FPV drones, and ground robots (UGVs). For kids and adults. Ukrainian and English. Free, no ads, no accounts, no internet. Requires Android 7 or newer and OpenGL ES 3.0.
+An offline trainer for piloting drones and ground robots, for Android. For kids and adults. Ukrainian and English. Free, no ads, no accounts, no internet. Requires Android 7 or newer and OpenGL ES 3.0.
 
-> **Version 1.0.1.** Four vehicles: the camera drone (8 lessons, 4 missions), the FPV drone (6 lessons, 4 missions), the UGV (5 lessons, 4 missions) and the plane (8 lessons, 2 missions; 4 lessons and 2 missions for kids), the aerial survey course (5 lessons, 3 missions; 3 lessons and a photo album for kids), the interception course (5 lessons, 3 missions; butterflies for kids), plus the pilot's book in 10 chapters with "Check yourself" questions, a little book for kids, a glossary of 40 words, and badges with the overall progress.
+> Feedback and bugs: [Issues](../../issues).
 
-## The idea
+## Features
 
-- 🧒 **Three modes, each with its own progress.** Kids: crashing is impossible, playful tasks, hardly any text. Simple: the drone helps you level out, with hints. Adult: full physics with inertia, wind and battery.
-- 🛸 **Three vehicles.** A camera drone that hovers by itself. An FPV drone with Angle, Horizon and Acro modes. A UGV with tank steering, terrain and video delay.
-- 👪 **Kids mode** has its own light Morning look and larger text. An optional grown-ups' lock asks for a sum to be solved before leaving Kids mode or opening settings.
-- 👀 **Three cameras.** From the ground: as a pilot standing with the radio, the way real flying is learnt. Behind the drone: easier to start with. Camera: the view from the drone itself, for searching and surveying.
-- 🎯 **Lessons and missions.** Lessons from easy to hard, each with clear pass conditions. Missions use the same skills in a story: a search in a field, a gate course, cargo delivery, casualty evacuation. For kids: a kitten on a roof, hoops, a parcel for granny.
-- 🎮 **Controls.** On-screen sticks, a gamepad, and a real radio over USB, so muscle memory carries over to a real drone. Mode 2 or Mode 1 layout, and softer sticks for fine moves.
-- 📷 **Aerial survey.** A course of its own: camera down, sharp pictures, height and detail, orbit, grid; missions to find a person, check roofs and count tents, with a report after landing. "Photographer" for kids.
-- ✈️ **Plane.** A course of its own on a small trainer plane: straight and level, banked turns, take-off, take-off into the wind, a circuit over the field, the stall and the spin, landing on the runway. Missions: photographing houses after a flood and searching a big field for a lost person. For kids: flying with storks, clouds and a kite caught in a tree.
-- 🎯 **Interception.** A course of its own on the FPV drone: catch up with a training target, cut the corner, lead it, meet it head on, in the evening and in fog. The target is abstract; a touch counts. "Butterflies" for kids.
-- 🌫️ **Weather.** Fog and winter in free flight and in missions.
-- 🌻 **Sunflowers and licences.** One to three sunflowers per lesson: for passing, for flying without a touch, and for speed. Best times are kept. All of a vehicle's lessons earn a pilot's licence, or a certificate in Kids mode.
-- 🕊️ **Free flight.** No task: wind, time of day and gold balls for fun.
-- 🔊 **Sound.** Motors that answer the throttle, a chime when a lesson counts and a beep when the link drops. The sound is made in code, with no audio files, and can be turned off in settings.
-- 📘 **Theory.** Short cards: before you fly, battery safety, lost signal, flying rules in Ukraine.
-
-Shyriai teaches piloting itself. Scenarios are rescue and training only, on abstract targets, with no combat details, and Kids mode is always peaceful. So it is fine for kids and for schools.
+- 🛸 **Six courses.** Camera drone, FPV drone, ground robot (UGV), plane, aerial survey and search, intercepting a training target.
+- 🧒 **Three modes, each with its own progress.** Kids: crashing is impossible, playful tasks, a light look and a grown-ups' lock. Simple: the drone helps, with hints. Adult: inertia, wind, battery, FPV up to Acro.
+- 🎯 **Lessons and missions.** From easy to hard, with clear pass conditions. Missions are rescue and training only: a search in a field, delivery, evacuation, pictures after a flood. No combat details.
+- 🎮 **Controls.** On-screen sticks, a gamepad or a real radio over USB; Mode 2 or Mode 1. Three cameras: from the ground, behind the drone and from the craft itself.
+- 📘 **The pilot's book.** 10 chapters with drawings and "Check yourself" questions, a glossary of 40 words and a little book for kids.
+- 🌻 **Sunflowers, licences and badges.** Up to three sunflowers per lesson, a pilot's licence per course, 14 badges and the overall progress.
+- 🌫️ **Weather and free flight.** Wind, fog, winter, evening; flying with no task.
+- 🎨 **Looks and text.** Light and dark themes, three text sizes.
+- 🔊 **Sound** of motors and signals is made in code and can be turned off in settings.
 
 ## Install
 
 - 📲 **Directly:** download the `.apk` file from [github.com/marybezuhla/shyriai/releases/latest](https://github.com/marybezuhla/shyriai/releases/latest).
-- 🔄 **With updates:** use the free app Obtainium, available on F-Droid: [f-droid.org/packages/dev.imranr.obtainium.fdroid](https://f-droid.org/packages/dev.imranr.obtainium.fdroid). In Obtainium tap "Add App" and paste `github.com/marybezuhla/shyriai`.
+- 🔄 **With updates:** use the free app Obtainium, available on F-Droid: [f-droid.org/packages/dev.imranr.obtainium.fdroid](https://f-droid.org/packages/dev.imranr.obtainium.fdroid) (F-Droid is a free catalogue of Android apps, a bit like Google Play: every app there is open source, without ads or tracking, and is checked and built by the catalogue's maintainers before publishing). In Obtainium tap "Add App" and paste `github.com/marybezuhla/shyriai`.
 
 ## Transparency
 
-- **Permissions:** none that concern you or your phone; there is only one internal technical permission of the AndroidX library. The build stops if any other permission appears in the APK, internet above all.
-- **Data:** settings and progress stay on the phone, in one small file. Android cloud backup is off, so after uninstalling progress starts again. Direct transfer to a new phone (Android 12+) cannot be switched off with the current way of building, so the file may be copied then. Settings can start a mode over or erase all data, with an immediate Undo. More in [PRIVACY.md](PRIVACY.md).
-- **Signature:** the genuine APK is signed with a certificate whose SHA-256 fingerprint is `BF:06:A3:A2:27:BB:10:32:DC:B1:41:C8:92:93:85:80:72:A5:A0:0A:F2:BF:70:39:4A:44:9E:B3:25:FF:2E:1F`. To check a downloaded file: `apksigner verify --print-certs shyriai-<version>.apk`; the `SHA-256 digest` line must match (it is printed in lower case, without the colons).
-- **Build:** the APK is built from this code in GitHub Actions. Godot and its templates are checked by SHA-512. The APK is signed only after the author's approval.
-- **Accessibility:** text size can be increased in settings. Screen readers (TalkBack) are not supported yet: the Godot engine passes them nothing on Android.
-- **Vulnerabilities:** how to report one is in [SECURITY.md](SECURITY.md).
+- **Permissions:** none that concern you or your phone; only an internal technical permission of the AndroidX library. The build stops if any other permission appears, internet above all.
+- **Data:** settings and progress stay on the phone, in one small file; cloud backup is off. Direct transfer to a new phone (Android 12+) cannot be switched off, so the file may be copied then.
+- **Signature:** the genuine APK is signed with a certificate whose SHA-256 fingerprint is `BF:06:A3:A2:27:BB:10:32:DC:B1:41:C8:92:93:85:80:72:A5:A0:0A:F2:BF:70:39:4A:44:9E:B3:25:FF:2E:1F`. To check it without any app: `apksigner verify --print-certs shyriai-<version>.apk` (from the Android SDK Build Tools) must show this fingerprint (in lower case, without the colons).
+- **Build:** the APK is built from this code in GitHub Actions and signed only after the author's approval. Godot and its templates are checked by SHA-512.
+- **Accessibility:** text can be made larger; screen readers (TalkBack) are not supported yet: the Godot engine passes them nothing on Android.
 - **How it was made:** the code was written with AI (Claude, Anthropic), directed and tested by the author.
 - **Disclaimer:** the trainer does not replace lessons with an instructor and gives no right to fly. Before a real flight, find out where and how flying is allowed.
 
-© 2026 marybezuhla. Godot 4.7 · GDScript. GPL-3.0-or-later licence. Unbounded (Latin and Cyrillic only, for a smaller APK) and Manrope fonts: SIL Open Font License 1.1.
+Godot 4.7 · GDScript. Licence: GNU GPL version 3 or (at your option) any later version (GPL-3.0-or-later). Libraries and sources: [NOTICE.md](NOTICE.md), privacy: [PRIVACY.md](PRIVACY.md), vulnerabilities: [SECURITY.md](SECURITY.md).
