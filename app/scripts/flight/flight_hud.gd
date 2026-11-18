@@ -21,14 +21,23 @@ static func fit_top(f: Flight, top: HBoxContainer) -> void:
 		var panel := top.get_child(top.get_child_count() - 1)
 		top.remove_child(panel)  # nothing left in the numbers panel
 		panel.queue_free()
-	# Still too wide (an unfolded phone held upright): the lesson title gets "…".
+	# Still too wide (an unfolded phone held upright): the lesson title, and the name of a second bar
+	# (the casualty's comfort), get "…". The chip is as wide as the wider of its lines.
 	var over := top.get_combined_minimum_size().x - room
 	if over > 0.0:
-		var title: Label = top.get_child(1).find_children("*", "Label", true, false)[0]
-		var w := title.get_combined_minimum_size().x
-		title.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-		title.clip_text = true
-		title.custom_minimum_size.x = maxf(40.0, w - over)
+		var chip: Control = top.get_child(1).get_child(0)
+		var most := chip.get_combined_minimum_size().x - over
+		for l in chip.find_children("*", "Label", true, false):
+			var label := l as Label
+			if label == f._bar_text:
+				continue
+			var w := label.get_combined_minimum_size().x
+			var line: Control = label if label.get_parent() == chip else label.get_parent()
+			var cut := line.get_combined_minimum_size().x - most
+			if cut > 0.0:
+				label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+				label.clip_text = true
+				label.custom_minimum_size.x = maxf(40.0, w - cut)
 
 
 static func build_no_signal(f: Flight) -> void:

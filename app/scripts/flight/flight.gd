@@ -69,6 +69,8 @@ var _finished := false
 var _sock: Node3D
 ## The camera drone's way home (not for kids); null for other machines.
 var home: FlightHome
+## Fits the HUD to the screen's height again (after a longer hint).
+var _hud_fit := Callable()
 ## FPV and plane battery warnings (Adult mode).
 var battery: FlightBattery
 var _hint_warn := false
@@ -378,6 +380,7 @@ func _build_hud() -> void:
 	col.add_child(fill)
 
 	FlightBottom.build_bottom(self, col, ins)
+	_hud_fit = FlightBottom.fit_height.bind(self, col, ins)
 	FlightBottom.build_view_toggle(self)
 	if not get_viewport().size_changed.is_connected(_on_resize):
 		get_viewport().size_changed.connect(_on_resize)
@@ -570,6 +573,8 @@ func _update_hint() -> void:
 			var wrap := minf(520.0, get_viewport_rect().size.x - 2.0 * SIDE - _ins_x() - 24.0)
 			_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART if w > wrap else TextServer.AUTOWRAP_OFF
 			_hint.custom_minimum_size = Vector2(wrap, 0) if w > wrap else Vector2.ZERO
+			if _hud_fit.is_valid():
+				_hud_fit.call_deferred()  # a longer hint may need the sticks a little smaller
 	_hint_panel.visible = hint_key != ""
 
 
