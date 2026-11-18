@@ -24,6 +24,7 @@ func test_book() -> void:
 			check(go[1] in Curriculum.lessons(go[0]), "%s leads to a real lesson" % id)
 		if ch["card"] != "":
 			check(ch["card"] in Curriculum.THEORY, "%s carries a real theory card" % id)
+	_glossary_matches_book()
 	TranslationServer.set_locale("en")
 	for v in Curriculum.VEHICLES:
 		for key in Curriculum.lessons(v):
@@ -41,6 +42,31 @@ func test_book() -> void:
 	check(Prefs.book_read.is_empty(), "a list that is not a list is ignored")
 	Prefs.erase_all()
 	check(Prefs.book_read.is_empty(), "erasing everything forgets the reading too")
+
+
+## The glossary and the book stay in step: every word the book links is in the glossary, every
+## glossary word is linked from some chapter, and both languages link the same words.
+func _glossary_matches_book() -> void:
+	var listed: Array = preload("res://scripts/screens/glossary.gd").TERMS
+	var linked := {}
+	for ch in Book.CHAPTERS:
+		var per_lang := []
+		for lang in ["uk", "en"]:
+			TranslationServer.set_locale(lang)
+			var t := Book.terms(String(TranslationServer.translate("BOOK_%s_BODY" % ch["id"])))
+			t.sort()
+			per_lang.append(t)
+			for term in t:
+				linked[term] = true
+		check(per_lang[0] == per_lang[1], "%s links the same words in both languages" % ch["id"])
+	for term in listed:
+		check(listed.count(term) == 1, "%s is in the glossary once" % term)
+		check(linked.has(term), "the glossary word %s is linked from a chapter" % term)
+		for lang in ["uk", "en"]:
+			TranslationServer.set_locale(lang)
+			check(String(TranslationServer.translate("GL_" + term)) != "GL_" + term, "%s is explained (%s)" % [term, lang])
+	for term in linked:
+		check(term in listed, "the linked word %s is in the glossary" % term)
 
 
 func test_kids_book() -> void:

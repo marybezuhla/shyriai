@@ -223,6 +223,7 @@ func open_flight(vehicle: String, key: String, seed_ := -1, practice := false) -
 	if flight:
 		flight.queue_free()
 		remove_child(flight)
+	_cover_turn(true)
 	_set_landscape(true)
 	OS.low_processor_usage_mode = false  # the flight draws every frame
 	Engine.max_fps = 60  # smooth enough, and a 120 Hz phone does not burn its battery twice as fast
@@ -247,6 +248,7 @@ func close_flight() -> void:
 		flight.queue_free()
 		remove_child(flight)
 		flight = null
+	_cover_turn(false)
 	_set_landscape(false)
 	OS.low_processor_usage_mode = true
 	Engine.max_fps = 0
@@ -280,6 +282,31 @@ func _set_landscape(on: bool) -> void:
 		var w := get_window().size
 		if (w.x < w.y) == on:
 			get_window().size = Vector2i(w.y, w.x)
+
+
+## While the phone turns, the screen is one calm colour: no half-black frame, and no stretched
+## picture of the old layout. It lifts once the new shape has settled, or after a second at most.
+func _cover_turn(landscape: bool) -> void:
+	var layer := CanvasLayer.new()
+	layer.layer = 90
+	var c := ColorRect.new()
+	c.color = Pal.c("bg")
+	c.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	c.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	layer.add_child(c)
+	add_child(layer)
+	var started := Time.get_ticks_msec()
+	while is_instance_valid(layer) and Time.get_ticks_msec() - started < 1000:
+		var v := get_viewport_rect().size
+		if (v.x > v.y) == landscape:
+			break
+		await get_tree().process_frame
+	for i in 3:  # a few frames for the new layout to draw
+		await get_tree().process_frame
+	if is_instance_valid(layer):
+		var tw := layer.create_tween()
+		tw.tween_property(c, "modulate:a", 0.0, 0.15)
+		tw.tween_callback(layer.queue_free)
 
 
 func _make(path: String) -> Screen:
