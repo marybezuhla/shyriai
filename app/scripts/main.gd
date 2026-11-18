@@ -165,6 +165,10 @@ func open_pad() -> void:
 	_push(_make("res://scripts/screens/pad.gd"))
 
 
+func open_badges() -> void:
+	_push(_make("res://scripts/screens/badges.gd"))
+
+
 func open_glossary() -> void:
 	_push(_make("res://scripts/screens/glossary.gd"))
 

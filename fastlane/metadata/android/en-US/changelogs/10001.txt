@@ -1,0 +1,1 @@
+Shyriai 1.0.1: badges and the overall progress, larger text in the menus, a glossary of 40 words linked from the book, calmer scrolling and a smooth turn into flight.

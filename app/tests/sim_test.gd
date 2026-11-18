@@ -23,6 +23,7 @@ func _ready() -> void:
 	test_kids_texts()
 	test_book()
 	test_kids_book()
+	test_badges()
 	for mode in ["simple", "pro"]:
 		for key in ["MIS_CAM_LINK", "MIS_CAM_JAM"]:
 			await test_link_mission(key, mode)

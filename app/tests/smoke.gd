@@ -42,6 +42,7 @@ func _ready() -> void:
 	await preload("res://tests/smoke_p3.gd").new(self).run()
 	await preload("res://tests/smoke_p4.gd").new(self).run()
 	await preload("res://tests/smoke_book.gd").new(self).run()
+	await preload("res://tests/smoke_badges.gd").new(self).run()
 	Prefs.set_language("system")
 	Prefs.set_theme("dusk")
 	Prefs.set_mode("simple")

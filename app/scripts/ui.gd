@@ -50,7 +50,7 @@ static func fit_words(l: Label, max_w: float) -> void:
 
 ## A small uppercase label above a group, like "WHAT WE PILOT".
 static func eyebrow(text: String, token := "muted") -> Label:
-	var l := label(text.to_upper(), 12, 800, token)
+	var l := label(text.to_upper(), CAPTION, 800, token)
 	# Uppercase labels read better with a little air between letters.
 	l.add_theme_font_override("font", Pal.font(800, false, 1))
 	return l
@@ -169,7 +169,7 @@ static func segmented(options: Array, selected: String, on_pick: Callable) -> Pa
 		var on: bool = opt[0] == selected
 		var c := CenterContainer.new()
 		c.custom_minimum_size = Vector2(0, 52)
-		var l := label(opt[1], 14, 700 if on else 600, "on_accent" if on else "text", false, false)
+		var l := label(opt[1], SMALL, 700 if on else 600, "on_accent" if on else "text", false, false)
 		if not stacked and options.size() > 2:
 			l.add_theme_font_size_override("font_size", roundi(14 * minf(Pal.text_scale(), 1.15)))
 		c.add_child(l)
@@ -192,7 +192,7 @@ static func primary(text: String, on_press: Callable, icon := "") -> PanelContai
 	row.alignment = BoxContainer.ALIGNMENT_CENTER
 	if icon != "":
 		row.add_child(Glyph.make(icon, 18, Pal.c("on_accent")))
-	row.add_child(label(text, 16, 800, "on_accent", false, false))
+	row.add_child(_button_text(text, 800, "on_accent", 250.0 if icon != "" else 276.0))
 	var c := CenterContainer.new()
 	c.custom_minimum_size = Vector2(0, 52)
 	c.add_child(row)
@@ -203,8 +203,21 @@ static func primary(text: String, on_press: Callable, icon := "") -> PanelContai
 static func secondary(text: String, on_press: Callable) -> PanelContainer:
 	var c := CenterContainer.new()
 	c.custom_minimum_size = Vector2(0, 48)
-	c.add_child(label(text, TEXT, 700, "text", false, false))
+	c.add_child(_button_text(text, 700, "text", 276.0))
 	return tappable(c, Pal.c("surface2"), on_press, text, 16, 0)
+
+
+## A button's words: on one line while they fit, wrapped and centred when they do not, so a long
+## name at the largest text never pushes the screen wider than the phone. `most` is the room
+## inside a card on the narrowest phone.
+static func _button_text(text: String, weight: int, token: String, most: float) -> Label:
+	var l := label(text, TEXT, weight, token)
+	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	var px := l.get_theme_font_size("font_size")
+	var natural := l.get_theme_font("font").get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, px).x
+	l.custom_minimum_size = Vector2(minf(ceilf(natural) + 2.0, most), 0)
+	UI.fit_words(l, most)
+	return l
 
 
 ## The pressed look, a tenth of a second after the touch, if the finger is still down and has not
@@ -229,8 +242,8 @@ static func _ignore_mouse(n: Node) -> void:
 static func switch_row(title: String, desc: String, on: bool, on_toggle: Callable) -> PanelContainer:
 	var text := vbox(3)
 	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	text.add_child(label(title, 16, 700))
-	text.add_child(label(desc, 13, 500, "muted"))
+	text.add_child(label(title, LEAD, 700))
+	text.add_child(label(desc, SMALL, 500, "muted"))
 	var sw := Toggle.new()
 	sw.on = on
 	sw.custom_minimum_size = Vector2(48, 28)

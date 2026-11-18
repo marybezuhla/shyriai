@@ -16,7 +16,7 @@
 - налаштування пульта чи геймпада (які осі й кнопки) і чи читати підказки вголос;
 - які розділи підручника прочитано.
 
-Віку, контактів, місця, фото, звуку чи будь-яких ідентифікаторів немає. Скільки дитина літала для нагадування про перерву, рахується лише поки застосунок відкритий і не зберігається. Підказки вголос читає голос самого телефона (той, що налаштовано в Android); Ширяй передає йому лише текст підказки, а сам нічого не надсилає. Посвідчення «на весь екран» лише показується: файлу застосунок не створює, зберегти можна скріншотом телефона. Знімки з камери дрона в курсі аерозйомки існують лише під час польоту для звіту: вони не зберігаються на телефоні й нікуди не надсилаються. Імʼя нікуди не надсилається й ніде не показується, крім посвідчення на цьому телефоні.
+Віку, контактів, місця, фото, звуку чи будь-яких ідентифікаторів немає. Скільки дитина літала для нагадування про перерву, рахується лише поки застосунок відкритий і не зберігається. Підказки вголос читає голос самого телефона (той, що налаштовано в Android); Ширяй передає йому лише текст підказки, а сам нічого не надсилає. Посвідчення «на весь екран» лише показується: файлу застосунок не створює, зберегти можна скріншотом телефона. Знімки з камери дрона в курсі аерозйомки існують лише під час польоту для звіту: вони не зберігаються на телефоні й нікуди не надсилаються. Імʼя нікуди не надсилається й ніде не показується, крім посвідчення на цьому телефоні. Відзнаки й загальний підсумок застосунок щоразу рахує з пройденого: окремо вони не зберігаються.
 
 ## Хто їх бачить
 
@@ -55,7 +55,7 @@ One small file on the phone (up to 64 KB), in the app's own folder. It holds:
 - the radio or gamepad set-up (which axes and buttons) and whether hints are read aloud;
 - which chapters of the book have been read.
 
-No age, contacts, location, photos, sound or identifiers of any kind. How long a child has flown, for the break reminder, is counted only while the app is open and is not saved. Hints read aloud use the phone's own voice (the one set in Android); Shyriai only hands it the hint's text and sends nothing itself. The licence "on the whole screen" is only shown: the app makes no file, and it can be kept with the phone's own screenshot. Pictures from the drone camera in the survey course exist only during the flight, for the report: they are not saved on the phone and never sent anywhere. The name is never sent anywhere and shows only on the licence on this phone.
+No age, contacts, location, photos, sound or identifiers of any kind. How long a child has flown, for the break reminder, is counted only while the app is open and is not saved. Hints read aloud use the phone's own voice (the one set in Android); Shyriai only hands it the hint's text and sends nothing itself. The licence "on the whole screen" is only shown: the app makes no file, and it can be kept with the phone's own screenshot. Pictures from the drone camera in the survey course exist only during the flight, for the report: they are not saved on the phone and never sent anywhere. The name is never sent anywhere and shows only on the licence on this phone. Badges and the overall totals are worked out each time from what was done: they are not saved on their own.
 
 ## Who can see it
 

@@ -1365,3 +1365,37 @@ GL_TIP_T,Tipping over,Перекидання
 GL_TIP,"The robot falls on its side when the slope under it is too steep. A long, narrow robot tips sideways much sooner than along its length.","Робот падає набік, коли схил під ним надто крутий. Довгий і вузький робот перекидається вбік набагато раніше, ніж уздовж."
 GL_LATENCY_T,Video delay,Затримка відео
 GL_LATENCY,"The picture from the craft arrives a little after things happen. The longer the delay, the slower and more carefully you drive.","Картинка з апарата приходить трохи пізніше, ніж усе відбувається. Що більша затримка, то повільніше й обережніше треба керувати."
+BADGES,Badges,Відзнаки
+BADGES_KIDS,My badges,Мої значки
+BADGES_DESC,%d of %d earned,Отримано %d з %d
+BADGES_DESC_KIDS,Look what you can do already,"Подивись, що вже вмієш"
+BADGES_TOTALS,All the training,Уся підготовка
+BADGES_EARNED,Badges · %d of %d,Відзнаки · %d з %d
+BADGES_OUT_OF,of %d,з %d
+BADGES_PART_LESSONS,lessons,уроків
+BADGES_PART_MISSIONS,missions,місій
+BADGES_PART_FLOWERS,sunflowers,соняшників
+BADGES_PART_CHAPTERS,book chapters,розділів підручника
+BADGES_LEGEND,A pale badge is still ahead. Half filled: on the way. Full: earned. A double rim marks a big step.,Блідий значок ще попереду. Заповнений наполовину: уже на шляху. Повний: отримано. Подвійний обідок позначає великий крок.
+BADGE_OF,%d of %d,%d з %d
+BADGE_STATE_0,still ahead,ще попереду
+BADGE_STATE_1,on the way,уже на шляху
+BADGE_STATE_2,earned,отримано
+BADGE_FIRST_T,First flight,Перший політ
+BADGE_FIRST_HOW,The first lesson passed,Перший пройдений урок
+BADGE_LIC_HOW,Every lesson of the course,Усі уроки курсу
+BADGE_CLEAN_T,Clean flying,Чистий політ
+BADGE_CLEAN_HOW,Ten lessons without touching anything,Десять уроків без жодного дотику
+BADGE_FIELD_T,Sunflower field,Соняшникове поле
+BADGE_FIELD_T_KIDS,Sunflowers,Соняшники
+BADGE_FIELD_HOW,Every sunflower of one course,Усі соняшники одного курсу
+BADGE_MISSION_T,First mission,Перша місія
+BADGE_MISSION_HOW,Any mission,Будь-яка місія
+BADGE_MISSIONS_T,Every mission,Усі місії
+BADGE_MISSIONS_HOW,Every mission in this mode,Усі місії цього режиму
+BADGE_READER_T,The whole book,Увесь підручник
+BADGE_READER_HOW,All ten chapters read,Прочитано всі десять розділів
+BADGE_ALL_T,Every craft,Усі апарати
+BADGE_ALL_HOW,A lesson on each of the six,Урок на кожному з шести
+BADGE_ACE_T,Shyriai pilot,Пілот Ширяю
+BADGE_ACE_HOW,Every licence,Усі посвідчення
